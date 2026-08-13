@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0E1214;
+  --color-panel: #161B1E;
+  --color-panel-2: #1E2529;
+  --color-line: #2A3338;
+  --color-text: #ECE7DF;
+  --color-muted: #8A979E;
+  --color-brass: #D9A441;
+  --color-good: #6FBF8B;
+  --color-bad: #E0645A;
+
+  --font-display: "Fraunces", serif;
+  --font-ui: "Inter Tight", sans-serif;
+  --font-mono: "Geist Mono", "IBM Plex Mono", monospace;
+}
