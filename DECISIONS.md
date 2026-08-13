@@ -33,3 +33,19 @@
 **Problem:** Node.js w zależności od wersji ICU nie zawsze dodaje separator tysięcy dla `pl-PL` przy liczbach < 10000.
 
 **Decyzja:** Testy weryfikują poprawność formatowania (kwota + waluta), ale nie wymuszają separatora tysięcy — to zależy od runtime'u. W przeglądarce separator będzie obecny.
+
+## D6: Lazy Firebase initialization
+
+**Problem:** Firebase SDK inicjalizuje się przy imporcie modułu, co powoduje błąd `auth/invalid-api-key` podczas statycznego generowania stron w Next.js (brak zmiennych środowiskowych na serwerze budowania).
+
+**Decyzja:** Eksportujemy gettery (funkcje) zamiast gotowych instancji — `auth()`, `db()`, `storage()`. Firebase inicjalizuje się dopiero przy pierwszym wywołaniu w przeglądarce.
+
+**Dlaczego:** Pozwala zachować standardowy import bez dynamic importów czy `typeof window` checków. Koszt: `()` przy każdym użyciu, ale jest to explicitne i bezpieczne.
+
+## D7: PIN hash format
+
+**Problem:** Spec mówi PBKDF2 z solą. Jak przechowywać?
+
+**Decyzja:** Format `salt:hash` (oba hex-encoded) w jednym stringu. 100k iteracji, SHA-256, 256-bit klucz. Sól losowa (16 bajtów, crypto.getRandomValues).
+
+**Dlaczego:** Jeden string w Firestore jest prostszy niż obiekt z dwoma polami. Format jest samodokumentujący.
