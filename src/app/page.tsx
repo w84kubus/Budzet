@@ -7,8 +7,10 @@ import { useBudgetData } from "@/lib/hooks/use-budget-data";
 import { usePinLock } from "@/lib/hooks/use-pin-lock";
 import { useBudgetStore } from "@/stores/budget-store";
 import { PinLock } from "@/components/PinLock";
-import { OnlineIndicator } from "@/components/OnlineIndicator";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/layout/AppShell";
+import { DashboardView } from "@/components/views/DashboardView";
+import { EnvelopesView } from "@/components/views/EnvelopesView";
+import { StatsView } from "@/components/views/StatsView";
 import { ExpenseSheet } from "@/components/ExpenseSheet";
 import { AddFixedExpenseSheet } from "@/components/AddFixedExpenseSheet";
 import { AddEnvelopeSheet } from "@/components/AddEnvelopeSheet";
@@ -18,23 +20,11 @@ import { WithdrawalSheet } from "@/components/WithdrawalSheet";
 import { EnvelopeTransferSheet } from "@/components/EnvelopeTransferSheet";
 import { ClosePeriodWizard } from "@/components/ClosePeriodWizard";
 import { ExpensesList } from "@/components/ExpensesList";
-import { PeriodTab } from "@/components/stats/PeriodTab";
-import { TrendsTab } from "@/components/stats/TrendsTab";
-import { CategoriesTab } from "@/components/stats/CategoriesTab";
-import { EnvelopeCard } from "@/components/envelopes/EnvelopeCard";
 import { EnvelopeHistory } from "@/components/envelopes/EnvelopeHistory";
 import { ToastContainer, showToast } from "@/components/Toast";
-import { PeriodHeader } from "@/components/dashboard/PeriodHeader";
-import { MainIndicator } from "@/components/dashboard/MainIndicator";
-import { TransferTaskCard } from "@/components/dashboard/TransferTaskCard";
-import { FixedExpenses } from "@/components/dashboard/FixedExpenses";
-import { EnvelopeTiles } from "@/components/dashboard/EnvelopeTiles";
-import { ImpulseCounter } from "@/components/dashboard/ImpulseCounter";
-import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
+import { DashboardSkeleton } from "@/components/ui";
 import {
   calculateFreeFunds,
-  calculateAllEnvelopeBalances,
-  calculateAccountBalances,
 } from "@/domain/calculations";
 import { closePeriod } from "@/domain/operations";
 import {
@@ -96,7 +86,6 @@ export default function Home() {
   const [historyEnvelope, setHistoryEnvelope] = useState<Envelope | null>(null);
 
   const [activeNav, setActiveNav] = useState<"dashboard" | "expenses" | "envelopes" | "stats">("dashboard");
-  const [statsTab, setStatsTab] = useState<"period" | "trends" | "categories">("period");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -116,15 +105,11 @@ export default function Home() {
     : periods.find((p) => p.status === "open");
   const today = new Date().toISOString().split("T")[0];
 
-  const activeTask = activePeriod
-    ? transferTasks.find((t) => t.periodId === activePeriod.id && !t.isDone)
-    : undefined;
-
   const freeFunds = activePeriod
     ? calculateFreeFunds(transactions, fixedExpenseInstances)
     : 0;
 
-  // ── Handlers: existing ──
+  // ── Handlers ──
 
   const handleSaveExpense = useCallback(
     async (tx: Omit<Transaction, "id" | "createdAt">) => {
@@ -250,15 +235,12 @@ export default function Home() {
     [setActivePeriodId]
   );
 
-  // ── Handlers: Phase 4 ──
-
   const handleDistribute = useCallback(
     async (allocations: TransferBreakdownItem[]) => {
       if (!budgetId || !activePeriod) return;
       const now = new Date().toISOString();
       const dateStr = now.split("T")[0];
 
-      // Save allocation transactions
       for (const alloc of allocations) {
         await saveTransaction(budgetId, {
           id: "",
@@ -272,7 +254,6 @@ export default function Home() {
         });
       }
 
-      // Save transfer task
       const totalAmount = allocations.reduce((s, a) => s + a.amount, 0);
       await saveTransferTask(budgetId, {
         id: "",
@@ -358,10 +339,7 @@ export default function Home() {
     async (data: { newStartDate: string; newIncome: number }) => {
       if (!budgetId || !activePeriod) return;
 
-      // Create income transaction for new period
       const now = new Date().toISOString();
-
-      // Close current period and create new one
       const result = closePeriod({
         currentPeriod: activePeriod,
         newStartDate: data.newStartDate,
@@ -369,16 +347,12 @@ export default function Home() {
         fixedExpenseDefs,
       });
 
-      // Save closed period
       await savePeriod(budgetId, result.closedPeriod);
-      // Save new period
       await savePeriod(budgetId, result.newPeriod);
-      // Save new fixed expense instances
       if (result.newInstances.length > 0) {
         await saveFixedExpenseInstances(budgetId, result.newInstances);
       }
 
-      // Create income transaction
       await saveTransaction(budgetId, {
         id: "",
         periodId: result.newPeriod.id,
@@ -389,10 +363,8 @@ export default function Home() {
         createdAt: now,
       });
 
-      // Switch to new period
       setActivePeriodId(result.newPeriod.id);
       setClosePeriodOpen(false);
-
       showToast({ message: `Nowy okres: ${result.newPeriod.label}` });
     },
     [budgetId, activePeriod, fixedExpenseDefs, setActivePeriodId]
@@ -402,8 +374,8 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-pulse text-muted">Ładowanie…</div>
+      <div className="min-h-screen bg-ink">
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -411,355 +383,97 @@ export default function Home() {
   if (!user) return null;
   if (isLocked) return <PinLock />;
 
-  // ── Envelopes view ──
-  const renderEnvelopesView = () => {
-    if (!activePeriod || !settings) return null;
+  // ── Active view ──
 
-    const active = envelopes.filter((e) => !e.archived);
-    const balances = calculateAllEnvelopeBalances(
-      active.map((e) => e.id),
-      allTransactions
-    );
-    const totalSavings = [...balances.values()].reduce((s, b) => s + b, 0);
-
-    const acctBalances = calculateAccountBalances(
-      allTransactions,
-      active.map((e) => e.id)
-    );
-
-    // Sort: overdrafted first, then by order
-    const sorted = [...active].sort((a, b) => {
-      const balA = balances.get(a.id) ?? 0;
-      const balB = balances.get(b.id) ?? 0;
-      if (balA < 0 && balB >= 0) return -1;
-      if (balA >= 0 && balB < 0) return 1;
-      return a.order - b.order;
-    });
-
-    return (
-      <div className="mx-auto max-w-[960px] px-4 md:px-8">
-        <div className="safe-top pt-2 pb-4">
-          <h1 className="font-display text-title font-semibold text-text">
-            Koperty
-          </h1>
-        </div>
-
-        {/* Total savings */}
-        <div className="mb-4 rounded-xl bg-panel p-4">
-          <div className="flex items-baseline justify-between">
-            <span className="text-caption text-muted">Suma kopert</span>
-            <span className="font-mono text-title font-semibold tabular-nums text-text">
-              {formatAmount(totalSavings)}{" "}
-              <span className="text-sm text-muted">zł</span>
-            </span>
-          </div>
-          <div className="mt-2 flex items-baseline justify-between text-micro">
-            <span className="text-muted">
-              Na koncie oszczędnościowym powinno być:
-            </span>
-            <span className="font-mono tabular-nums text-muted">
-              {formatAmount(acctBalances.expectedSavings)} zł
-            </span>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="mb-4 flex gap-2">
-          <button
-            onClick={() => setDistributeOpen(true)}
-            disabled={freeFunds <= 0}
-            className={`flex-1 rounded-xl py-2.5 text-caption font-medium transition-all ${
-              freeFunds > 0
-                ? "bg-brass text-ink active:opacity-90"
-                : "bg-panel-2 text-muted/30"
-            }`}
-          >
-            Rozdysponuj
-          </button>
-          <button
-            onClick={() => setWithdrawalOpen(true)}
-            className="flex-1 rounded-xl border border-line py-2.5 text-caption font-medium text-muted transition-colors hover:text-text"
-          >
-            Wyjmij z koperty
-          </button>
-          <button
-            onClick={() => setClosePeriodOpen(true)}
-            className="flex-1 rounded-xl border border-line py-2.5 text-caption font-medium text-muted transition-colors hover:text-text"
-          >
-            Mam wypłatę
-          </button>
-        </div>
-
-        {/* Envelope cards */}
-        <div className="space-y-3 pb-24 md:pb-4">
-          {sorted.length === 0 ? (
-            <div className="rounded-xl bg-panel p-6 text-center">
-              <p className="text-sm text-muted">Brak kopert.</p>
-              <button
-                onClick={() => setAddEnvOpen(true)}
-                className="mt-2 text-caption font-medium text-brass"
-              >
-                Dodaj pierwszą
-              </button>
-            </div>
-          ) : (
-            sorted.map((env) => (
-              <EnvelopeCard
-                key={env.id}
-                envelope={env}
-                allTransactions={allTransactions}
-                periodTransactions={transactions}
-                period={activePeriod}
-                paydayDay={settings.paydayDay}
-                today={today}
-                onExpand={handleExpandEnvelope}
-                onCoverOverdraft={handleCoverOverdraft}
-              />
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // ── Dashboard view ──
-  const renderDashboard = () => {
-    if (!activePeriod || !settings) {
-      return (
-        <div className="safe-top flex min-h-[60vh] flex-col items-center justify-center px-5">
-          <p className="mb-4 text-center text-muted">
-            Brak otwartego okresu budżetowego.
-          </p>
-          <button
-            onClick={() => setClosePeriodOpen(true)}
-            className="rounded-lg bg-brass px-6 py-2.5 text-sm font-medium text-ink"
-          >
-            Rozpocznij okres
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="mx-auto max-w-[960px] px-4 md:px-8">
-        {/* Period header */}
-        <div className="safe-top">
-          <PeriodHeader
-            period={activePeriod}
+  const renderActiveView = () => {
+    switch (activeNav) {
+      case "dashboard":
+        return (
+          <DashboardView
+            activePeriod={activePeriod ?? null}
             periods={periods}
-            paydayDay={settings.paydayDay}
+            settings={settings}
+            transactions={transactions}
+            allTransactions={allTransactions}
+            fixedExpenseDefs={fixedExpenseDefs}
+            fixedExpenseInstances={fixedExpenseInstances}
+            envelopes={envelopes}
+            transferTasks={transferTasks}
+            freeFunds={freeFunds}
             today={today}
             onChangePeriod={handleChangePeriod}
+            onTogglePaid={handleTogglePaid}
+            onMarkTransferDone={handleMarkTransferDone}
+            onAddDef={() => setAddDefOpen(true)}
+            onAddEnvelope={() => setAddEnvOpen(true)}
+            onEditInstance={handleEditInstance}
+            onDistribute={() => setDistributeOpen(true)}
+            onClosePeriod={() => setClosePeriodOpen(true)}
+            onShowAllExpenses={() => setActiveNav("expenses")}
           />
-        </div>
-
-        {/* ── Desktop: 2-column grid / Mobile: stack ── */}
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-          {/* LEFT COLUMN */}
-          <div className="space-y-4 md:space-y-5">
-            <MainIndicator
-              period={activePeriod}
-              transactions={transactions}
-              fixedExpenseInstances={fixedExpenseInstances}
-              paydayDay={settings.paydayDay}
-              today={today}
-            />
-
-            {activeTask && (
-              <TransferTaskCard
-                task={activeTask}
-                envelopes={envelopes}
-                onMarkDone={handleMarkTransferDone}
-              />
-            )}
-
-            {/* Distribute / Close period buttons */}
-            {activePeriod.status === "open" && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setDistributeOpen(true)}
-                  disabled={freeFunds <= 0}
-                  className={`flex-1 rounded-xl py-2.5 text-caption font-medium transition-all ${
-                    freeFunds > 0
-                      ? "bg-panel text-brass hover:bg-panel-2"
-                      : "bg-panel text-muted/30"
-                  }`}
-                >
-                  Rozdysponuj
-                </button>
-                <button
-                  onClick={() => setClosePeriodOpen(true)}
-                  className="flex-1 rounded-xl bg-panel py-2.5 text-caption font-medium text-muted transition-colors hover:bg-panel-2 hover:text-text"
-                >
-                  Mam wypłatę
-                </button>
-              </div>
-            )}
-
-            <FixedExpenses
-              defs={fixedExpenseDefs}
-              instances={fixedExpenseInstances}
-              onTogglePaid={handleTogglePaid}
-              onAddDef={() => setAddDefOpen(true)}
-              onEditInstance={handleEditInstance}
-            />
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div className="space-y-4 md:space-y-5">
-            <EnvelopeTiles
-              envelopes={envelopes}
-              allTransactions={allTransactions}
-              onAdd={() => setAddEnvOpen(true)}
-            />
-          </div>
-
-          {/* FULL WIDTH ROW */}
-          <div className="space-y-4 md:col-span-2 md:space-y-5">
-            <ImpulseCounter
-              periodTransactions={transactions}
-              allTransactions={allTransactions}
-              currentPeriodId={activePeriod.id}
-            />
-            <RecentTransactions
-              transactions={transactions}
-              fixedExpenseDefs={fixedExpenseDefs}
-              envelopes={envelopes}
-              onShowAll={() => setActiveNav("expenses")}
-            />
-          </div>
-        </div>
-      </div>
-    );
+        );
+      case "envelopes":
+        return (
+          <EnvelopesView
+            activePeriod={activePeriod ?? null}
+            settings={settings}
+            transactions={transactions}
+            allTransactions={allTransactions}
+            envelopes={envelopes}
+            fixedExpenseDefs={fixedExpenseDefs}
+            freeFunds={freeFunds}
+            today={today}
+            onAddEnvelope={() => setAddEnvOpen(true)}
+            onDistribute={() => setDistributeOpen(true)}
+            onWithdrawal={() => setWithdrawalOpen(true)}
+            onClosePeriod={() => setClosePeriodOpen(true)}
+            onExpandEnvelope={handleExpandEnvelope}
+            onCoverOverdraft={handleCoverOverdraft}
+          />
+        );
+      case "expenses":
+        return (
+          <ExpensesList
+            transactions={transactions}
+            allTransactions={allTransactions}
+            fixedExpenseDefs={fixedExpenseDefs}
+            envelopes={envelopes}
+            periods={periods}
+            activePeriodId={activePeriod?.id ?? ""}
+            onDelete={handleDeleteTransaction}
+          />
+        );
+      case "stats":
+        return (
+          <StatsView
+            activePeriod={activePeriod ?? null}
+            settings={settings}
+            periods={periods}
+            transactions={transactions}
+            allTransactions={allTransactions}
+            allFixedExpenseInstances={allFixedExpenseInstances}
+            fixedExpenseDefs={fixedExpenseDefs}
+            fixedExpenseInstances={fixedExpenseInstances}
+            envelopes={envelopes}
+            today={today}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-ink pb-24 md:pb-8">
-      {/* Online indicator */}
-      <div className="fixed top-0 right-0 z-20 p-3">
-        <OnlineIndicator />
-      </div>
-
-      {/* Desktop top nav — hidden on mobile (BottomNav handles it) */}
-      <nav className="mx-auto hidden max-w-[960px] px-4 pt-2 md:block md:px-8">
-        <div className="flex gap-1 rounded-xl bg-panel p-1">
-          {([
-            { key: "dashboard" as const, label: "Pulpit" },
-            { key: "expenses" as const, label: "Wydatki" },
-            { key: "envelopes" as const, label: "Koperty" },
-            { key: "stats" as const, label: "Statystyki" },
-          ]).map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveNav(tab.key)}
-              className={`flex-1 rounded-lg py-2 text-caption font-medium transition-colors ${
-                activeNav === tab.key
-                  ? "bg-panel-2 text-brass"
-                  : "text-muted hover:text-text"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      {/* View switching based on nav */}
-      {activeNav === "dashboard" && renderDashboard()}
-      {activeNav === "envelopes" && renderEnvelopesView()}
-      {activeNav === "expenses" && (
-        <ExpensesList
-          transactions={transactions}
-          allTransactions={allTransactions}
-          fixedExpenseDefs={fixedExpenseDefs}
-          envelopes={envelopes}
-          periods={periods}
-          activePeriodId={activePeriod?.id ?? ""}
-          onDelete={handleDeleteTransaction}
-        />
-      )}
-      {activeNav === "stats" && activePeriod && settings && (
-        <div className="mx-auto max-w-[960px] px-4 md:px-8">
-          <div className="safe-top pt-2 pb-2">
-            <h1 className="font-display text-title font-semibold text-text">
-              Statystyki
-            </h1>
-          </div>
-
-          {/* Tab selector */}
-          <div className="mb-4 flex gap-1 rounded-xl bg-panel p-1">
-            {([
-              { key: "period" as const, label: "Okres" },
-              { key: "trends" as const, label: "Trendy" },
-              { key: "categories" as const, label: "Kategorie" },
-            ]).map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setStatsTab(tab.key)}
-                className={`flex-1 rounded-lg py-2 text-caption font-medium transition-colors ${
-                  statsTab === tab.key
-                    ? "bg-panel-2 text-text"
-                    : "text-muted hover:text-text"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="pb-24 md:pb-4">
-            {statsTab === "period" && (
-              <PeriodTab
-                period={activePeriod}
-                transactions={transactions}
-                fixedExpenseDefs={fixedExpenseDefs}
-                fixedExpenseInstances={fixedExpenseInstances}
-                envelopes={envelopes}
-                today={today}
-              />
-            )}
-            {statsTab === "trends" && (
-              <TrendsTab
-                periods={periods}
-                allTransactions={allTransactions}
-                allInstances={allFixedExpenseInstances}
-              />
-            )}
-            {statsTab === "categories" && (
-              <CategoriesTab
-                periods={periods}
-                allTransactions={allTransactions}
-                allInstances={allFixedExpenseInstances}
-                fixedExpenseDefs={fixedExpenseDefs}
-                envelopes={envelopes}
-                currentPeriodId={activePeriod.id}
-              />
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Bottom navigation — mobile only */}
-      <div className="md:hidden">
-        <BottomNav
-          active={activeNav}
-          onNavigate={setActiveNav}
-          onFab={() => setSheetOpen(true)}
-        />
-      </div>
-
-      {/* Desktop FAB */}
-      <button
-        onClick={() => setSheetOpen(true)}
-        className="fixed right-8 bottom-8 z-30 hidden h-14 w-14 items-center justify-center rounded-full bg-brass shadow-lg shadow-brass/20 active:opacity-90 md:flex"
-        aria-label="Dodaj wydatek"
+    <>
+      <AppShell
+        activeNav={activeNav}
+        onNavigate={setActiveNav}
+        onFab={() => setSheetOpen(true)}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 5V19M5 12H19" stroke="var(--color-ink)" strokeWidth="2.5" strokeLinecap="round" />
-        </svg>
-      </button>
+        {renderActiveView()}
+      </AppShell>
 
-      {/* ── All Sheets ── */}
+      {/* ── Sheets ── */}
 
       <ExpenseSheet
         open={sheetOpen}
@@ -856,6 +570,6 @@ export default function Home() {
       )}
 
       <ToastContainer />
-    </div>
+    </>
   );
 }
