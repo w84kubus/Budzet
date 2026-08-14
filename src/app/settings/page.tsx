@@ -271,30 +271,17 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-1">
             {activeEnvelopes.map((env) => (
-              <div
+              <EditableEnvelopeRow
                 key={env.id}
-                className="flex items-center justify-between rounded-lg px-3 py-2.5"
-              >
-                <div>
-                  <span className="text-[14px] text-text">
-                    {env.emoji} {env.name}
-                  </span>
-                  <span className="ml-2 font-mono text-[12px] tabular-nums text-muted">
-                    {formatAmount(env.monthlyPlan)} zł/mies.
-                  </span>
-                  {env.targetAmount && (
-                    <span className="ml-1 font-mono text-[11px] tabular-nums text-muted/50">
-                      cel: {formatAmount(env.targetAmount)} zł
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleToggleArchiveEnvelope(env)}
-                  className="text-[12px] text-muted hover:text-bad"
-                >
-                  Archiwizuj
-                </button>
-              </div>
+                env={env}
+                onSaveName={(name) => {
+                  if (budgetId) updateEnvelope(budgetId, env.id, { name });
+                }}
+                onSavePlan={(monthlyPlan) => {
+                  if (budgetId) updateEnvelope(budgetId, env.id, { monthlyPlan });
+                }}
+                onArchive={() => handleToggleArchiveEnvelope(env)}
+              />
             ))}
           </div>
         )}
@@ -690,6 +677,127 @@ function EditableDefRow({
             title="Kliknij, aby edytować kwotę"
           >
             {formatAmount(def.defaultPlanned)} zł
+          </button>
+        )}
+      </div>
+
+      {/* Archive button */}
+      <button
+        onClick={onArchive}
+        className="shrink-0 text-[12px] text-muted hover:text-bad transition-colors"
+      >
+        Archiwizuj
+      </button>
+    </div>
+  );
+}
+
+function EditableEnvelopeRow({
+  env,
+  onSaveName,
+  onSavePlan,
+  onArchive,
+}: {
+  env: Envelope;
+  onSaveName: (name: string) => void;
+  onSavePlan: (monthlyPlan: number) => void;
+  onArchive: () => void;
+}) {
+  const [editingName, setEditingName] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(false);
+  const [nameValue, setNameValue] = useState(env.name);
+  const [planValue, setPlanValue] = useState(formatAmount(env.monthlyPlan));
+  const nameRef = useRef<HTMLInputElement>(null);
+  const planRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingName) nameRef.current?.focus();
+  }, [editingName]);
+
+  useEffect(() => {
+    if (editingPlan) planRef.current?.focus();
+  }, [editingPlan]);
+
+  const commitName = () => {
+    const trimmed = nameValue.trim();
+    if (trimmed && trimmed !== env.name) {
+      onSaveName(trimmed);
+    } else {
+      setNameValue(env.name);
+    }
+    setEditingName(false);
+  };
+
+  const commitPlan = () => {
+    const grosze = parseAmountInput(planValue);
+    if (grosze > 0 && grosze !== env.monthlyPlan) {
+      onSavePlan(grosze);
+    } else {
+      setPlanValue(formatAmount(env.monthlyPlan));
+    }
+    setEditingPlan(false);
+  };
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg px-3 py-2.5">
+      {/* Emoji + Name */}
+      <div className="min-w-0 flex-1">
+        {editingName ? (
+          <div className="flex items-center gap-1">
+            <span className="text-[14px]">{env.emoji}</span>
+            <input
+              ref={nameRef}
+              type="text"
+              value={nameValue}
+              onChange={(e) => setNameValue(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitName();
+                if (e.key === "Escape") {
+                  setNameValue(env.name);
+                  setEditingName(false);
+                }
+              }}
+              className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-[14px] text-text outline-none focus:border-brass"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => setEditingName(true)}
+            className="text-left text-[14px] text-text hover:text-brass transition-colors"
+            title="Kliknij, aby edytować nazwę"
+          >
+            {env.emoji} {env.name}
+          </button>
+        )}
+      </div>
+
+      {/* Monthly plan */}
+      <div className="shrink-0">
+        {editingPlan ? (
+          <input
+            ref={planRef}
+            type="text"
+            inputMode="decimal"
+            value={planValue}
+            onChange={(e) => setPlanValue(e.target.value)}
+            onBlur={commitPlan}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitPlan();
+              if (e.key === "Escape") {
+                setPlanValue(formatAmount(env.monthlyPlan));
+                setEditingPlan(false);
+              }
+            }}
+            className="w-[90px] rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
+          />
+        ) : (
+          <button
+            onClick={() => setEditingPlan(true)}
+            className="font-mono text-[12px] tabular-nums text-muted hover:text-brass transition-colors"
+            title="Kliknij, aby edytować kwotę"
+          >
+            {formatAmount(env.monthlyPlan)} zł
           </button>
         )}
       </div>
