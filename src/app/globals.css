@@ -120,3 +120,31 @@
 input[type="checkbox"] {
   accent-color: var(--color-brass);
 }
+
+/* ── PWA native feel ───────────────────────────────────────────── */
+
+/* Suppress blue tap highlight on iOS/Android */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent pull-to-refresh on standalone PWA */
+html {
+  overscroll-behavior: none;
+}
+
+/* Prevent text selection on UI elements (not inputs) */
+button, [role="tab"], nav {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth momentum scrolling */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Input font-size ≥ 16px prevents iOS zoom on focus */
+input, select, textarea {
+  font-size: max(16px, 1em);
+}

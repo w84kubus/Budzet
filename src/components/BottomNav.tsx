@@ -14,7 +14,7 @@ function NavIcon({ item, isActive }: { item: NavItem; isActive: boolean }) {
   switch (item) {
     case "dashboard":
       return (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <rect x="2" y="2" width="8" height="8" rx="2" stroke={color} strokeWidth="1.5" />
           <rect x="12" y="2" width="8" height="4" rx="1.5" stroke={color} strokeWidth="1.5" />
           <rect x="12" y="8" width="8" height="12" rx="2" stroke={color} strokeWidth="1.5" />
@@ -23,20 +23,20 @@ function NavIcon({ item, isActive }: { item: NavItem; isActive: boolean }) {
       );
     case "expenses":
       return (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <path d="M3 6H19M3 11H19M3 16H13" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       );
     case "envelopes":
       return (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <rect x="3" y="5" width="16" height="12" rx="2" stroke={color} strokeWidth="1.5" />
           <path d="M3 9L11 13L19 9" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
         </svg>
       );
     case "stats":
       return (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <path d="M4 18V12M9 18V8M14 18V10M19 18V4" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       );
@@ -60,7 +60,9 @@ export function BottomNav({ active, onNavigate, onFab }: Props) {
           <div key={item} className="flex flex-col items-center" style={{ order: i >= 2 ? i + 1 : i }}>
             <button
               onClick={() => onNavigate(item)}
-              className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 px-3"
+              className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 px-3 rounded-lg
+                focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+              aria-label={labels[item]}
             >
               <NavIcon item={item} isActive={active === item} />
               <span
@@ -78,7 +80,8 @@ export function BottomNav({ active, onNavigate, onFab }: Props) {
         <div className="flex flex-col items-center" style={{ order: 2 }}>
           <button
             onClick={onFab}
-            className="-mt-5 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-brass shadow-lg shadow-brass/20 active:opacity-90"
+            className="-mt-5 flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brass shadow-lg shadow-ink/50 active:opacity-90
+              focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             aria-label="Dodaj wydatek"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

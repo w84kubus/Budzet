@@ -52,7 +52,7 @@ export default function RootLayout({
       lang="pl"
       className={`${interTight.variable} ${fraunces.variable} ${geistMono.variable}`}
     >
-      <body className="bg-ink text-text font-ui antialiased">
+      <body className="bg-ink text-text font-ui antialiased overscroll-none">
         {children}
       </body>
     </html>
