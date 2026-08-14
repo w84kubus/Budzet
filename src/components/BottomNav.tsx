@@ -64,7 +64,7 @@ export function BottomNav({ active, onNavigate, onFab }: Props) {
             >
               <NavIcon item={item} isActive={active === item} />
               <span
-                className={`text-[10px] font-medium ${
+                className={`text-micro font-medium ${
                   active === item ? "text-brass" : "text-muted"
                 }`}
               >

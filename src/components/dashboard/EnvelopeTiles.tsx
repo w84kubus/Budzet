@@ -29,13 +29,13 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted">
+        <h2 className="text-caption font-semibold uppercase tracking-wider text-muted">
           Koperty
         </h2>
         {onAdd && (
           <button
             onClick={onAdd}
-            className="flex h-7 items-center gap-1 rounded-lg px-2 text-[12px] font-medium text-muted transition-colors hover:bg-panel hover:text-text"
+            className="flex h-7 items-center gap-1 rounded-lg px-2 text-micro font-medium text-muted transition-colors hover:bg-panel hover:text-text"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M7 3V11M3 7H11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -47,9 +47,9 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
 
       {sorted.length === 0 ? (
         <div className="rounded-xl bg-panel p-5 text-center">
-          <p className="text-[14px] text-muted">Brak kopert.</p>
+          <p className="text-sm text-muted">Brak kopert.</p>
           {onAdd && (
-            <button onClick={onAdd} className="mt-2 text-[13px] font-medium text-brass">
+            <button onClick={onAdd} className="mt-2 text-caption font-medium text-brass">
               Dodaj pierwszą
             </button>
           )}
@@ -103,14 +103,14 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
               {/* Content */}
               <div className="relative z-10 flex flex-1 flex-col justify-between p-3">
                 <div>
-                  <span className="text-[20px] leading-none">{env.emoji}</span>
-                  <p className="mt-1 text-[12px] leading-tight text-muted">
+                  <span className="text-body-lg leading-none">{env.emoji}</span>
+                  <p className="mt-1 text-micro leading-tight text-muted">
                     {env.name}
                   </p>
                 </div>
                 <div>
                   <span
-                    className={`font-mono text-[14px] font-medium tabular-nums ${
+                    className={`font-mono text-sm font-medium tabular-nums ${
                       isOverdraft ? "text-bad" : "text-text"
                     }`}
                   >
@@ -118,7 +118,7 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
                     {formatAmount(Math.abs(balance))}
                   </span>
                   <span
-                    className={`ml-0.5 text-[11px] ${
+                    className={`ml-0.5 text-micro ${
                       isOverdraft ? "text-bad/60" : "text-muted"
                     }`}
                   >

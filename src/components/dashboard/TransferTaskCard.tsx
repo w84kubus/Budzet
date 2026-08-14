@@ -15,10 +15,10 @@ export function TransferTaskCard({ task, envelopes, onMarkDone }: Props) {
   return (
     <section className="rounded-xl border border-brass/20 bg-panel p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-[13px] font-semibold uppercase tracking-wider text-brass">
+        <h3 className="text-caption font-semibold uppercase tracking-wider text-brass">
           Przelew do zrobienia
         </h3>
-        <span className="font-mono text-[15px] font-medium text-text tabular-nums">
+        <span className="font-mono text-body font-medium text-text tabular-nums">
           {formatAmount(task.totalAmount)} zł
         </span>
       </div>
@@ -29,12 +29,12 @@ export function TransferTaskCard({ task, envelopes, onMarkDone }: Props) {
           return (
             <div
               key={item.envelopeId}
-              className="flex items-center justify-between text-[13px]"
+              className="flex items-center justify-between text-caption"
             >
               <span className="text-muted">
                 {env ? `${env.emoji} ${env.name}` : item.envelopeId}
               </span>
-              <span className="font-mono text-[13px] text-text/80 tabular-nums">
+              <span className="font-mono text-caption text-text/80 tabular-nums">
                 {formatAmount(item.amount)} zł
               </span>
             </div>
@@ -44,7 +44,7 @@ export function TransferTaskCard({ task, envelopes, onMarkDone }: Props) {
 
       <button
         onClick={() => onMarkDone(task.id)}
-        className="w-full rounded-lg bg-brass/10 py-2.5 text-[13px] font-medium text-brass transition-colors active:bg-brass/20"
+        className="w-full rounded-lg bg-brass/10 py-2.5 text-caption font-medium text-brass transition-colors active:bg-brass/20"
       >
         Przelew zrobiony
       </button>

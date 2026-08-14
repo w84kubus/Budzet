@@ -92,16 +92,16 @@ export function RecentTransactions({
 
   return (
     <section>
-      <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-wider text-muted">
+      <h2 className="mb-3 text-caption font-semibold uppercase tracking-wider text-muted">
         Ostatnie transakcje
       </h2>
 
       {recent.length === 0 ? (
         <div className="rounded-xl bg-panel p-6 text-center">
-          <p className="text-[14px] text-muted">
+          <p className="text-sm text-muted">
             Brak transakcji w tym okresie.
           </p>
-          <p className="mt-1 text-[13px] text-muted/60">
+          <p className="mt-1 text-caption text-muted/60">
             Dodaj pierwszą za pomocą przycisku +
           </p>
         </div>
@@ -118,10 +118,10 @@ export function RecentTransactions({
                 className="flex items-center justify-between bg-panel px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] leading-tight text-text">
+                  <span className="block truncate text-sm leading-tight text-text">
                     {label}
                   </span>
-                  <span className="text-[12px] text-muted/60">
+                  <span className="text-micro text-muted/60">
                     {formatDate(tx.date)}
                     {tx.note && ` · ${tx.note}`}
                     {tx.isImpulse && (
@@ -130,7 +130,7 @@ export function RecentTransactions({
                   </span>
                 </div>
                 <span
-                  className={`shrink-0 font-mono text-[14px] font-medium tabular-nums ${color}`}
+                  className={`shrink-0 font-mono text-sm font-medium tabular-nums ${color}`}
                 >
                   {sign}
                   {formatAmount(tx.amount)} zł
@@ -144,7 +144,7 @@ export function RecentTransactions({
       {transactions.length > 5 && (
         <button
           onClick={onShowAll}
-          className="mt-3 w-full text-center text-[13px] font-medium text-brass hover:text-text transition-colors"
+          className="mt-3 w-full text-center text-caption font-medium text-brass hover:text-text transition-colors"
         >
           Zobacz wszystkie ({transactions.length})
         </button>

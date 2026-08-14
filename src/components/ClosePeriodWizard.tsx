@@ -160,7 +160,7 @@ export function ClosePeriodWizard({
           {/* ── Step 1: Summary ── */}
           {step === "summary" && (
             <div>
-              <h2 className="mb-4 font-display text-[20px] font-semibold text-text">
+              <h2 className="mb-4 font-display text-body-lg font-semibold text-text">
                 Podsumowanie: {period.label}
               </h2>
 
@@ -194,11 +194,11 @@ export function ClosePeriodWizard({
 
                 <div className="border-t border-line pt-3">
                   <div className="flex items-baseline justify-between">
-                    <span className="text-[14px] font-medium text-text">
+                    <span className="text-sm font-medium text-text">
                       Wolne środki
                     </span>
                     <span
-                      className={`font-mono text-[18px] font-semibold tabular-nums ${
+                      className={`font-mono text-body-lg font-semibold tabular-nums ${
                         freeFunds >= 0 ? "text-text" : "text-bad"
                       }`}
                     >
@@ -214,13 +214,13 @@ export function ClosePeriodWizard({
           {/* ── Step 2: Issues ── */}
           {step === "issues" && (
             <div>
-              <h2 className="mb-4 font-display text-[20px] font-semibold text-text">
+              <h2 className="mb-4 font-display text-body-lg font-semibold text-text">
                 Niedokończone sprawy
               </h2>
 
               {!hasIssues ? (
                 <div className="rounded-xl bg-good/8 p-4 text-center">
-                  <p className="text-[14px] text-good">
+                  <p className="text-sm text-good">
                     Wszystko załatwione! ✓
                   </p>
                 </div>
@@ -228,7 +228,7 @@ export function ClosePeriodWizard({
                 <div className="space-y-4">
                   {unpaidInstances.length > 0 && (
                     <div>
-                      <h3 className="mb-2 text-[13px] font-medium uppercase tracking-wider text-muted">
+                      <h3 className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
                         Niezapłacone wydatki stałe
                       </h3>
                       <div className="space-y-1">
@@ -241,10 +241,10 @@ export function ClosePeriodWizard({
                               key={inst.id}
                               className="flex items-center justify-between rounded-lg bg-panel-2 px-3 py-2"
                             >
-                              <span className="text-[13px] text-text">
+                              <span className="text-caption text-text">
                                 {def?.name ?? "—"}
                               </span>
-                              <span className="font-mono text-[13px] tabular-nums text-muted">
+                              <span className="font-mono text-caption tabular-nums text-muted">
                                 {formatAmount(inst.planned)} zł
                               </span>
                             </div>
@@ -256,7 +256,7 @@ export function ClosePeriodWizard({
 
                   {openTransferTasks.length > 0 && (
                     <div>
-                      <h3 className="mb-2 text-[13px] font-medium uppercase tracking-wider text-muted">
+                      <h3 className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
                         Otwarte zadania przelewu
                       </h3>
                       {openTransferTasks.map((task) => (
@@ -264,10 +264,10 @@ export function ClosePeriodWizard({
                           key={task.id}
                           className="rounded-lg bg-panel-2 px-3 py-2"
                         >
-                          <span className="font-mono text-[13px] tabular-nums text-text">
+                          <span className="font-mono text-caption tabular-nums text-text">
                             {formatAmount(task.totalAmount)} zł
                           </span>
-                          <span className="ml-2 text-[12px] text-muted">
+                          <span className="ml-2 text-micro text-muted">
                             do przelania
                           </span>
                         </div>
@@ -277,7 +277,7 @@ export function ClosePeriodWizard({
 
                   {overdraftedEnvelopes.length > 0 && (
                     <div>
-                      <h3 className="mb-2 text-[13px] font-medium uppercase tracking-wider text-muted">
+                      <h3 className="mb-2 text-caption font-medium uppercase tracking-wider text-muted">
                         Przekroczone koperty
                       </h3>
                       <div className="space-y-1">
@@ -288,10 +288,10 @@ export function ClosePeriodWizard({
                               key={env.id}
                               className="flex items-center justify-between rounded-lg bg-bad/8 px-3 py-2"
                             >
-                              <span className="text-[13px] text-text">
+                              <span className="text-caption text-text">
                                 {env.emoji} {env.name}
                               </span>
-                              <span className="font-mono text-[13px] tabular-nums text-bad">
+                              <span className="font-mono text-caption tabular-nums text-bad">
                                 −{formatAmount(Math.abs(bal))} zł
                               </span>
                             </div>
@@ -301,7 +301,7 @@ export function ClosePeriodWizard({
                     </div>
                   )}
 
-                  <p className="text-[12px] text-muted/70">
+                  <p className="text-micro text-muted/70">
                     Możesz zamknąć okres mimo niedokończonych spraw — przejdą do
                     następnego.
                   </p>
@@ -313,25 +313,25 @@ export function ClosePeriodWizard({
           {/* ── Step 3: New Period ── */}
           {step === "newPeriod" && (
             <div>
-              <h2 className="mb-4 font-display text-[20px] font-semibold text-text">
+              <h2 className="mb-4 font-display text-body-lg font-semibold text-text">
                 Nowy okres
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-[12px] text-muted">
+                  <label className="mb-1 block text-micro text-muted">
                     Data wypłaty
                   </label>
                   <input
                     type="date"
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-[14px] text-text focus:border-brass/40 focus:outline-none"
+                    className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text focus:border-brass/40 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[12px] text-muted">
+                  <label className="mb-1 block text-micro text-muted">
                     Kwota wypłaty (zł)
                   </label>
                   <input
@@ -340,7 +340,7 @@ export function ClosePeriodWizard({
                     value={newIncome}
                     onChange={(e) => setNewIncome(e.target.value)}
                     placeholder="0,00"
-                    className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right font-mono text-[18px] tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+                    className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right font-mono text-body-lg tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
                   />
                 </div>
               </div>
@@ -357,7 +357,7 @@ export function ClosePeriodWizard({
                   if (step === "issues") setStep("summary");
                   if (step === "newPeriod") setStep("issues");
                 }}
-                className="flex-1 rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:text-text"
+                className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
               >
                 Wstecz
               </button>
@@ -365,7 +365,7 @@ export function ClosePeriodWizard({
             {step === "summary" && (
               <button
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:text-text"
+                className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
               >
                 Anuluj
               </button>
@@ -376,7 +376,7 @@ export function ClosePeriodWizard({
                   if (step === "summary") setStep("issues");
                   if (step === "issues") setStep("newPeriod");
                 }}
-                className="flex-1 rounded-xl bg-brass py-3 text-[14px] font-semibold text-ink active:opacity-90"
+                className="flex-1 rounded-xl bg-brass py-3 text-sm font-semibold text-ink active:opacity-90"
               >
                 Dalej
               </button>
@@ -392,7 +392,7 @@ export function ClosePeriodWizard({
                   }
                 }}
                 disabled={!canComplete}
-                className={`flex-1 rounded-xl py-3 text-[14px] font-semibold transition-all ${
+                className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
                   canComplete
                     ? "bg-brass text-ink active:opacity-90"
                     : "bg-panel-2 text-muted/30"
@@ -422,13 +422,13 @@ function SummaryRow({
   return (
     <div className="flex items-baseline justify-between">
       <div>
-        <span className="text-[13px] text-muted">{label}</span>
+        <span className="text-caption text-muted">{label}</span>
         {sub && (
-          <span className="ml-2 text-[11px] text-muted/50">{sub}</span>
+          <span className="ml-2 text-micro text-muted/50">{sub}</span>
         )}
       </div>
       <span
-        className={`font-mono text-[14px] tabular-nums ${color ?? "text-text"}`}
+        className={`font-mono text-sm tabular-nums ${color ?? "text-text"}`}
       >
         {formatAmount(value)} zł
       </span>

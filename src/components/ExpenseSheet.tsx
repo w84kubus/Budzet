@@ -163,14 +163,14 @@ export function ExpenseSheet({
           {isMobile ? (
             <>
               <span
-                className={`font-display text-[40px] font-semibold tabular-nums tracking-[-0.02em] ${
+                className={`font-display text-display font-semibold tabular-nums tracking-[-0.02em] ${
                   amount > 0 ? "text-text" : "text-muted/30"
                 }`}
                 style={{ fontOpticalSizing: "auto" }}
               >
                 {amount > 0 ? formatAmount(amount) : "0,00"}
               </span>
-              <span className="ml-1.5 text-[18px] text-muted/50">zł</span>
+              <span className="ml-1.5 text-body-lg text-muted/50">zł</span>
             </>
           ) : (
             <div className="flex items-baseline justify-center gap-2">
@@ -184,10 +184,10 @@ export function ExpenseSheet({
                   if (e.key === "Enter" && canSave) handleSave();
                 }}
                 placeholder="0,00"
-                className="w-40 border-b-2 border-line bg-transparent text-center font-display text-[40px] font-semibold tabular-nums tracking-[-0.02em] text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+                className="w-40 border-b-2 border-line bg-transparent text-center font-display text-display font-semibold tabular-nums tracking-[-0.02em] text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
                 style={{ fontOpticalSizing: "auto" }}
               />
-              <span className="text-[18px] text-muted/50">zł</span>
+              <span className="text-body-lg text-muted/50">zł</span>
             </div>
           )}
         </div>
@@ -213,9 +213,9 @@ export function ExpenseSheet({
                 >
                   {cat.type === "envelope" ? (
                     <>
-                      <span className="text-[22px] leading-none">{cat.emoji}</span>
+                      <span className="text-title leading-none">{cat.emoji}</span>
                       <span
-                        className={`mt-1 line-clamp-1 text-[10px] leading-tight ${
+                        className={`mt-1 line-clamp-1 text-micro leading-tight ${
                           isSelected ? "text-brass" : "text-muted"
                         }`}
                       >
@@ -224,9 +224,9 @@ export function ExpenseSheet({
                     </>
                   ) : (
                     <>
-                      <span className="text-[14px] leading-none text-muted">💸</span>
+                      <span className="text-sm leading-none text-muted">💸</span>
                       <span
-                        className={`mt-1 line-clamp-2 text-center text-[10px] leading-tight ${
+                        className={`mt-1 line-clamp-2 text-center text-micro leading-tight ${
                           isSelected ? "text-brass" : "text-muted"
                         }`}
                       >
@@ -243,7 +243,7 @@ export function ExpenseSheet({
           {!showMore ? (
             <button
               onClick={() => setShowMore(true)}
-              className="mb-4 w-full text-center text-[13px] text-muted"
+              className="mb-4 w-full text-center text-caption text-muted"
             >
               Więcej opcji ▾
             </button>
@@ -255,13 +255,13 @@ export function ExpenseSheet({
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Notatka (opcjonalne)"
-                className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-[14px] text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+                className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
               />
 
               {/* Impulse toggle */}
               <button
                 onClick={() => setIsImpulse(!isImpulse)}
-                className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-[14px] transition-colors ${
+                className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors ${
                   isImpulse
                     ? "border-bad/30 bg-bad/8 text-bad"
                     : "border-line bg-panel-2 text-muted"
@@ -284,7 +284,7 @@ export function ExpenseSheet({
               {/* Paid from */}
               {selectedCategory?.type === "envelope" && (
                 <div>
-                  <span className="mb-1.5 block text-[12px] text-muted">
+                  <span className="mb-1.5 block text-micro text-muted">
                     Zapłacone z
                   </span>
                   <div className="flex gap-[1px] overflow-hidden rounded-lg bg-line">
@@ -292,7 +292,7 @@ export function ExpenseSheet({
                       <button
                         key={opt}
                         onClick={() => setPaidFrom(opt)}
-                        className={`flex-1 py-2 text-[13px] font-medium transition-colors ${
+                        className={`flex-1 py-2 text-caption font-medium transition-colors ${
                           paidFrom === opt
                             ? "bg-brass/15 text-brass"
                             : "bg-panel-2 text-muted"
@@ -316,7 +316,7 @@ export function ExpenseSheet({
                 <button
                   key={d}
                   onClick={() => handleDigit(d)}
-                  className="flex h-[52px] items-center justify-center rounded-lg text-[22px] font-medium text-text active:bg-panel-2"
+                  className="flex h-[52px] items-center justify-center rounded-lg text-title font-medium text-text active:bg-panel-2"
                 >
                   {d}
                 </button>
@@ -327,13 +327,13 @@ export function ExpenseSheet({
                   handleDigit("0");
                   handleDigit("0");
                 }}
-                className="flex h-[52px] items-center justify-center rounded-lg text-[18px] font-medium text-muted active:bg-panel-2"
+                className="flex h-[52px] items-center justify-center rounded-lg text-body-lg font-medium text-muted active:bg-panel-2"
               >
                 00
               </button>
               <button
                 onClick={() => handleDigit("0")}
-                className="flex h-[52px] items-center justify-center rounded-lg text-[22px] font-medium text-text active:bg-panel-2"
+                className="flex h-[52px] items-center justify-center rounded-lg text-title font-medium text-text active:bg-panel-2"
               >
                 0
               </button>
@@ -361,7 +361,7 @@ export function ExpenseSheet({
           <button
             onClick={handleSave}
             disabled={!canSave}
-            className={`mt-2 mb-1 w-full rounded-xl py-3.5 text-[15px] font-semibold transition-all ${
+            className={`mt-2 mb-1 w-full rounded-xl py-3.5 text-body font-semibold transition-all ${
               canSave
                 ? "bg-brass text-ink active:opacity-90"
                 : "bg-panel-2 text-muted/30"

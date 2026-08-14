@@ -57,7 +57,7 @@ export function PeriodHeader({
           </svg>
         </button>
 
-        <h1 className="font-display text-[17px] font-semibold tracking-tight text-text">
+        <h1 className="font-display text-body-lg font-semibold tracking-tight text-text">
           {period.label}
         </h1>
 
@@ -77,7 +77,7 @@ export function PeriodHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-[13px] text-muted">{daysLabel}</span>
+        <span className="text-caption text-muted">{daysLabel}</span>
 
         {/* Settings */}
         <button

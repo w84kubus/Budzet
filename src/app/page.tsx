@@ -439,7 +439,7 @@ export default function Home() {
     return (
       <div className="mx-auto max-w-[960px] px-4 md:px-8">
         <div className="safe-top pt-2 pb-4">
-          <h1 className="font-display text-[22px] font-semibold text-text">
+          <h1 className="font-display text-title font-semibold text-text">
             Koperty
           </h1>
         </div>
@@ -447,13 +447,13 @@ export default function Home() {
         {/* Total savings */}
         <div className="mb-4 rounded-xl bg-panel p-4">
           <div className="flex items-baseline justify-between">
-            <span className="text-[13px] text-muted">Suma kopert</span>
-            <span className="font-mono text-[22px] font-semibold tabular-nums text-text">
+            <span className="text-caption text-muted">Suma kopert</span>
+            <span className="font-mono text-title font-semibold tabular-nums text-text">
               {formatAmount(totalSavings)}{" "}
-              <span className="text-[14px] text-muted">zł</span>
+              <span className="text-sm text-muted">zł</span>
             </span>
           </div>
-          <div className="mt-2 flex items-baseline justify-between text-[12px]">
+          <div className="mt-2 flex items-baseline justify-between text-micro">
             <span className="text-muted">
               Na koncie oszczędnościowym powinno być:
             </span>
@@ -468,7 +468,7 @@ export default function Home() {
           <button
             onClick={() => setDistributeOpen(true)}
             disabled={freeFunds <= 0}
-            className={`flex-1 rounded-xl py-2.5 text-[13px] font-medium transition-all ${
+            className={`flex-1 rounded-xl py-2.5 text-caption font-medium transition-all ${
               freeFunds > 0
                 ? "bg-brass text-ink active:opacity-90"
                 : "bg-panel-2 text-muted/30"
@@ -478,13 +478,13 @@ export default function Home() {
           </button>
           <button
             onClick={() => setWithdrawalOpen(true)}
-            className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-muted transition-colors hover:text-text"
+            className="flex-1 rounded-xl border border-line py-2.5 text-caption font-medium text-muted transition-colors hover:text-text"
           >
             Wyjmij z koperty
           </button>
           <button
             onClick={() => setClosePeriodOpen(true)}
-            className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-muted transition-colors hover:text-text"
+            className="flex-1 rounded-xl border border-line py-2.5 text-caption font-medium text-muted transition-colors hover:text-text"
           >
             Mam wypłatę
           </button>
@@ -494,10 +494,10 @@ export default function Home() {
         <div className="space-y-3 pb-24 md:pb-4">
           {sorted.length === 0 ? (
             <div className="rounded-xl bg-panel p-6 text-center">
-              <p className="text-[14px] text-muted">Brak kopert.</p>
+              <p className="text-sm text-muted">Brak kopert.</p>
               <button
                 onClick={() => setAddEnvOpen(true)}
-                className="mt-2 text-[13px] font-medium text-brass"
+                className="mt-2 text-caption font-medium text-brass"
               >
                 Dodaj pierwszą
               </button>
@@ -579,7 +579,7 @@ export default function Home() {
                 <button
                   onClick={() => setDistributeOpen(true)}
                   disabled={freeFunds <= 0}
-                  className={`flex-1 rounded-xl py-2.5 text-[13px] font-medium transition-all ${
+                  className={`flex-1 rounded-xl py-2.5 text-caption font-medium transition-all ${
                     freeFunds > 0
                       ? "bg-panel text-brass hover:bg-panel-2"
                       : "bg-panel text-muted/30"
@@ -589,7 +589,7 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => setClosePeriodOpen(true)}
-                  className="flex-1 rounded-xl bg-panel py-2.5 text-[13px] font-medium text-muted transition-colors hover:bg-panel-2 hover:text-text"
+                  className="flex-1 rounded-xl bg-panel py-2.5 text-caption font-medium text-muted transition-colors hover:bg-panel-2 hover:text-text"
                 >
                   Mam wypłatę
                 </button>
@@ -652,7 +652,7 @@ export default function Home() {
             <button
               key={tab.key}
               onClick={() => setActiveNav(tab.key)}
-              className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-colors ${
+              className={`flex-1 rounded-lg py-2 text-caption font-medium transition-colors ${
                 activeNav === tab.key
                   ? "bg-panel-2 text-brass"
                   : "text-muted hover:text-text"
@@ -681,7 +681,7 @@ export default function Home() {
       {activeNav === "stats" && activePeriod && settings && (
         <div className="mx-auto max-w-[960px] px-4 md:px-8">
           <div className="safe-top pt-2 pb-2">
-            <h1 className="font-display text-[22px] font-semibold text-text">
+            <h1 className="font-display text-title font-semibold text-text">
               Statystyki
             </h1>
           </div>
@@ -696,7 +696,7 @@ export default function Home() {
               <button
                 key={tab.key}
                 onClick={() => setStatsTab(tab.key)}
-                className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-colors ${
+                className={`flex-1 rounded-lg py-2 text-caption font-medium transition-colors ${
                   statsTab === tab.key
                     ? "bg-panel-2 text-text"
                     : "text-muted hover:text-text"

@@ -194,7 +194,7 @@ export default function SettingsPage() {
             <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1 className="font-display text-[22px] font-semibold text-text">
+        <h1 className="font-display text-title font-semibold text-text">
           Ustawienia
         </h1>
       </div>
@@ -209,7 +209,7 @@ export default function SettingsPage() {
             value={paydayDay}
             onChange={(e) => setPaydayDay(e.target.value)}
             onBlur={handleSavePaydayDay}
-            className="w-16 rounded-lg border border-line bg-panel-2 px-2 py-1.5 text-center font-mono text-[14px] tabular-nums text-text focus:border-brass/40 focus:outline-none"
+            className="w-16 rounded-lg border border-line bg-panel-2 px-2 py-1.5 text-center font-mono text-sm tabular-nums text-text focus:border-brass/40 focus:outline-none"
           />
         </Row>
       </Section>
@@ -217,7 +217,7 @@ export default function SettingsPage() {
       {/* ── Fixed Expenses ── */}
       <Section title="Wydatki stałe">
         {activeDefs.length === 0 ? (
-          <p className="py-3 text-center text-[13px] text-muted">
+          <p className="py-3 text-center text-caption text-muted">
             Brak aktywnych wydatków stałych.
           </p>
         ) : (
@@ -239,7 +239,7 @@ export default function SettingsPage() {
         )}
         {archivedDefs.length > 0 && (
           <div className="mt-3 border-t border-line pt-3">
-            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted">
+            <p className="mb-2 text-micro uppercase tracking-wider text-muted">
               Zarchiwizowane
             </p>
             {archivedDefs.map((def) => (
@@ -247,12 +247,12 @@ export default function SettingsPage() {
                 key={def.id}
                 className="flex items-center justify-between rounded-lg px-3 py-2"
               >
-                <span className="text-[13px] text-muted line-through">
+                <span className="text-caption text-muted line-through">
                   {def.name}
                 </span>
                 <button
                   onClick={() => handleToggleArchiveDef(def)}
-                  className="text-[12px] text-muted hover:text-good"
+                  className="text-micro text-muted hover:text-good"
                 >
                   Przywróć
                 </button>
@@ -265,7 +265,7 @@ export default function SettingsPage() {
       {/* ── Envelopes ── */}
       <Section title="Koperty">
         {activeEnvelopes.length === 0 ? (
-          <p className="py-3 text-center text-[13px] text-muted">
+          <p className="py-3 text-center text-caption text-muted">
             Brak aktywnych kopert.
           </p>
         ) : (
@@ -287,7 +287,7 @@ export default function SettingsPage() {
         )}
         {archivedEnvelopes.length > 0 && (
           <div className="mt-3 border-t border-line pt-3">
-            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted">
+            <p className="mb-2 text-micro uppercase tracking-wider text-muted">
               Zarchiwizowane
             </p>
             {archivedEnvelopes.map((env) => (
@@ -295,12 +295,12 @@ export default function SettingsPage() {
                 key={env.id}
                 className="flex items-center justify-between rounded-lg px-3 py-2"
               >
-                <span className="text-[13px] text-muted line-through">
+                <span className="text-caption text-muted line-through">
                   {env.emoji} {env.name}
                 </span>
                 <button
                   onClick={() => handleToggleArchiveEnvelope(env)}
-                  className="text-[12px] text-muted hover:text-good"
+                  className="text-micro text-muted hover:text-good"
                 >
                   Przywróć
                 </button>
@@ -314,18 +314,18 @@ export default function SettingsPage() {
       <Section title="Blokada PIN">
         {settings?.pinHash ? (
           <div className="space-y-3">
-            <p className="text-[13px] text-good">PIN aktywny ✓</p>
+            <p className="text-caption text-good">PIN aktywny ✓</p>
             {pinMode === "idle" && (
               <div className="flex gap-2">
                 <button
                   onClick={() => setPinMode("change")}
-                  className="rounded-lg bg-panel-2 px-3 py-2 text-[13px] text-muted hover:text-text"
+                  className="rounded-lg bg-panel-2 px-3 py-2 text-caption text-muted hover:text-text"
                 >
                   Zmień PIN
                 </button>
                 <button
                   onClick={() => setPinMode("remove")}
-                  className="rounded-lg bg-panel-2 px-3 py-2 text-[13px] text-muted hover:text-bad"
+                  className="rounded-lg bg-panel-2 px-3 py-2 text-caption text-muted hover:text-bad"
                 >
                   Wyłącz PIN
                 </button>
@@ -338,19 +338,19 @@ export default function SettingsPage() {
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                   placeholder="Nowy PIN"
-                  className="w-32 rounded-lg border border-line bg-panel-2 px-3 py-2 text-center font-mono text-[16px] text-text focus:border-brass/40 focus:outline-none"
+                  className="w-32 rounded-lg border border-line bg-panel-2 px-3 py-2 text-center font-mono text-body text-text focus:border-brass/40 focus:outline-none"
                   autoFocus
                 />
                 <button
                   onClick={handleSavePin}
                   disabled={pinInput.length < 4}
-                  className="rounded-lg bg-brass px-4 py-2 text-[13px] font-semibold text-ink disabled:opacity-30"
+                  className="rounded-lg bg-brass px-4 py-2 text-caption font-semibold text-ink disabled:opacity-30"
                 >
                   Zapisz
                 </button>
                 <button
                   onClick={() => { setPinMode("idle"); setPinInput(""); }}
-                  className="text-[12px] text-muted"
+                  className="text-micro text-muted"
                 >
                   Anuluj
                 </button>
@@ -358,16 +358,16 @@ export default function SettingsPage() {
             )}
             {pinMode === "remove" && (
               <div className="flex items-center gap-2">
-                <span className="text-[13px] text-bad">Na pewno wyłączyć?</span>
+                <span className="text-caption text-bad">Na pewno wyłączyć?</span>
                 <button
                   onClick={handleRemovePin}
-                  className="rounded-lg bg-bad px-4 py-2 text-[13px] font-semibold text-white"
+                  className="rounded-lg bg-bad px-4 py-2 text-caption font-semibold text-white"
                 >
                   Wyłącz
                 </button>
                 <button
                   onClick={() => setPinMode("idle")}
-                  className="text-[12px] text-muted"
+                  className="text-micro text-muted"
                 >
                   Anuluj
                 </button>
@@ -379,7 +379,7 @@ export default function SettingsPage() {
             {pinMode !== "set" ? (
               <button
                 onClick={() => setPinMode("set")}
-                className="rounded-lg bg-panel-2 px-4 py-2 text-[13px] text-muted hover:text-text"
+                className="rounded-lg bg-panel-2 px-4 py-2 text-caption text-muted hover:text-text"
               >
                 Ustaw PIN
               </button>
@@ -390,19 +390,19 @@ export default function SettingsPage() {
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                   placeholder="PIN (min. 4 cyfry)"
-                  className="w-40 rounded-lg border border-line bg-panel-2 px-3 py-2 text-center font-mono text-[16px] text-text focus:border-brass/40 focus:outline-none"
+                  className="w-40 rounded-lg border border-line bg-panel-2 px-3 py-2 text-center font-mono text-body text-text focus:border-brass/40 focus:outline-none"
                   autoFocus
                 />
                 <button
                   onClick={handleSavePin}
                   disabled={pinInput.length < 4}
-                  className="rounded-lg bg-brass px-4 py-2 text-[13px] font-semibold text-ink disabled:opacity-30"
+                  className="rounded-lg bg-brass px-4 py-2 text-caption font-semibold text-ink disabled:opacity-30"
                 >
                   Zapisz
                 </button>
                 <button
                   onClick={() => { setPinMode("idle"); setPinInput(""); }}
-                  className="text-[12px] text-muted"
+                  className="text-micro text-muted"
                 >
                   Anuluj
                 </button>
@@ -418,18 +418,18 @@ export default function SettingsPage() {
           <button
             onClick={handleExportCSV}
             disabled={allTransactions.length === 0}
-            className="w-full rounded-xl bg-panel-2 py-3 text-[14px] font-medium text-text transition-colors hover:bg-line disabled:text-muted/30"
+            className="w-full rounded-xl bg-panel-2 py-3 text-sm font-medium text-text transition-colors hover:bg-line disabled:text-muted/30"
           >
             📄 Eksportuj CSV (transakcje)
           </button>
           <button
             onClick={handleExportJSON}
-            className="w-full rounded-xl bg-panel-2 py-3 text-[14px] font-medium text-text transition-colors hover:bg-line"
+            className="w-full rounded-xl bg-panel-2 py-3 text-sm font-medium text-text transition-colors hover:bg-line"
           >
             💾 Pobierz kopię zapasową (JSON)
           </button>
           {lastBackup && (
-            <p className={`text-[12px] ${daysSinceBackup !== null && daysSinceBackup > 30 ? "text-bad" : "text-muted"}`}>
+            <p className={`text-micro ${daysSinceBackup !== null && daysSinceBackup > 30 ? "text-bad" : "text-muted"}`}>
               Ostatnia kopia: {lastBackup}
               {daysSinceBackup !== null && daysSinceBackup > 30 && (
                 <span className="ml-1">⚠ ponad 30 dni temu</span>
@@ -451,30 +451,30 @@ export default function SettingsPage() {
           />
           <button
             onClick={() => fileRef.current?.click()}
-            className="w-full rounded-xl bg-panel-2 py-3 text-[14px] font-medium text-text transition-colors hover:bg-line"
+            className="w-full rounded-xl bg-panel-2 py-3 text-sm font-medium text-text transition-colors hover:bg-line"
           >
             📂 Wczytaj kopię zapasową
           </button>
           {importError && (
-            <p className="text-[13px] text-bad">{importError}</p>
+            <p className="text-caption text-bad">{importError}</p>
           )}
           {importData && (
             <div className="rounded-xl border border-line bg-panel-2 p-4">
-              <p className="mb-2 text-[14px] font-medium text-text">
+              <p className="mb-2 text-sm font-medium text-text">
                 Podgląd importu
               </p>
-              <div className="space-y-1 text-[13px] text-muted">
+              <div className="space-y-1 text-caption text-muted">
                 <p>{importData.transactions.length} transakcji</p>
                 <p>{importData.envelopes.length} kopert</p>
                 <p>{importData.periods.length} okresów</p>
                 <p>{importData.fixedExpenseDefs.length} wydatków stałych</p>
-                <p className="text-[11px] text-muted/50">
+                <p className="text-micro text-muted/50">
                   Wyeksportowano: {new Date(importData.exportedAt).toLocaleString("pl-PL")}
                 </p>
               </div>
 
               <div className="mt-4">
-                <p className="mb-1 text-[12px] text-bad">
+                <p className="mb-1 text-micro text-bad">
                   Wpisz ZASTĄP żeby potwierdzić nadpisanie danych:
                 </p>
                 <input
@@ -482,11 +482,11 @@ export default function SettingsPage() {
                   value={confirmWord}
                   onChange={(e) => setConfirmWord(e.target.value)}
                   placeholder="ZASTĄP"
-                  className="w-full rounded-lg border border-line bg-ink px-3 py-2 text-center font-mono text-[14px] text-text focus:border-bad/40 focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-ink px-3 py-2 text-center font-mono text-sm text-text focus:border-bad/40 focus:outline-none"
                 />
                 <button
                   disabled={confirmWord !== "ZASTĄP"}
-                  className="mt-3 w-full rounded-xl bg-bad py-3 text-[14px] font-semibold text-white transition-all disabled:opacity-30"
+                  className="mt-3 w-full rounded-xl bg-bad py-3 text-sm font-semibold text-white transition-all disabled:opacity-30"
                 >
                   Zastąp dane (nieodwracalne)
                 </button>
@@ -495,7 +495,7 @@ export default function SettingsPage() {
                     setImportData(null);
                     setConfirmWord("");
                   }}
-                  className="mt-2 w-full text-center text-[13px] text-muted hover:text-text"
+                  className="mt-2 w-full text-center text-caption text-muted hover:text-text"
                 >
                   Anuluj
                 </button>
@@ -516,7 +516,7 @@ export default function SettingsPage() {
                 <button
                   key={p.id}
                   onClick={() => window.open(`/print/${p.id}`, "_blank")}
-                  className="flex w-full items-center justify-between rounded-lg bg-panel-2 px-3 py-2.5 text-[13px] transition-colors hover:bg-line"
+                  className="flex w-full items-center justify-between rounded-lg bg-panel-2 px-3 py-2.5 text-caption transition-colors hover:bg-line"
                 >
                   <span className="text-text">{p.label}</span>
                   <span className="text-muted">🖨 Drukuj</span>
@@ -528,10 +528,10 @@ export default function SettingsPage() {
 
       {/* ── Account ── */}
       <Section title="Konto">
-        <p className="mb-3 text-[13px] text-muted">{user?.email}</p>
+        <p className="mb-3 text-caption text-muted">{user?.email}</p>
         <button
           onClick={handleLogout}
-          className="w-full rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:border-bad/30 hover:text-bad"
+          className="w-full rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:border-bad/30 hover:text-bad"
         >
           Wyloguj się
         </button>
@@ -549,7 +549,7 @@ function Section({
 }) {
   return (
     <section className="mb-6">
-      <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-muted">
+      <h2 className="mb-3 text-micro font-semibold uppercase tracking-wider text-muted">
         {title}
       </h2>
       <div className="rounded-xl bg-panel p-4">{children}</div>
@@ -566,7 +566,7 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[14px] text-text">{label}</span>
+      <span className="text-sm text-text">{label}</span>
       {children}
     </div>
   );
@@ -638,12 +638,12 @@ function EditableDefRow({
                 setEditingName(false);
               }
             }}
-            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-[14px] text-text outline-none focus:border-brass"
+            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-sm text-text outline-none focus:border-brass"
           />
         ) : (
           <button
             onClick={() => setEditingName(true)}
-            className="text-left text-[14px] text-text hover:text-brass transition-colors"
+            className="text-left text-sm text-text hover:text-brass transition-colors"
             title="Kliknij, aby edytować nazwę"
           >
             {def.name}
@@ -668,12 +668,12 @@ function EditableDefRow({
                 setEditingAmount(false);
               }
             }}
-            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
+            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-micro tabular-nums text-text outline-none focus:border-brass"
           />
         ) : (
           <button
             onClick={() => setEditingAmount(true)}
-            className="font-mono text-[12px] tabular-nums text-muted hover:text-brass transition-colors"
+            className="font-mono text-micro tabular-nums text-muted hover:text-brass transition-colors"
             title="Kliknij, aby edytować kwotę"
           >
             {formatAmount(def.defaultPlanned)} zł
@@ -684,7 +684,7 @@ function EditableDefRow({
       {/* Archive button */}
       <button
         onClick={onArchive}
-        className="w-[75px] shrink-0 text-right text-[12px] text-muted hover:text-bad transition-colors"
+        className="w-[75px] shrink-0 text-right text-micro text-muted hover:text-bad transition-colors"
       >
         Archiwizuj
       </button>
@@ -744,7 +744,7 @@ function EditableEnvelopeRow({
       <div className="min-w-0 flex-1">
         {editingName ? (
           <div className="flex items-center gap-1">
-            <span className="text-[14px]">{env.emoji}</span>
+            <span className="text-sm">{env.emoji}</span>
             <input
               ref={nameRef}
               type="text"
@@ -758,13 +758,13 @@ function EditableEnvelopeRow({
                   setEditingName(false);
                 }
               }}
-              className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-[14px] text-text outline-none focus:border-brass"
+              className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-sm text-text outline-none focus:border-brass"
             />
           </div>
         ) : (
           <button
             onClick={() => setEditingName(true)}
-            className="text-left text-[14px] text-text hover:text-brass transition-colors"
+            className="text-left text-sm text-text hover:text-brass transition-colors"
             title="Kliknij, aby edytować nazwę"
           >
             {env.emoji} {env.name}
@@ -789,12 +789,12 @@ function EditableEnvelopeRow({
                 setEditingPlan(false);
               }
             }}
-            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
+            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-micro tabular-nums text-text outline-none focus:border-brass"
           />
         ) : (
           <button
             onClick={() => setEditingPlan(true)}
-            className="font-mono text-[12px] tabular-nums text-muted hover:text-brass transition-colors"
+            className="font-mono text-micro tabular-nums text-muted hover:text-brass transition-colors"
             title="Kliknij, aby edytować kwotę"
           >
             {formatAmount(env.monthlyPlan)} zł
@@ -805,7 +805,7 @@ function EditableEnvelopeRow({
       {/* Archive button */}
       <button
         onClick={onArchive}
-        className="w-[75px] shrink-0 text-right text-[12px] text-muted hover:text-bad transition-colors"
+        className="w-[75px] shrink-0 text-right text-micro text-muted hover:text-bad transition-colors"
       >
         Archiwizuj
       </button>

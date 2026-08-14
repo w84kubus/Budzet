@@ -278,12 +278,12 @@ export function ExpensesList({
     <div className="mx-auto max-w-[960px] px-4 md:px-8">
       <div className="safe-top pt-2 pb-2">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-[22px] font-semibold text-text">
+          <h1 className="font-display text-title font-semibold text-text">
             Wydatki
           </h1>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors ${
+            className={`rounded-lg px-3 py-1.5 text-micro font-medium transition-colors ${
               showFilters || filter.envelopeId || filter.fixedDefId || filter.onlyImpulse
                 ? "bg-brass/15 text-brass"
                 : "bg-panel text-muted"
@@ -301,7 +301,7 @@ export function ExpensesList({
           value={filter.search}
           onChange={(e) => setFilter((f) => ({ ...f, search: e.target.value }))}
           placeholder="Szukaj: kwota, notatka, kategoria…"
-          className="w-full rounded-xl border border-line bg-panel px-4 py-2.5 text-[14px] text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+          className="w-full rounded-xl border border-line bg-panel px-4 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
         />
       </div>
 
@@ -310,13 +310,13 @@ export function ExpensesList({
         <div className="mb-3 space-y-3 rounded-xl bg-panel p-4">
           {/* Period selector */}
           <div>
-            <label className="mb-1 block text-[11px] text-muted">Okres</label>
+            <label className="mb-1 block text-micro text-muted">Okres</label>
             <select
               value={filter.periodId}
               onChange={(e) =>
                 setFilter((f) => ({ ...f, periodId: e.target.value }))
               }
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-[13px] text-text focus:border-brass/40 focus:outline-none"
+              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-caption text-text focus:border-brass/40 focus:outline-none"
             >
               <option value="__all__">Wszystkie okresy</option>
               {periods
@@ -332,7 +332,7 @@ export function ExpensesList({
 
           {/* Envelope filter */}
           <div>
-            <label className="mb-1 block text-[11px] text-muted">
+            <label className="mb-1 block text-micro text-muted">
               Koperta
             </label>
             <select
@@ -343,7 +343,7 @@ export function ExpensesList({
                   envelopeId: e.target.value || null,
                 }))
               }
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-[13px] text-text focus:border-brass/40 focus:outline-none"
+              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-caption text-text focus:border-brass/40 focus:outline-none"
             >
               <option value="">Wszystkie</option>
               {activeEnvelopes.map((e) => (
@@ -356,7 +356,7 @@ export function ExpensesList({
 
           {/* Fixed expense filter */}
           <div>
-            <label className="mb-1 block text-[11px] text-muted">
+            <label className="mb-1 block text-micro text-muted">
               Wydatek stały
             </label>
             <select
@@ -367,7 +367,7 @@ export function ExpensesList({
                   fixedDefId: e.target.value || null,
                 }))
               }
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-[13px] text-text focus:border-brass/40 focus:outline-none"
+              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-caption text-text focus:border-brass/40 focus:outline-none"
             >
               <option value="">Wszystkie</option>
               {activeDefs.map((d) => (
@@ -388,7 +388,7 @@ export function ExpensesList({
               }
               className="h-4 w-4 rounded border-line accent-brass"
             />
-            <span className="text-[13px] text-text">Tylko impulsy ⚡</span>
+            <span className="text-caption text-text">Tylko impulsy ⚡</span>
           </label>
 
           {/* Reset */}
@@ -402,7 +402,7 @@ export function ExpensesList({
                 onlyImpulse: false,
               })
             }
-            className="text-[12px] text-muted hover:text-text"
+            className="text-micro text-muted hover:text-text"
           >
             Wyczyść filtry
           </button>
@@ -410,7 +410,7 @@ export function ExpensesList({
       )}
 
       {/* Results count */}
-      <p className="mb-2 text-[12px] text-muted">
+      <p className="mb-2 text-micro text-muted">
         {filtered.length}{" "}
         {filtered.length === 1
           ? "transakcja"
@@ -423,7 +423,7 @@ export function ExpensesList({
       <div className="pb-24 md:pb-4">
         {visibleGroups.length === 0 ? (
           <div className="rounded-xl bg-panel p-8 text-center">
-            <p className="text-[14px] text-muted">
+            <p className="text-sm text-muted">
               {filter.search || filter.envelopeId || filter.fixedDefId || filter.onlyImpulse
                 ? "Brak wyników dla wybranych filtrów."
                 : "Brak transakcji w tym okresie."}
@@ -434,11 +434,11 @@ export function ExpensesList({
             <div key={group.date} className="mb-1">
               {/* Date header — sticky */}
               <div className="sticky top-0 z-10 flex items-baseline justify-between bg-ink/90 px-1 py-2 backdrop-blur-sm">
-                <span className="text-[13px] font-medium text-text">
+                <span className="text-caption font-medium text-text">
                   {formatDate(group.date)}
                 </span>
                 {group.total > 0 && (
-                  <span className="font-mono text-[12px] tabular-nums text-muted">
+                  <span className="font-mono text-micro tabular-nums text-muted">
                     −{formatAmount(group.total)} zł
                   </span>
                 )}
@@ -456,7 +456,7 @@ export function ExpensesList({
                       <div className="absolute inset-0 flex items-center justify-end bg-bad/15 pr-3">
                         <button
                           onClick={() => handleDelete(tx.id)}
-                          className={`rounded-lg px-3 py-1.5 text-[12px] font-medium ${
+                          className={`rounded-lg px-3 py-1.5 text-micro font-medium ${
                             deleteConfirm === tx.id
                               ? "bg-bad text-white"
                               : "bg-bad/20 text-bad"
@@ -475,21 +475,21 @@ export function ExpensesList({
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="truncate text-[13px] text-text">
+                          <span className="truncate text-caption text-text">
                             {getLabel(tx)}
                           </span>
                           {tx.isImpulse && (
-                            <span className="text-[11px]">⚡</span>
+                            <span className="text-micro">⚡</span>
                           )}
                         </div>
                         {tx.note && (
-                          <p className="truncate text-[11px] text-muted/60">
+                          <p className="truncate text-micro text-muted/60">
                             {tx.note}
                           </p>
                         )}
                       </div>
                       <span
-                        className={`font-mono text-[14px] tabular-nums ${getAmountColor(
+                        className={`font-mono text-sm tabular-nums ${getAmountColor(
                           tx.kind
                         )}`}
                       >
@@ -507,7 +507,7 @@ export function ExpensesList({
         {/* Infinite scroll sentinel */}
         {visibleGroups.length < grouped.length && (
           <div ref={sentinelRef} className="flex justify-center py-4">
-            <div className="animate-pulse text-[12px] text-muted">
+            <div className="animate-pulse text-micro text-muted">
               Ładowanie…
             </div>
           </div>

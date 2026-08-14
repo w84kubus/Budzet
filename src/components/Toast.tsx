@@ -47,14 +47,14 @@ export function ToastContainer() {
       }`}
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[14px] text-text">{toast.message}</span>
+        <span className="text-sm text-text">{toast.message}</span>
         {toast.undoAction && (
           <button
             onClick={() => {
               toast.undoAction?.();
               setVisible(false);
             }}
-            className="shrink-0 text-[14px] font-semibold text-brass"
+            className="shrink-0 text-sm font-semibold text-brass"
           >
             Cofnij
           </button>

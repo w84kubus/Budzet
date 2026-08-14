@@ -59,31 +59,31 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
         </div>
 
         <div className="px-5 pb-6">
-          <h2 className="mb-5 font-display text-[20px] font-semibold text-text">
+          <h2 className="mb-5 font-display text-body-lg font-semibold text-text">
             Nowy wydatek stały
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-[12px] text-muted">Nazwa</label>
+              <label className="mb-1 block text-micro text-muted">Nazwa</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="np. Czynsz"
-                className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-[14px] text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+                className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
                 autoFocus
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] text-muted">Typ</label>
+              <label className="mb-1.5 block text-micro text-muted">Typ</label>
               <div className="flex gap-[1px] overflow-hidden rounded-lg bg-line">
                 {(["single", "accumulating"] as const).map((t) => (
                   <button
                     key={t}
                     onClick={() => setType(t)}
-                    className={`flex-1 py-2 text-[13px] font-medium transition-colors ${
+                    className={`flex-1 py-2 text-caption font-medium transition-colors ${
                       type === t
                         ? "bg-brass/15 text-brass"
                         : "bg-panel-2 text-muted"
@@ -97,7 +97,7 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
 
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="mb-1 block text-[12px] text-muted">
+                <label className="mb-1 block text-micro text-muted">
                   Kwota planowana (zł)
                 </label>
                 <input
@@ -106,11 +106,11 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
-                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right text-[14px] text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
                 />
               </div>
               <div className="w-20">
-                <label className="mb-1 block text-[12px] text-muted">
+                <label className="mb-1 block text-micro text-muted">
                   Dzień
                 </label>
                 <input
@@ -120,7 +120,7 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
                   value={dueDay}
                   onChange={(e) => setDueDay(e.target.value)}
                   placeholder="—"
-                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-center text-[14px] text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-center text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
                 />
               </div>
             </div>
@@ -129,14 +129,14 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
           <div className="mt-6 flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:text-text"
+              className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
             >
               Anuluj
             </button>
             <button
               onClick={handleSave}
               disabled={!name.trim()}
-              className={`flex-1 rounded-xl py-3 text-[14px] font-semibold transition-all ${
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
                 name.trim()
                   ? "bg-brass text-ink active:opacity-90"
                   : "bg-panel-2 text-muted/30"

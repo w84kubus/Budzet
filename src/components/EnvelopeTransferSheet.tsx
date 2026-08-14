@@ -87,10 +87,10 @@ export function EnvelopeTransferSheet({
         </div>
 
         <div className="px-5 pb-5">
-          <h2 className="mb-1 font-display text-[20px] font-semibold text-text">
+          <h2 className="mb-1 font-display text-body-lg font-semibold text-text">
             Pokryj przekroczenie
           </h2>
-          <p className="mb-4 text-[13px] text-muted">
+          <p className="mb-4 text-caption text-muted">
             {targetEnvelope.emoji} {targetEnvelope.name} — przekroczone o{" "}
             <span className="font-mono text-bad">
               {formatAmount(suggestedAmount)} zł
@@ -99,11 +99,11 @@ export function EnvelopeTransferSheet({
 
           {/* Source picker */}
           <div className="mb-4">
-            <label className="mb-1.5 block text-[12px] text-muted">
+            <label className="mb-1.5 block text-micro text-muted">
               Pokryj z koperty
             </label>
             {sourceCandidates.length === 0 ? (
-              <p className="rounded-lg bg-panel-2 p-4 text-center text-[13px] text-muted">
+              <p className="rounded-lg bg-panel-2 p-4 text-center text-caption text-muted">
                 Brak kopert z dodatnim saldem.
               </p>
             ) : (
@@ -120,15 +120,15 @@ export function EnvelopeTransferSheet({
                           : "border-line bg-panel-2 active:bg-line"
                       }`}
                     >
-                      <span className="text-[20px]">{env.emoji}</span>
+                      <span className="text-body-lg">{env.emoji}</span>
                       <span
-                        className={`flex-1 text-left text-[13px] ${
+                        className={`flex-1 text-left text-caption ${
                           isSelected ? "text-brass" : "text-text"
                         }`}
                       >
                         {env.name}
                       </span>
-                      <span className="font-mono text-[13px] tabular-nums text-good">
+                      <span className="font-mono text-caption tabular-nums text-good">
                         {formatAmount(balance)} zł
                       </span>
                     </button>
@@ -140,7 +140,7 @@ export function EnvelopeTransferSheet({
 
           {/* Amount */}
           <div className="mb-3">
-            <label className="mb-1 block text-[12px] text-muted">
+            <label className="mb-1 block text-micro text-muted">
               Kwota (zł)
             </label>
             <input
@@ -149,10 +149,10 @@ export function EnvelopeTransferSheet({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0,00"
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right font-mono text-[18px] tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right font-mono text-body-lg tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
             />
             {sourceId && grosze > sourceBalance && (
-              <p className="mt-1 text-[12px] text-bad">
+              <p className="mt-1 text-micro text-bad">
                 Przekracza saldo źródła ({formatAmount(sourceBalance)} zł)
               </p>
             )}
@@ -161,14 +161,14 @@ export function EnvelopeTransferSheet({
           <div className="mt-5 flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:text-text"
+              className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
             >
               Anuluj
             </button>
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className={`flex-1 rounded-xl py-3 text-[14px] font-semibold transition-all ${
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
                 canSave
                   ? "bg-brass text-ink active:opacity-90"
                   : "bg-panel-2 text-muted/30"

@@ -130,12 +130,12 @@ export function DistributeFundsSheet({
         </div>
 
         <div className="px-5 pb-3">
-          <h2 className="font-display text-[20px] font-semibold text-text">
+          <h2 className="font-display text-body-lg font-semibold text-text">
             Rozdysponuj wolne środki
           </h2>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-[13px] text-muted">Do rozdysponowania:</span>
-            <span className="font-mono text-[18px] font-semibold tabular-nums text-brass">
+            <span className="text-caption text-muted">Do rozdysponowania:</span>
+            <span className="font-mono text-body-lg font-semibold tabular-nums text-brass">
               {formatAmount(available)} zł
             </span>
           </div>
@@ -145,20 +145,20 @@ export function DistributeFundsSheet({
         <div className="flex gap-2 px-5 pb-3">
           <button
             onClick={handleProportional}
-            className="rounded-lg bg-panel-2 px-3 py-1.5 text-[11px] font-medium text-muted transition-colors hover:text-text"
+            className="rounded-lg bg-panel-2 px-3 py-1.5 text-micro font-medium text-muted transition-colors hover:text-text"
           >
             Proporcjonalnie
           </button>
           <button
             onClick={handleZero}
-            className="rounded-lg bg-panel-2 px-3 py-1.5 text-[11px] font-medium text-muted transition-colors hover:text-text"
+            className="rounded-lg bg-panel-2 px-3 py-1.5 text-micro font-medium text-muted transition-colors hover:text-text"
           >
             Wyzeruj
           </button>
           {hasPoduszka && (
             <button
               onClick={handleRestToPoduszka}
-              className="rounded-lg bg-panel-2 px-3 py-1.5 text-[11px] font-medium text-muted transition-colors hover:text-text"
+              className="rounded-lg bg-panel-2 px-3 py-1.5 text-micro font-medium text-muted transition-colors hover:text-text"
             >
               Resztę do Poduszki
             </button>
@@ -173,10 +173,10 @@ export function DistributeFundsSheet({
                 key={env.id}
                 className="flex items-center gap-3 rounded-lg bg-panel-2 px-3 py-2.5"
               >
-                <span className="text-[20px]">{env.emoji}</span>
+                <span className="text-body-lg">{env.emoji}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] text-text">{env.name}</p>
-                  <p className="text-[11px] text-muted/60">
+                  <p className="truncate text-caption text-text">{env.name}</p>
+                  <p className="text-micro text-muted/60">
                     Plan: {formatAmount(env.monthlyPlan)} zł
                   </p>
                 </div>
@@ -187,9 +187,9 @@ export function DistributeFundsSheet({
                     value={amounts[env.id] ?? ""}
                     onChange={(e) => handleChange(env.id, e.target.value)}
                     placeholder="0,00"
-                    className="w-20 rounded-lg border border-line bg-ink px-2 py-1.5 text-right font-mono text-[14px] tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+                    className="w-20 rounded-lg border border-line bg-ink px-2 py-1.5 text-right font-mono text-sm tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
                   />
-                  <span className="text-[11px] text-muted">zł</span>
+                  <span className="text-micro text-muted">zł</span>
                 </div>
               </div>
             ))}
@@ -199,9 +199,9 @@ export function DistributeFundsSheet({
         {/* Remaining + Save */}
         <div className="border-t border-line px-5 pb-2 pt-3">
           <div className="mb-3 flex items-baseline justify-between">
-            <span className="text-[13px] text-muted">Pozostanie:</span>
+            <span className="text-caption text-muted">Pozostanie:</span>
             <span
-              className={`font-mono text-[18px] font-semibold tabular-nums ${
+              className={`font-mono text-body-lg font-semibold tabular-nums ${
                 isOver ? "text-bad" : remaining === 0 ? "text-good" : "text-text"
               }`}
             >
@@ -210,7 +210,7 @@ export function DistributeFundsSheet({
             </span>
           </div>
           {isOver && (
-            <p className="mb-2 text-center text-[12px] text-bad">
+            <p className="mb-2 text-center text-micro text-bad">
               Suma przekracza dostępne środki o{" "}
               {formatAmount(Math.abs(remaining))} zł
             </p>
@@ -218,7 +218,7 @@ export function DistributeFundsSheet({
           <button
             onClick={handleSave}
             disabled={!canSave}
-            className={`mb-1 w-full rounded-xl py-3.5 text-[15px] font-semibold transition-all ${
+            className={`mb-1 w-full rounded-xl py-3.5 text-body font-semibold transition-all ${
               canSave
                 ? "bg-brass text-ink active:opacity-90"
                 : "bg-panel-2 text-muted/30"

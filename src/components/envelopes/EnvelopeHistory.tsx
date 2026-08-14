@@ -88,15 +88,15 @@ export function EnvelopeHistory({
         </div>
 
         <div className="flex items-center gap-2.5 px-5 pb-3">
-          <span className="text-[24px]">{envelope.emoji}</span>
-          <h2 className="font-display text-[20px] font-semibold text-text">
+          <span className="text-title">{envelope.emoji}</span>
+          <h2 className="font-display text-body-lg font-semibold text-text">
             {envelope.name}
           </h2>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-6">
           {sortedDates.length === 0 ? (
-            <p className="py-8 text-center text-[14px] text-muted">
+            <p className="py-8 text-center text-sm text-muted">
               Brak transakcji dla tej koperty.
             </p>
           ) : (
@@ -110,7 +110,7 @@ export function EnvelopeHistory({
 
               return (
                 <div key={date} className="mb-4">
-                  <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted">
+                  <p className="mb-1.5 text-micro font-medium uppercase tracking-wider text-muted">
                     {dateLabel}
                   </p>
                   <div className="space-y-1">
@@ -127,17 +127,17 @@ export function EnvelopeHistory({
                           className="flex items-center justify-between rounded-lg px-2 py-2"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-[13px] text-text">
+                            <p className="truncate text-caption text-text">
                               {label}
                             </p>
                             {tx.isImpulse && (
-                              <span className="text-[11px] text-bad/70">
+                              <span className="text-micro text-bad/70">
                                 ⚡ impuls
                               </span>
                             )}
                           </div>
                           <span
-                            className={`ml-3 shrink-0 font-mono text-[14px] tabular-nums ${
+                            className={`ml-3 shrink-0 font-mono text-sm tabular-nums ${
                               isPositive ? "text-good" : "text-text"
                             }`}
                           >
@@ -157,7 +157,7 @@ export function EnvelopeHistory({
         <div className="border-t border-line px-5 py-3">
           <button
             onClick={onClose}
-            className="w-full rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:text-text"
+            className="w-full rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
           >
             Zamknij
           </button>

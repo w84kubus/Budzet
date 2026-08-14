@@ -109,21 +109,21 @@ export function PeriodTab({
       {/* Category breakdown — horizontal bars (works on all sizes) */}
       {categories.length > 0 && (
         <div className="rounded-xl bg-panel p-4">
-          <h3 className="mb-3 text-[13px] font-medium uppercase tracking-wider text-muted">
+          <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">
             Wydatki wg kategorii
           </h3>
           <div className="space-y-2.5">
             {categories.map((cat, i) => (
               <div key={cat.id}>
                 <div className="mb-1 flex items-baseline justify-between">
-                  <span className="text-[13px] text-text">
+                  <span className="text-caption text-text">
                     {cat.emoji} {cat.name}
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-[12px] tabular-nums text-muted">
+                    <span className="font-mono text-micro tabular-nums text-muted">
                       {cat.percentage}%
                     </span>
-                    <span className="font-mono text-[13px] tabular-nums text-text">
+                    <span className="font-mono text-caption tabular-nums text-text">
                       {formatAmount(cat.amount)} zł
                     </span>
                   </div>
@@ -146,15 +146,15 @@ export function PeriodTab({
       {/* Fixed expenses: plan vs actual */}
       {fixedComparison.length > 0 && (
         <div className="rounded-xl bg-panel p-4">
-          <h3 className="mb-3 text-[13px] font-medium uppercase tracking-wider text-muted">
+          <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">
             Wydatki stałe: plan vs rzeczywistość
           </h3>
           <div className="space-y-3">
             {fixedComparison.map((item) => (
               <div key={item.id}>
                 <div className="mb-1 flex items-baseline justify-between">
-                  <span className="text-[13px] text-text">{item.name}</span>
-                  <span className="font-mono text-[12px] tabular-nums text-muted">
+                  <span className="text-caption text-text">{item.name}</span>
+                  <span className="font-mono text-micro tabular-nums text-muted">
                     {formatAmount(item.actual)}{" "}
                     <span className="text-muted/50">
                       / {formatAmount(item.planned)} zł
@@ -188,13 +188,13 @@ export function PeriodTab({
       {summary.impulseTotal > 0 && (
         <div className="rounded-xl border border-bad/20 bg-bad/5 p-4">
           <div className="flex items-baseline justify-between">
-            <span className="text-[13px] text-muted">⚡ Wydatki impulsywne</span>
-            <span className="font-mono text-[18px] font-semibold tabular-nums text-bad">
+            <span className="text-caption text-muted">⚡ Wydatki impulsywne</span>
+            <span className="font-mono text-body-lg font-semibold tabular-nums text-bad">
               {formatAmount(summary.impulseTotal)} zł
             </span>
           </div>
           {summary.totalExpenses > 0 && (
-            <p className="mt-1 text-[12px] text-muted/60">
+            <p className="mt-1 text-micro text-muted/60">
               {Math.round(
                 (summary.impulseTotal / summary.totalExpenses) * 100
               )}
@@ -220,9 +220,9 @@ function StatTile({
 }) {
   return (
     <div className="rounded-xl bg-panel p-3">
-      <p className="text-[11px] text-muted">{label}</p>
+      <p className="text-micro text-muted">{label}</p>
       <p
-        className={`mt-1 font-mono text-[18px] font-semibold tabular-nums ${
+        className={`mt-1 font-mono text-body-lg font-semibold tabular-nums ${
           color ?? "text-text"
         }`}
       >

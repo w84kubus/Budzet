@@ -95,7 +95,7 @@ export function CategoriesTab({
   if (categoryHistory.length === 0) {
     return (
       <div className="rounded-xl bg-panel p-8 text-center">
-        <p className="text-[14px] text-muted">
+        <p className="text-sm text-muted">
           Brak danych o wydatkach w tym okresie.
         </p>
       </div>
@@ -125,7 +125,7 @@ export function CategoriesTab({
       {/* Bar chart — top categories */}
       {mounted && chartData.length > 0 && (
         <div className="rounded-xl bg-panel p-4">
-          <h3 className="mb-3 text-[13px] font-medium uppercase tracking-wider text-muted">
+          <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">
             Ranking kategorii
           </h3>
           <div className="h-[200px] w-full">
@@ -173,7 +173,7 @@ export function CategoriesTab({
 
       {/* Full category list with sparklines */}
       <div className="rounded-xl bg-panel p-4">
-        <h3 className="mb-3 text-[13px] font-medium uppercase tracking-wider text-muted">
+        <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">
           Wszystkie kategorie
         </h3>
         <div className="space-y-2">
@@ -182,12 +182,12 @@ export function CategoriesTab({
               key={cat.id}
               className="flex items-center gap-3 rounded-lg bg-panel-2 px-3 py-2.5"
             >
-              <span className="text-[16px]">{cat.emoji}</span>
+              <span className="text-body">{cat.emoji}</span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] text-text">{cat.name}</p>
+                <p className="truncate text-caption text-text">{cat.name}</p>
                 {cat.changePercent !== null && (
                   <p
-                    className={`text-[11px] ${
+                    className={`text-micro ${
                       cat.changePercent > 0
                         ? "text-bad"
                         : cat.changePercent < 0
@@ -208,7 +208,7 @@ export function CategoriesTab({
                     : "var(--color-muted)"
                 }
               />
-              <span className="font-mono text-[13px] tabular-nums text-text">
+              <span className="font-mono text-caption tabular-nums text-text">
                 {formatAmount(cat.currentAmount)} zł
               </span>
             </div>
@@ -221,7 +221,7 @@ export function CategoriesTab({
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {increased.length > 0 && (
             <div className="rounded-xl border border-bad/15 bg-bad/5 p-4">
-              <h4 className="mb-2 text-[12px] font-medium uppercase tracking-wider text-bad">
+              <h4 className="mb-2 text-micro font-medium uppercase tracking-wider text-bad">
                 📈 Najbardziej wzrosło
               </h4>
               <div className="space-y-1.5">
@@ -230,10 +230,10 @@ export function CategoriesTab({
                     key={cat.id}
                     className="flex items-baseline justify-between"
                   >
-                    <span className="text-[13px] text-text">
+                    <span className="text-caption text-text">
                       {cat.emoji} {cat.name}
                     </span>
-                    <span className="font-mono text-[12px] tabular-nums text-bad">
+                    <span className="font-mono text-micro tabular-nums text-bad">
                       +{cat.changePercent}%
                     </span>
                   </div>
@@ -243,7 +243,7 @@ export function CategoriesTab({
           )}
           {decreased.length > 0 && (
             <div className="rounded-xl border border-good/15 bg-good/5 p-4">
-              <h4 className="mb-2 text-[12px] font-medium uppercase tracking-wider text-good">
+              <h4 className="mb-2 text-micro font-medium uppercase tracking-wider text-good">
                 📉 Najbardziej spadło
               </h4>
               <div className="space-y-1.5">
@@ -252,10 +252,10 @@ export function CategoriesTab({
                     key={cat.id}
                     className="flex items-baseline justify-between"
                   >
-                    <span className="text-[13px] text-text">
+                    <span className="text-caption text-text">
                       {cat.emoji} {cat.name}
                     </span>
-                    <span className="font-mono text-[12px] tabular-nums text-good">
+                    <span className="font-mono text-micro tabular-nums text-good">
                       {cat.changePercent}%
                     </span>
                   </div>

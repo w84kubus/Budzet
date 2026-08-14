@@ -72,8 +72,8 @@ function CustomTooltip({
   const val = payload[0].value;
   return (
     <div className="rounded-lg bg-panel-2 px-3 py-2 shadow-lg">
-      <p className="text-[11px] text-muted">{payload[0].payload.label}</p>
-      <p className="font-mono text-[14px] font-semibold tabular-nums text-text">
+      <p className="text-micro text-muted">{payload[0].payload.label}</p>
+      <p className="font-mono text-sm font-semibold tabular-nums text-text">
         {config.isPercent ? `${val}%` : `${formatAmount(val)} zł`}
       </p>
     </div>
@@ -98,7 +98,7 @@ export function TrendsTab({
   if (trends.length === 0) {
     return (
       <div className="rounded-xl bg-panel p-8 text-center">
-        <p className="text-[14px] text-muted">
+        <p className="text-sm text-muted">
           Brak danych — zamknij przynajmniej jeden okres.
         </p>
       </div>
@@ -129,7 +129,7 @@ export function TrendsTab({
           <button
             key={view}
             onClick={() => setActiveView(view)}
-            className={`flex-1 rounded-lg py-2 text-[12px] font-medium transition-colors ${
+            className={`flex-1 rounded-lg py-2 text-micro font-medium transition-colors ${
               activeView === view
                 ? "bg-panel-2 text-text"
                 : "text-muted hover:text-text"
@@ -142,10 +142,10 @@ export function TrendsTab({
 
       {/* Chart */}
       <div className="rounded-xl bg-panel p-4">
-        <h3 className="mb-1 text-[15px] font-medium text-text">
+        <h3 className="mb-1 text-body font-medium text-text">
           {config.label}
         </h3>
-        <p className="mb-4 text-[12px] text-muted">
+        <p className="mb-4 text-micro text-muted">
           Ostatnie {trends.length}{" "}
           {trends.length === 1
             ? "okres"
@@ -256,14 +256,14 @@ export function TrendsTab({
       {trends.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl bg-panel p-3">
-            <p className="text-[11px] text-muted">Suma oszczędności</p>
-            <p className="mt-1 font-mono text-[18px] font-semibold tabular-nums text-good">
+            <p className="text-micro text-muted">Suma oszczędności</p>
+            <p className="mt-1 font-mono text-body-lg font-semibold tabular-nums text-good">
               {formatAmount(trends[trends.length - 1].totalSavings)} zł
             </p>
           </div>
           <div className="rounded-xl bg-panel p-3">
-            <p className="text-[11px] text-muted">Ostatnie wydatki</p>
-            <p className="mt-1 font-mono text-[18px] font-semibold tabular-nums text-text">
+            <p className="text-micro text-muted">Ostatnie wydatki</p>
+            <p className="mt-1 font-mono text-body-lg font-semibold tabular-nums text-text">
               {formatAmount(trends[trends.length - 1].totalExpenses)} zł
             </p>
           </div>

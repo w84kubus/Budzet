@@ -32,13 +32,13 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted">
+        <h2 className="text-caption font-semibold uppercase tracking-wider text-muted">
           Wydatki stałe
         </h2>
         {onAddDef && (
           <button
             onClick={onAddDef}
-            className="flex h-7 items-center gap-1 rounded-lg px-2 text-[12px] font-medium text-muted transition-colors hover:bg-panel hover:text-text"
+            className="flex h-7 items-center gap-1 rounded-lg px-2 text-micro font-medium text-muted transition-colors hover:bg-panel hover:text-text"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M7 3V11M3 7H11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -50,11 +50,11 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
 
       {instances.length === 0 ? (
         <div className="rounded-xl bg-panel p-5 text-center">
-          <p className="text-[14px] text-muted">Brak wydatków stałych.</p>
+          <p className="text-sm text-muted">Brak wydatków stałych.</p>
           {onAddDef && (
             <button
               onClick={onAddDef}
-              className="mt-2 text-[13px] font-medium text-brass"
+              className="mt-2 text-caption font-medium text-brass"
             >
               Dodaj pierwszy
             </button>
@@ -104,7 +104,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
                 {/* Name + progress */}
                 <div className="min-w-0 flex-1">
                   <span
-                    className={`block text-[14px] leading-tight ${
+                    className={`block text-sm leading-tight ${
                       inst.isPaid ? "text-muted line-through" : "text-text"
                     }`}
                   >
@@ -124,7 +124,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
                 {/* Amount — clickable to edit */}
                 <button
                   onClick={() => onEditInstance?.(inst, def)}
-                  className={`shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[13px] tabular-nums transition-colors hover:bg-panel-2 ${
+                  className={`shrink-0 rounded-md px-1.5 py-0.5 font-mono text-caption tabular-nums transition-colors hover:bg-panel-2 ${
                     inst.isPaid ? "text-muted/50" : "text-text/80"
                   }`}
                 >
@@ -141,7 +141,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
 
       {/* Summary */}
       {instances.length > 0 && (
-        <div className="mt-2 px-1 text-[12px] text-muted">
+        <div className="mt-2 px-1 text-micro text-muted">
           Zapłacono{" "}
           <span className="font-mono tabular-nums">{formatAmount(totalPaid)}</span>{" "}
           z{" "}

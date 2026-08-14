@@ -94,13 +94,13 @@ export function EnvelopeCard({
         {/* Header */}
         <div className="mb-3 flex items-start justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="text-[28px] leading-none">{envelope.emoji}</span>
+            <span className="text-title leading-none">{envelope.emoji}</span>
             <div>
-              <h3 className="text-[15px] font-medium text-text">
+              <h3 className="text-body font-medium text-text">
                 {envelope.name}
               </h3>
               {showDailyLimit && (
-                <p className="mt-0.5 text-[12px] text-muted">
+                <p className="mt-0.5 text-micro text-muted">
                   ok. {formatAmount(dailyLimit)} zł / dzień
                 </p>
               )}
@@ -108,7 +108,7 @@ export function EnvelopeCard({
           </div>
           <div className="text-right">
             <span
-              className={`font-mono text-[20px] font-semibold tabular-nums ${
+              className={`font-mono text-body-lg font-semibold tabular-nums ${
                 isOverdraft ? "text-bad" : "text-text"
               }`}
             >
@@ -116,7 +116,7 @@ export function EnvelopeCard({
               {formatAmount(Math.abs(balance))}
             </span>
             <span
-              className={`ml-1 text-[13px] ${
+              className={`ml-1 text-caption ${
                 isOverdraft ? "text-bad/60" : "text-muted"
               }`}
             >
@@ -136,7 +136,7 @@ export function EnvelopeCard({
                 style={{ width: `${Math.max(0, fillPct)}%` }}
               />
             </div>
-            <div className="mt-1 flex justify-between text-[11px] text-muted">
+            <div className="mt-1 flex justify-between text-micro text-muted">
               <span>{formatAmount(Math.max(0, balance))} zł</span>
               <span>{formatAmount(target)} zł</span>
             </div>
@@ -145,11 +145,11 @@ export function EnvelopeCard({
 
         {/* Projection */}
         {projection && (
-          <p className="mb-2 text-[12px] text-muted/70">{projection}</p>
+          <p className="mb-2 text-micro text-muted/70">{projection}</p>
         )}
 
         {/* Period stats */}
-        <div className="flex gap-4 text-[12px]">
+        <div className="flex gap-4 text-micro">
           {periodAllocated > 0 && (
             <span className="text-good/70">
               +{formatAmount(periodAllocated)} zł wpłacono
@@ -168,7 +168,7 @@ export function EnvelopeCard({
         {/* Overdraft warning */}
         {isOverdraft && (
           <div className="mt-3 rounded-lg border border-bad/20 bg-bad/8 px-3 py-2">
-            <p className="text-[13px] font-medium text-bad">
+            <p className="text-caption font-medium text-bad">
               Przekroczone o {formatAmount(Math.abs(balance))} zł
             </p>
             {onCoverOverdraft && (
@@ -177,7 +177,7 @@ export function EnvelopeCard({
                   e.stopPropagation();
                   onCoverOverdraft(envelope, Math.abs(balance));
                 }}
-                className="mt-1.5 text-[12px] font-medium text-bad underline decoration-bad/30 underline-offset-2"
+                className="mt-1.5 text-micro font-medium text-bad underline decoration-bad/30 underline-offset-2"
               >
                 Pokryj z innej koperty
               </button>

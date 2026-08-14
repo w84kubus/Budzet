@@ -40,13 +40,13 @@ export function ImpulseCounter({
 
   return (
     <section className="rounded-xl bg-panel p-4">
-      <h2 className="mb-2 text-[13px] font-semibold uppercase tracking-wider text-muted">
+      <h2 className="mb-2 text-caption font-semibold uppercase tracking-wider text-muted">
         Impulsy w tym okresie
       </h2>
 
       <div className="flex items-baseline gap-3">
         <span
-          className={`font-display text-[32px] font-semibold tabular-nums ${
+          className={`font-display text-display font-semibold tabular-nums ${
             currentTotal > 0 ? "text-bad" : "text-muted/40"
           }`}
           style={{ fontOpticalSizing: "auto", letterSpacing: "-0.01em" }}
@@ -58,7 +58,7 @@ export function ImpulseCounter({
 
         {prevTotal > 0 && currentTotal > 0 && (
           <span
-            className={`text-[13px] font-medium ${
+            className={`text-caption font-medium ${
               diff > 0 ? "text-bad/70" : diff < 0 ? "text-good/70" : "text-muted"
             }`}
           >
@@ -72,7 +72,7 @@ export function ImpulseCounter({
       </div>
 
       {currentTotal === 0 && (
-        <p className="mt-1 text-[13px] text-muted/60">
+        <p className="mt-1 text-caption text-muted/60">
           Żadnych impulsywnych wydatków. Tak trzymaj.
         </p>
       )}

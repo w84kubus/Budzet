@@ -56,13 +56,13 @@ export function MainIndicator({
     <section className="rounded-2xl bg-panel px-5 pb-5 pt-6">
       {/* Free funds — THE number */}
       <div className="mb-1 text-center">
-        <span className="text-[13px] font-medium uppercase tracking-wider text-muted">
+        <span className="text-caption font-medium uppercase tracking-wider text-muted">
           Zostało
         </span>
       </div>
       <div className="mb-3 text-center">
         <span
-          className={`font-display text-[56px] font-semibold leading-none tracking-[-0.02em] tabular-nums ${
+          className={`font-display text-hero font-semibold leading-none tracking-[-0.02em] tabular-nums ${
             isNegative ? "text-bad" : "text-brass"
           } amount-enter`}
           style={{ fontOpticalSizing: "auto" }}
@@ -71,7 +71,7 @@ export function MainIndicator({
           {formatAmount(Math.abs(freeFunds))}
         </span>
         <span
-          className={`ml-2 font-display text-[22px] font-medium ${
+          className={`ml-2 font-display text-title font-medium ${
             isNegative ? "text-bad/60" : "text-brass/60"
           }`}
         >
@@ -81,9 +81,9 @@ export function MainIndicator({
 
       {/* Daily allowance */}
       {daysLeft > 0 && (
-        <p className="mb-5 text-center text-[15px] text-muted">
+        <p className="mb-5 text-center text-body text-muted">
           Możesz wydawać ok.{" "}
-          <span className="font-mono text-[15px] font-medium text-text tabular-nums">
+          <span className="font-mono text-body font-medium text-text tabular-nums">
             {formatAmount(Math.max(0, daily))} zł
           </span>{" "}
           dziennie
@@ -112,7 +112,7 @@ export function MainIndicator({
           style={{ left: `${timePct}%` }}
         />
       </div>
-      <div className="mt-2 flex justify-between text-[11px] text-muted/60">
+      <div className="mt-2 flex justify-between text-micro text-muted/60">
         <span>początek okresu</span>
         <span>wypłata</span>
       </div>
