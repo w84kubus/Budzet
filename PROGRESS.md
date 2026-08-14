@@ -118,4 +118,26 @@
 - `src/components/dashboard/PeriodHeader.tsx` — ikona zębatki (ustawienia) zamiast logout
 - `src/components/EditFixedExpenseSheet.tsx` — dodano pole edycji nazwy wydatku stałego
 
+## UI/UX Upgrade ✅
+
+**Zakres:** Audyt UI, design system, biblioteka prymitywów, refaktor architektury komponentów, PWA polish.
+
+**Co zrobione:**
+- `docs/design-system.md` — pełna specyfikacja design systemu (11 sekcji)
+- `docs/ui-audit.md` — audyt 25 problemów UI/UX
+- `docs/ui-upgrade-report.md` — raport końcowy upgrade'u
+- `src/components/ui/` — 16 nowych prymitywów UI (Button, Input, Card, Sheet, Dialog, Badge, ProgressBar, Tabs, Skeleton, EmptyState, ErrorState itd.)
+- `src/components/layout/AppShell.tsx` — shell aplikacji z desktop/mobile nav
+- `src/components/views/` — 3 wydzielone widoki (Dashboard, Envelopes, Stats)
+- `src/lib/format.ts` — centralna biblioteka formatowania (daty, pluralizacje, kwoty ze znakiem)
+- `globals.css` — 6 semantycznych tokenów kolorów domenowych, 8 tokenów skali typograficznej, CSS natywnego PWA feel
+- Zamienione 293 arbitralnych rozmiarów tekstu na tokeny (0 pozostało)
+- `page.tsx` zredukowany z 861 → 575 linii
+- Atrybuty ARIA: 8 → 29 (+263%)
+- `public/manifest.json` — dodane shortcuts (Dodaj wydatek, Koperty)
+- Build: 0 errors, 0 warnings, lint clean
+- 0 nowych zależności
+
+**Pełny raport:** `docs/ui-upgrade-report.md`
+
 ## Notatki między sesjami
