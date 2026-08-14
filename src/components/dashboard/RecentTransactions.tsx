@@ -1,6 +1,7 @@
 "use client";
 
 import { formatAmount } from "@/domain/money";
+import { formatDateShort } from "@/lib/format";
 import type { Transaction, FixedExpenseDef, Envelope } from "@/domain/types";
 
 type Props = {
@@ -9,16 +10,6 @@ type Props = {
   envelopes: Envelope[];
   onShowAll?: () => void;
 };
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  const day = d.getDate();
-  const months = [
-    "sty", "lut", "mar", "kwi", "maj", "cze",
-    "lip", "sie", "wrz", "paź", "lis", "gru",
-  ];
-  return `${day} ${months[d.getMonth()]}`;
-}
 
 function getLabel(
   tx: Transaction,
@@ -122,7 +113,7 @@ export function RecentTransactions({
                     {label}
                   </span>
                   <span className="text-micro text-muted/60">
-                    {formatDate(tx.date)}
+                    {formatDateShort(tx.date)}
                     {tx.note && ` · ${tx.note}`}
                     {tx.isImpulse && (
                       <span className="ml-1 text-bad/60">⚡</span>

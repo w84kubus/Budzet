@@ -10,6 +10,30 @@ type Props = {
   onAdd?: () => void;
 };
 
+function getEnvelopeState(balance: number, target: number) {
+  if (balance < 0) return "over" as const;
+  if (target > 0 && balance / target >= 0.75) return "warn" as const;
+  return "ok" as const;
+}
+
+const fillColors = {
+  ok: "bg-envelope-ok/12",
+  warn: "bg-envelope-warn/15",
+  over: "bg-envelope-over/15",
+} as const;
+
+const meniscusColors = {
+  ok: "bg-envelope-ok/40",
+  warn: "bg-envelope-warn/50",
+  over: "bg-envelope-over/50",
+} as const;
+
+const amountColors = {
+  ok: "text-text",
+  warn: "text-text",
+  over: "text-bad",
+} as const;
+
 export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
   const active = envelopes.filter((e) => !e.archived);
   const balances = calculateAllEnvelopeBalances(
@@ -35,9 +59,10 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
         {onAdd && (
           <button
             onClick={onAdd}
-            className="flex h-7 items-center gap-1 rounded-lg px-2 text-micro font-medium text-muted transition-colors hover:bg-panel hover:text-text"
+            className="flex min-h-9 items-center gap-1 rounded-lg px-2 text-micro font-medium text-muted transition-colors hover:bg-panel hover:text-text
+              focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M7 3V11M3 7H11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             Dodaj
@@ -55,81 +80,72 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
           )}
         </div>
       ) : (
+        <div className="no-scrollbar flex gap-3 overflow-x-auto md:grid md:grid-cols-2 md:overflow-x-visible">
+          {sorted.map((env) => {
+            const balance = balances.get(env.id) ?? 0;
+            const target = env.targetAmount ?? env.monthlyPlan;
+            const state = getEnvelopeState(balance, target);
 
-      <div className="no-scrollbar flex gap-3 overflow-x-auto md:grid md:grid-cols-2 md:overflow-x-visible">
-        {sorted.map((env) => {
-          const balance = balances.get(env.id) ?? 0;
-          const target = env.targetAmount ?? env.monthlyPlan;
-          const isOverdraft = balance < 0;
+            // Fill level: 0–100% based on balance/target
+            const fillPct =
+              target > 0
+                ? Math.min(100, Math.max(0, (balance / target) * 100))
+                : balance > 0
+                  ? 50
+                  : 0;
 
-          // Fill level: 0–100% based on balance/target
-          const fillPct =
-            target > 0
-              ? Math.min(100, Math.max(0, (balance / target) * 100))
-              : balance > 0
-                ? 50 // no target set but has money
-                : 0;
-
-          return (
-            <div
-              key={env.id}
-              className="relative flex w-[120px] shrink-0 flex-col overflow-hidden rounded-xl bg-panel md:w-auto"
-              style={{ height: 140 }}
-            >
-              {/* Fill from bottom */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0">
-                <div
-                  className={`fill-animate w-full ${
-                    isOverdraft ? "bg-bad/15" : "bg-good/8"
-                  }`}
-                  style={{ height: `${fillPct}%` }}
-                />
-                {/* Meniscus line */}
-                {fillPct > 0 && fillPct < 100 && (
+            return (
+              <div
+                key={env.id}
+                className="relative flex w-[130px] shrink-0 flex-col overflow-hidden rounded-xl bg-panel md:w-auto"
+                style={{ height: 100 }}
+              >
+                {/* Fill from bottom — flat color, the signature element */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0">
                   <div
-                    className={`absolute inset-x-0 h-[1px] ${
-                      isOverdraft ? "bg-bad/30" : "bg-good/20"
-                    }`}
-                    style={{ bottom: `${fillPct}%` }}
-                  />
+                    className={`fill-animate w-full ${fillColors[state]}`}
+                    style={{ height: `${fillPct}%` }}
+                  >
+                    {/* Meniscus — 1px line at top of fill */}
+                    <div
+                      className={`absolute inset-x-0 top-0 h-px ${meniscusColors[state]}`}
+                    />
+                  </div>
+                </div>
+
+                {/* Overdraft stripe — red line at bottom */}
+                {state === "over" && (
+                  <div className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-bad/60" />
                 )}
-              </div>
 
-              {/* Overdraft indicator — red stripe at bottom */}
-              {isOverdraft && (
-                <div className="absolute inset-x-0 bottom-0 h-[3px] bg-bad/60" />
-              )}
-
-              {/* Content */}
-              <div className="relative z-10 flex flex-1 flex-col justify-between p-3">
-                <div>
-                  <span className="text-body-lg leading-none">{env.emoji}</span>
-                  <p className="mt-1 text-micro leading-tight text-muted">
-                    {env.name}
-                  </p>
-                </div>
-                <div>
-                  <span
-                    className={`font-mono text-sm font-medium tabular-nums ${
-                      isOverdraft ? "text-bad" : "text-text"
-                    }`}
-                  >
-                    {isOverdraft ? "−" : ""}
-                    {formatAmount(Math.abs(balance))}
-                  </span>
-                  <span
-                    className={`ml-0.5 text-micro ${
-                      isOverdraft ? "text-bad/60" : "text-muted"
-                    }`}
-                  >
-                    zł
-                  </span>
+                {/* Content */}
+                <div className="relative z-10 flex flex-1 flex-col justify-between p-3">
+                  <div>
+                    <span className="text-body-lg leading-none" aria-hidden="true">{env.emoji}</span>
+                    <p className="mt-1 truncate text-micro leading-tight text-muted">
+                      {env.name}
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      className={`font-mono text-sm font-medium tabular-nums ${amountColors[state]}`}
+                    >
+                      {state === "over" ? "−" : ""}
+                      {formatAmount(Math.abs(balance))}
+                    </span>
+                    <span
+                      className={`ml-0.5 text-micro ${
+                        state === "over" ? "text-bad/60" : "text-muted"
+                      }`}
+                    >
+                      zł
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
       )}
     </section>
   );

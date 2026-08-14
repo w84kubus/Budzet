@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { formatAmount } from "@/domain/money";
+import { pluralTransakcje } from "@/lib/format";
 import type {
   Transaction,
   FixedExpenseDef,
@@ -196,7 +197,7 @@ export function ExpensesList({
   // Flatten for virtualization
   const visibleGroups = grouped.slice(0, visibleCount);
 
-  const formatDate = (dateStr: string) => {
+  const formatGroupDate = (dateStr: string) => {
     const d = new Date(dateStr + "T00:00:00");
     const dayNames = ["Ndz", "Pon", "Wt", "Śr", "Czw", "Pt", "Sob"];
     const monthNames = [
@@ -411,12 +412,7 @@ export function ExpensesList({
 
       {/* Results count */}
       <p className="mb-2 text-micro text-muted">
-        {filtered.length}{" "}
-        {filtered.length === 1
-          ? "transakcja"
-          : filtered.length < 5
-          ? "transakcje"
-          : "transakcji"}
+        {filtered.length} {pluralTransakcje(filtered.length)}
       </p>
 
       {/* Grouped list */}
@@ -435,7 +431,7 @@ export function ExpensesList({
               {/* Date header — sticky */}
               <div className="sticky top-0 z-10 flex items-baseline justify-between bg-ink/90 px-1 py-2 backdrop-blur-sm">
                 <span className="text-caption font-medium text-text">
-                  {formatDate(group.date)}
+                  {formatGroupDate(group.date)}
                 </span>
                 {group.total > 0 && (
                   <span className="font-mono text-micro tabular-nums text-muted">
