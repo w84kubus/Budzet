@@ -9,7 +9,7 @@ export function budgetRoot(budgetId: string): string {
 }
 
 export function settingsPath(budgetId: string): string {
-  return `${budgetRoot(budgetId)}/settings`;
+  return `${budgetRoot(budgetId)}/settings/data`;
 }
 
 export function periodsCollection(budgetId: string): string {

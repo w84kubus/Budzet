@@ -27,10 +27,16 @@ export function useBudgetData(budgetId: string | null) {
     if (!budgetId) return;
 
     const unsubs: Array<() => void> = [];
+    let settingsLoaded = false;
 
     unsubs.push(
       subscribeSettings(budgetId, (settings) => {
         store.setSettings(settings);
+        // Mark data as loaded only after settings subscription fires
+        if (!settingsLoaded) {
+          settingsLoaded = true;
+          store.setIsDataLoaded(true);
+        }
       })
     );
 
@@ -68,8 +74,6 @@ export function useBudgetData(budgetId: string | null) {
         store.setTransferTasks(tasks);
       })
     );
-
-    store.setIsDataLoaded(true);
 
     unsubsRef.current = unsubs;
 
