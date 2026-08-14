@@ -7,6 +7,7 @@ type Props = {
   transactions: Transaction[];
   fixedExpenseDefs: FixedExpenseDef[];
   envelopes: Envelope[];
+  onShowAll?: () => void;
 };
 
 function formatDate(iso: string): string {
@@ -83,6 +84,7 @@ export function RecentTransactions({
   transactions,
   fixedExpenseDefs,
   envelopes,
+  onShowAll,
 }: Props) {
   const defMap = new Map(fixedExpenseDefs.map((d) => [d.id, d]));
   const envMap = new Map(envelopes.map((e) => [e.id, e]));
@@ -140,7 +142,10 @@ export function RecentTransactions({
       )}
 
       {transactions.length > 5 && (
-        <button className="mt-3 w-full text-center text-[13px] font-medium text-brass">
+        <button
+          onClick={onShowAll}
+          className="mt-3 w-full text-center text-[13px] font-medium text-brass hover:text-text transition-colors"
+        >
           Zobacz wszystkie ({transactions.length})
         </button>
       )}

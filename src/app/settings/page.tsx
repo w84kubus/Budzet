@@ -652,7 +652,7 @@ function EditableDefRow({
       </div>
 
       {/* Amount */}
-      <div className="shrink-0">
+      <div className="w-[100px] shrink-0 text-right">
         {editingAmount ? (
           <input
             ref={amountRef}
@@ -668,7 +668,7 @@ function EditableDefRow({
                 setEditingAmount(false);
               }
             }}
-            className="w-[90px] rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
+            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
           />
         ) : (
           <button
@@ -684,7 +684,7 @@ function EditableDefRow({
       {/* Archive button */}
       <button
         onClick={onArchive}
-        className="shrink-0 text-[12px] text-muted hover:text-bad transition-colors"
+        className="w-[75px] shrink-0 text-right text-[12px] text-muted hover:text-bad transition-colors"
       >
         Archiwizuj
       </button>
@@ -773,7 +773,7 @@ function EditableEnvelopeRow({
       </div>
 
       {/* Monthly plan */}
-      <div className="shrink-0">
+      <div className="w-[100px] shrink-0 text-right">
         {editingPlan ? (
           <input
             ref={planRef}
@@ -789,7 +789,7 @@ function EditableEnvelopeRow({
                 setEditingPlan(false);
               }
             }}
-            className="w-[90px] rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
+            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
           />
         ) : (
           <button
@@ -805,7 +805,7 @@ function EditableEnvelopeRow({
       {/* Archive button */}
       <button
         onClick={onArchive}
-        className="shrink-0 text-[12px] text-muted hover:text-bad transition-colors"
+        className="w-[75px] shrink-0 text-right text-[12px] text-muted hover:text-bad transition-colors"
       >
         Archiwizuj
       </button>

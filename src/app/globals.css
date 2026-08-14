@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* ── Kolory bazowe ─────────────────────────────── */
   --color-ink: #0E1214;
   --color-panel: #161B1E;
   --color-panel-2: #1E2529;
@@ -11,9 +12,43 @@
   --color-good: #6FBF8B;
   --color-bad: #E0645A;
 
+  /* ── Kolory semantyczne domenowe ───────────────── */
+  --color-income: #6FBF8B;
+  --color-expense: #ECE7DF;
+  --color-envelope-ok: #6FBF8B;
+  --color-envelope-warn: #D9A441;
+  --color-envelope-over: #E0645A;
+  --color-unassigned: #D9A441;
+
+  /* ── Typografia — rodziny ──────────────────────── */
   --font-display: var(--font-fraunces), "Fraunces", serif;
   --font-ui: var(--font-inter-tight), "Inter Tight", sans-serif;
   --font-mono: var(--font-geist-mono), "Geist Mono", monospace;
+
+  /* ── Typografia — skala rozmiarów ──────────────── */
+  --font-size-hero: 3.5rem;
+  --font-size-hero--line-height: 1;
+
+  --font-size-display: 2rem;
+  --font-size-display--line-height: 1.15;
+
+  --font-size-title: 1.375rem;
+  --font-size-title--line-height: 1.25;
+
+  --font-size-body-lg: 1.0625rem;
+  --font-size-body-lg--line-height: 1.4;
+
+  --font-size-body: 0.9375rem;
+  --font-size-body--line-height: 1.5;
+
+  --font-size-sm: 0.875rem;
+  --font-size-sm--line-height: 1.4;
+
+  --font-size-caption: 0.8125rem;
+  --font-size-caption--line-height: 1.4;
+
+  --font-size-micro: 0.75rem;
+  --font-size-micro--line-height: 1.35;
 }
 
 /* ── Tabular nums on all amounts ────────────────────────────────── */

@@ -625,6 +625,7 @@ export default function Home() {
               transactions={transactions}
               fixedExpenseDefs={fixedExpenseDefs}
               envelopes={envelopes}
+              onShowAll={() => setActiveNav("expenses")}
             />
           </div>
         </div>
@@ -638,6 +639,30 @@ export default function Home() {
       <div className="fixed top-0 right-0 z-20 p-3">
         <OnlineIndicator />
       </div>
+
+      {/* Desktop top nav — hidden on mobile (BottomNav handles it) */}
+      <nav className="mx-auto hidden max-w-[960px] px-4 pt-2 md:block md:px-8">
+        <div className="flex gap-1 rounded-xl bg-panel p-1">
+          {([
+            { key: "dashboard" as const, label: "Pulpit" },
+            { key: "expenses" as const, label: "Wydatki" },
+            { key: "envelopes" as const, label: "Koperty" },
+            { key: "stats" as const, label: "Statystyki" },
+          ]).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveNav(tab.key)}
+              className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-colors ${
+                activeNav === tab.key
+                  ? "bg-panel-2 text-brass"
+                  : "text-muted hover:text-text"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
 
       {/* View switching based on nav */}
       {activeNav === "dashboard" && renderDashboard()}
