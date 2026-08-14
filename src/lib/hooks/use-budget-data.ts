@@ -7,6 +7,7 @@ import {
   subscribePeriods,
   subscribeFixedExpenseDefs,
   subscribeFixedExpenseInstances,
+  subscribeAllFixedExpenseInstances,
   subscribeEnvelopes,
   subscribeTransactions,
   subscribeAllTransactions,
@@ -66,6 +67,12 @@ export function useBudgetData(budgetId: string | null) {
     unsubs.push(
       subscribeAllTransactions(budgetId, (txs) => {
         store.setAllTransactions(txs);
+      })
+    );
+
+    unsubs.push(
+      subscribeAllFixedExpenseInstances(budgetId, (instances) => {
+        store.setAllFixedExpenseInstances(instances);
       })
     );
 

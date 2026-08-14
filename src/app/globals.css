@@ -11,7 +11,77 @@
   --color-good: #6FBF8B;
   --color-bad: #E0645A;
 
-  --font-display: "Fraunces", serif;
-  --font-ui: "Inter Tight", sans-serif;
-  --font-mono: "Geist Mono", "IBM Plex Mono", monospace;
+  --font-display: var(--font-fraunces), "Fraunces", serif;
+  --font-ui: var(--font-inter-tight), "Inter Tight", sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", monospace;
+}
+
+/* ── Tabular nums on all amounts ────────────────────────────────── */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Horizontal scroll without visible scrollbar ────────────────── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Safe area padding ──────────────────────────────────────────── */
+.safe-top {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+.safe-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+/* ── Count-up animation helper ──────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .amount-enter {
+    animation: amount-fade 400ms ease-out;
+  }
+  @keyframes amount-fade {
+    from {
+      opacity: 0.4;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ── Bottom sheet backdrop ──────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .sheet-backdrop-enter {
+    animation: fade-in 200ms ease-out;
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .sheet-enter {
+    animation: slide-up 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+/* ── Envelope fill animation ────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .fill-animate {
+    transition: height 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* ── Checkbox custom ────────────────────────────────────────────── */
+input[type="checkbox"] {
+  accent-color: var(--color-brass);
 }

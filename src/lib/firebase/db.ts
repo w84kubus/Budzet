@@ -97,6 +97,17 @@ export async function saveFixedExpenseDef(
   await setDoc(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), def);
 }
 
+export async function updateFixedExpenseDef(
+  budgetId: string,
+  defId: string,
+  updates: Partial<FixedExpenseDef>
+): Promise<void> {
+  await updateDoc(
+    docRef(paths.fixedExpenseDefDoc(budgetId, defId)),
+    updates as DocumentData
+  );
+}
+
 export async function saveFixedExpenseDefs(
   budgetId: string,
   defs: FixedExpenseDef[]
@@ -169,6 +180,22 @@ export function subscribeFixedExpenseInstances(
       snap.docs.map((d) => ({ ...d.data(), id: d.id }) as FixedExpenseInstance)
     );
   });
+}
+
+export function subscribeAllFixedExpenseInstances(
+  budgetId: string,
+  callback: (instances: FixedExpenseInstance[]) => void
+): Unsubscribe {
+  return onSnapshot(
+    collRef(paths.fixedExpenseInstancesCollection(budgetId)),
+    (snap) => {
+      callback(
+        snap.docs.map(
+          (d) => ({ ...d.data(), id: d.id }) as FixedExpenseInstance
+        )
+      );
+    }
+  );
 }
 
 // ─── Envelopes ───────────────────────────────────────────────────────────────

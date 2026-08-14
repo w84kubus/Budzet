@@ -18,6 +18,7 @@ type BudgetState = {
   activePeriodId: string | null;
   fixedExpenseDefs: FixedExpenseDef[];
   fixedExpenseInstances: FixedExpenseInstance[];
+  allFixedExpenseInstances: FixedExpenseInstance[];
   envelopes: Envelope[];
   transactions: Transaction[];
   allTransactions: Transaction[];
@@ -33,6 +34,7 @@ type BudgetState = {
   setActivePeriodId: (id: string | null) => void;
   setFixedExpenseDefs: (defs: FixedExpenseDef[]) => void;
   setFixedExpenseInstances: (instances: FixedExpenseInstance[]) => void;
+  setAllFixedExpenseInstances: (instances: FixedExpenseInstance[]) => void;
   setEnvelopes: (envelopes: Envelope[]) => void;
   setTransactions: (transactions: Transaction[]) => void;
   setAllTransactions: (transactions: Transaction[]) => void;
@@ -47,6 +49,7 @@ export const useBudgetStore = create<BudgetState>((set) => ({
   activePeriodId: null,
   fixedExpenseDefs: [],
   fixedExpenseInstances: [],
+  allFixedExpenseInstances: [],
   envelopes: [],
   transactions: [],
   allTransactions: [],
@@ -60,6 +63,8 @@ export const useBudgetStore = create<BudgetState>((set) => ({
   setFixedExpenseDefs: (fixedExpenseDefs) => set({ fixedExpenseDefs }),
   setFixedExpenseInstances: (fixedExpenseInstances) =>
     set({ fixedExpenseInstances }),
+  setAllFixedExpenseInstances: (allFixedExpenseInstances) =>
+    set({ allFixedExpenseInstances }),
   setEnvelopes: (envelopes) => set({ envelopes }),
   setTransactions: (transactions) => set({ transactions }),
   setAllTransactions: (allTransactions) => set({ allTransactions }),

@@ -1,0 +1,706 @@
+"use client";
+
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useBudgetData } from "@/lib/hooks/use-budget-data";
+import { useBudgetStore } from "@/stores/budget-store";
+import {
+  updateSettings,
+  updateFixedExpenseDef,
+  updateEnvelope,
+} from "@/lib/firebase/db";
+import { signOut } from "@/lib/firebase/auth";
+import { hashPin } from "@/lib/pin";
+import { formatAmount } from "@/domain/money";
+import {
+  exportTransactionsCSV,
+  createBackup,
+  downloadFile,
+} from "@/domain/export";
+import type { BackupData } from "@/domain/export";
+import type { Envelope, FixedExpenseDef } from "@/domain/types";
+
+function parseAmountInput(val: string): number {
+  const cleaned = val.replace(",", ".").trim();
+  if (!cleaned) return 0;
+  const num = parseFloat(cleaned);
+  if (!Number.isFinite(num) || num < 0) return 0;
+  return Math.round(num * 100);
+}
+
+export default function SettingsPage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const budgetId = user?.uid ?? null;
+  useBudgetData(budgetId);
+
+  const settings = useBudgetStore((s) => s.settings);
+  const periods = useBudgetStore((s) => s.periods);
+  const fixedExpenseDefs = useBudgetStore((s) => s.fixedExpenseDefs);
+  const allFixedExpenseInstances = useBudgetStore((s) => s.allFixedExpenseInstances);
+  const envelopes = useBudgetStore((s) => s.envelopes);
+  const allTransactions = useBudgetStore((s) => s.allTransactions);
+  const transferTasks = useBudgetStore((s) => s.transferTasks);
+  const isDataLoaded = useBudgetStore((s) => s.isDataLoaded);
+
+  // Edit states
+  const [paydayDay, setPaydayDay] = useState("");
+  const [defaultIncome, setDefaultIncome] = useState("");
+  const [pinInput, setPinInput] = useState("");
+  const [pinMode, setPinMode] = useState<"idle" | "set" | "change" | "remove">("idle");
+  const [importData, setImportData] = useState<BackupData | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [confirmWord, setConfirmWord] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [loading, user, router]);
+
+  useEffect(() => {
+    if (settings) {
+      setPaydayDay(String(settings.paydayDay));
+      setDefaultIncome("");
+    }
+  }, [settings]);
+
+  const handleSavePaydayDay = useCallback(async () => {
+    if (!budgetId || !settings) return;
+    const day = parseInt(paydayDay);
+    if (day >= 1 && day <= 31 && day !== settings.paydayDay) {
+      await updateSettings(budgetId, { paydayDay: day });
+    }
+  }, [budgetId, settings, paydayDay]);
+
+  const handleSavePin = useCallback(async () => {
+    if (!budgetId || !pinInput.trim()) return;
+    const hash = await hashPin(pinInput.trim());
+    await updateSettings(budgetId, { pinHash: hash });
+    setPinInput("");
+    setPinMode("idle");
+  }, [budgetId, pinInput]);
+
+  const handleRemovePin = useCallback(async () => {
+    if (!budgetId) return;
+    await updateSettings(budgetId, { pinHash: null });
+    setPinMode("idle");
+  }, [budgetId]);
+
+  const handleExportCSV = useCallback(() => {
+    if (!allTransactions.length) return;
+    const csv = exportTransactionsCSV(allTransactions, fixedExpenseDefs, envelopes);
+    const date = new Date().toISOString().split("T")[0];
+    downloadFile(csv, `budzet-wydatki-${date}.csv`, "text/csv;charset=utf-8");
+  }, [allTransactions, fixedExpenseDefs, envelopes]);
+
+  const handleExportJSON = useCallback(async () => {
+    if (!settings || !budgetId) return;
+    const backup = createBackup({
+      settings,
+      periods,
+      fixedExpenseDefs,
+      fixedExpenseInstances: allFixedExpenseInstances,
+      envelopes,
+      transactions: allTransactions,
+      transferTasks,
+    });
+    const json = JSON.stringify(backup, null, 2);
+    const date = new Date().toISOString().split("T")[0];
+    downloadFile(json, `budzet-kopia-${date}.json`, "application/json");
+
+    await updateSettings(budgetId, {
+      lastBackupAt: new Date().toISOString(),
+    });
+  }, [settings, budgetId, periods, fixedExpenseDefs, allFixedExpenseInstances, envelopes, allTransactions, transferTasks]);
+
+  const handleImportFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string) as BackupData;
+        if (!data.version || !data.settings || !data.periods) {
+          setImportError("Nieprawidłowy format pliku.");
+          return;
+        }
+        setImportData(data);
+        setImportError(null);
+      } catch {
+        setImportError("Nie udało się odczytać pliku JSON.");
+      }
+    };
+    reader.readAsText(file);
+  }, []);
+
+  const handleToggleArchiveDef = useCallback(
+    async (def: FixedExpenseDef) => {
+      if (!budgetId) return;
+      await updateFixedExpenseDef(budgetId, def.id, {
+        archived: !def.archived,
+      });
+    },
+    [budgetId]
+  );
+
+  const handleToggleArchiveEnvelope = useCallback(
+    async (env: Envelope) => {
+      if (!budgetId) return;
+      await updateEnvelope(budgetId, env.id, {
+        archived: !env.archived,
+      });
+    },
+    [budgetId]
+  );
+
+  const handleLogout = useCallback(async () => {
+    await signOut();
+    router.push("/login");
+  }, [router]);
+
+  if (loading || !isDataLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-muted">Ładowanie…</div>
+      </div>
+    );
+  }
+
+  const activeDefs = fixedExpenseDefs.filter((d) => !d.archived);
+  const archivedDefs = fixedExpenseDefs.filter((d) => d.archived);
+  const activeEnvelopes = envelopes.filter((e) => !e.archived);
+  const archivedEnvelopes = envelopes.filter((e) => e.archived);
+
+  const lastBackup = settings?.lastBackupAt
+    ? new Date(settings.lastBackupAt).toLocaleDateString("pl-PL")
+    : null;
+  const daysSinceBackup = settings?.lastBackupAt
+    ? Math.floor(
+        (Date.now() - new Date(settings.lastBackupAt).getTime()) / 86400000
+      )
+    : null;
+
+  return (
+    <div className="mx-auto max-w-[600px] px-4 pb-12 md:px-8">
+      <div className="safe-top flex items-center gap-3 pt-4 pb-6">
+        <button
+          onClick={() => router.push("/")}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel hover:text-text"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <h1 className="font-display text-[22px] font-semibold text-text">
+          Ustawienia
+        </h1>
+      </div>
+
+      {/* ── General ── */}
+      <Section title="Ogólne">
+        <Row label="Dzień wypłaty">
+          <input
+            type="number"
+            min="1"
+            max="31"
+            value={paydayDay}
+            onChange={(e) => setPaydayDay(e.target.value)}
+            onBlur={handleSavePaydayDay}
+            className="w-16 rounded-lg border border-line bg-panel-2 px-2 py-1.5 text-center font-mono text-[14px] tabular-nums text-text focus:border-brass/40 focus:outline-none"
+          />
+        </Row>
+      </Section>
+
+      {/* ── Fixed Expenses ── */}
+      <Section title="Wydatki stałe">
+        {activeDefs.length === 0 ? (
+          <p className="py-3 text-center text-[13px] text-muted">
+            Brak aktywnych wydatków stałych.
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {activeDefs.map((def) => (
+              <EditableDefRow
+                key={def.id}
+                def={def}
+                onSaveName={(name) => {
+                  if (budgetId) updateFixedExpenseDef(budgetId, def.id, { name });
+                }}
+                onSavePlanned={(defaultPlanned) => {
+                  if (budgetId) updateFixedExpenseDef(budgetId, def.id, { defaultPlanned });
+                }}
+                onArchive={() => handleToggleArchiveDef(def)}
+              />
+            ))}
+          </div>
+        )}
+        {archivedDefs.length > 0 && (
+          <div className="mt-3 border-t border-line pt-3">
+            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted">
+              Zarchiwizowane
+            </p>
+            {archivedDefs.map((def) => (
+              <div
+                key={def.id}
+                className="flex items-center justify-between rounded-lg px-3 py-2"
+              >
+                <span className="text-[13px] text-muted line-through">
+                  {def.name}
+                </span>
+                <button
+                  onClick={() => handleToggleArchiveDef(def)}
+                  className="text-[12px] text-muted hover:text-good"
+                >
+                  Przywróć
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {/* ── Envelopes ── */}
+      <Section title="Koperty">
+        {activeEnvelopes.length === 0 ? (
+          <p className="py-3 text-center text-[13px] text-muted">
+            Brak aktywnych kopert.
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {activeEnvelopes.map((env) => (
+              <div
+                key={env.id}
+                className="flex items-center justify-between rounded-lg px-3 py-2.5"
+              >
+                <div>
+                  <span className="text-[14px] text-text">
+                    {env.emoji} {env.name}
+                  </span>
+                  <span className="ml-2 font-mono text-[12px] tabular-nums text-muted">
+                    {formatAmount(env.monthlyPlan)} zł/mies.
+                  </span>
+                  {env.targetAmount && (
+                    <span className="ml-1 font-mono text-[11px] tabular-nums text-muted/50">
+                      cel: {formatAmount(env.targetAmount)} zł
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleToggleArchiveEnvelope(env)}
+                  className="text-[12px] text-muted hover:text-bad"
+                >
+                  Archiwizuj
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {archivedEnvelopes.length > 0 && (
+          <div className="mt-3 border-t border-line pt-3">
+            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted">
+              Zarchiwizowane
+            </p>
+            {archivedEnvelopes.map((env) => (
+              <div
+                key={env.id}
+                className="flex items-center justify-between rounded-lg px-3 py-2"
+              >
+                <span className="text-[13px] text-muted line-through">
+                  {env.emoji} {env.name}
+                </span>
+                <button
+                  onClick={() => handleToggleArchiveEnvelope(env)}
+                  className="text-[12px] text-muted hover:text-good"
+                >
+                  Przywróć
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {/* ── PIN ── */}
+      <Section title="Blokada PIN">
+        {settings?.pinHash ? (
+          <div className="space-y-3">
+            <p className="text-[13px] text-good">PIN aktywny ✓</p>
+            {pinMode === "idle" && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPinMode("change")}
+                  className="rounded-lg bg-panel-2 px-3 py-2 text-[13px] text-muted hover:text-text"
+                >
+                  Zmień PIN
+                </button>
+                <button
+                  onClick={() => setPinMode("remove")}
+                  className="rounded-lg bg-panel-2 px-3 py-2 text-[13px] text-muted hover:text-bad"
+                >
+                  Wyłącz PIN
+                </button>
+              </div>
+            )}
+            {pinMode === "change" && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  placeholder="Nowy PIN"
+                  className="w-32 rounded-lg border border-line bg-panel-2 px-3 py-2 text-center font-mono text-[16px] text-text focus:border-brass/40 focus:outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSavePin}
+                  disabled={pinInput.length < 4}
+                  className="rounded-lg bg-brass px-4 py-2 text-[13px] font-semibold text-ink disabled:opacity-30"
+                >
+                  Zapisz
+                </button>
+                <button
+                  onClick={() => { setPinMode("idle"); setPinInput(""); }}
+                  className="text-[12px] text-muted"
+                >
+                  Anuluj
+                </button>
+              </div>
+            )}
+            {pinMode === "remove" && (
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] text-bad">Na pewno wyłączyć?</span>
+                <button
+                  onClick={handleRemovePin}
+                  className="rounded-lg bg-bad px-4 py-2 text-[13px] font-semibold text-white"
+                >
+                  Wyłącz
+                </button>
+                <button
+                  onClick={() => setPinMode("idle")}
+                  className="text-[12px] text-muted"
+                >
+                  Anuluj
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            {pinMode !== "set" ? (
+              <button
+                onClick={() => setPinMode("set")}
+                className="rounded-lg bg-panel-2 px-4 py-2 text-[13px] text-muted hover:text-text"
+              >
+                Ustaw PIN
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  placeholder="PIN (min. 4 cyfry)"
+                  className="w-40 rounded-lg border border-line bg-panel-2 px-3 py-2 text-center font-mono text-[16px] text-text focus:border-brass/40 focus:outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSavePin}
+                  disabled={pinInput.length < 4}
+                  className="rounded-lg bg-brass px-4 py-2 text-[13px] font-semibold text-ink disabled:opacity-30"
+                >
+                  Zapisz
+                </button>
+                <button
+                  onClick={() => { setPinMode("idle"); setPinInput(""); }}
+                  className="text-[12px] text-muted"
+                >
+                  Anuluj
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </Section>
+
+      {/* ── Export ── */}
+      <Section title="Eksport">
+        <div className="space-y-3">
+          <button
+            onClick={handleExportCSV}
+            disabled={allTransactions.length === 0}
+            className="w-full rounded-xl bg-panel-2 py-3 text-[14px] font-medium text-text transition-colors hover:bg-line disabled:text-muted/30"
+          >
+            📄 Eksportuj CSV (transakcje)
+          </button>
+          <button
+            onClick={handleExportJSON}
+            className="w-full rounded-xl bg-panel-2 py-3 text-[14px] font-medium text-text transition-colors hover:bg-line"
+          >
+            💾 Pobierz kopię zapasową (JSON)
+          </button>
+          {lastBackup && (
+            <p className={`text-[12px] ${daysSinceBackup !== null && daysSinceBackup > 30 ? "text-bad" : "text-muted"}`}>
+              Ostatnia kopia: {lastBackup}
+              {daysSinceBackup !== null && daysSinceBackup > 30 && (
+                <span className="ml-1">⚠ ponad 30 dni temu</span>
+              )}
+            </p>
+          )}
+        </div>
+      </Section>
+
+      {/* ── Import ── */}
+      <Section title="Import">
+        <div className="space-y-3">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="w-full rounded-xl bg-panel-2 py-3 text-[14px] font-medium text-text transition-colors hover:bg-line"
+          >
+            📂 Wczytaj kopię zapasową
+          </button>
+          {importError && (
+            <p className="text-[13px] text-bad">{importError}</p>
+          )}
+          {importData && (
+            <div className="rounded-xl border border-line bg-panel-2 p-4">
+              <p className="mb-2 text-[14px] font-medium text-text">
+                Podgląd importu
+              </p>
+              <div className="space-y-1 text-[13px] text-muted">
+                <p>{importData.transactions.length} transakcji</p>
+                <p>{importData.envelopes.length} kopert</p>
+                <p>{importData.periods.length} okresów</p>
+                <p>{importData.fixedExpenseDefs.length} wydatków stałych</p>
+                <p className="text-[11px] text-muted/50">
+                  Wyeksportowano: {new Date(importData.exportedAt).toLocaleString("pl-PL")}
+                </p>
+              </div>
+
+              <div className="mt-4">
+                <p className="mb-1 text-[12px] text-bad">
+                  Wpisz ZASTĄP żeby potwierdzić nadpisanie danych:
+                </p>
+                <input
+                  type="text"
+                  value={confirmWord}
+                  onChange={(e) => setConfirmWord(e.target.value)}
+                  placeholder="ZASTĄP"
+                  className="w-full rounded-lg border border-line bg-ink px-3 py-2 text-center font-mono text-[14px] text-text focus:border-bad/40 focus:outline-none"
+                />
+                <button
+                  disabled={confirmWord !== "ZASTĄP"}
+                  className="mt-3 w-full rounded-xl bg-bad py-3 text-[14px] font-semibold text-white transition-all disabled:opacity-30"
+                >
+                  Zastąp dane (nieodwracalne)
+                </button>
+                <button
+                  onClick={() => {
+                    setImportData(null);
+                    setConfirmWord("");
+                  }}
+                  className="mt-2 w-full text-center text-[13px] text-muted hover:text-text"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Section>
+
+      {/* ── Print ── */}
+      <Section title="Wydruk">
+        {periods.length > 0 && (
+          <div className="space-y-2">
+            {periods
+              .slice()
+              .sort((a, b) => b.startDate.localeCompare(a.startDate))
+              .map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => window.open(`/print/${p.id}`, "_blank")}
+                  className="flex w-full items-center justify-between rounded-lg bg-panel-2 px-3 py-2.5 text-[13px] transition-colors hover:bg-line"
+                >
+                  <span className="text-text">{p.label}</span>
+                  <span className="text-muted">🖨 Drukuj</span>
+                </button>
+              ))}
+          </div>
+        )}
+      </Section>
+
+      {/* ── Account ── */}
+      <Section title="Konto">
+        <p className="mb-3 text-[13px] text-muted">{user?.email}</p>
+        <button
+          onClick={handleLogout}
+          className="w-full rounded-xl border border-line py-3 text-[14px] font-medium text-muted transition-colors hover:border-bad/30 hover:text-bad"
+        >
+          Wyloguj się
+        </button>
+      </Section>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mb-6">
+      <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-muted">
+        {title}
+      </h2>
+      <div className="rounded-xl bg-panel p-4">{children}</div>
+    </section>
+  );
+}
+
+function Row({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[14px] text-text">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function EditableDefRow({
+  def,
+  onSaveName,
+  onSavePlanned,
+  onArchive,
+}: {
+  def: FixedExpenseDef;
+  onSaveName: (name: string) => void;
+  onSavePlanned: (defaultPlanned: number) => void;
+  onArchive: () => void;
+}) {
+  const [editingName, setEditingName] = useState(false);
+  const [editingAmount, setEditingAmount] = useState(false);
+  const [nameValue, setNameValue] = useState(def.name);
+  const [amountValue, setAmountValue] = useState(
+    formatAmount(def.defaultPlanned)
+  );
+  const nameRef = useRef<HTMLInputElement>(null);
+  const amountRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingName) nameRef.current?.focus();
+  }, [editingName]);
+
+  useEffect(() => {
+    if (editingAmount) amountRef.current?.focus();
+  }, [editingAmount]);
+
+  const commitName = () => {
+    const trimmed = nameValue.trim();
+    if (trimmed && trimmed !== def.name) {
+      onSaveName(trimmed);
+    } else {
+      setNameValue(def.name);
+    }
+    setEditingName(false);
+  };
+
+  const commitAmount = () => {
+    const grosze = parseAmountInput(amountValue);
+    if (grosze > 0 && grosze !== def.defaultPlanned) {
+      onSavePlanned(grosze);
+    } else {
+      setAmountValue(formatAmount(def.defaultPlanned));
+    }
+    setEditingAmount(false);
+  };
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg px-3 py-2.5">
+      {/* Name */}
+      <div className="min-w-0 flex-1">
+        {editingName ? (
+          <input
+            ref={nameRef}
+            type="text"
+            value={nameValue}
+            onChange={(e) => setNameValue(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitName();
+              if (e.key === "Escape") {
+                setNameValue(def.name);
+                setEditingName(false);
+              }
+            }}
+            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-[14px] text-text outline-none focus:border-brass"
+          />
+        ) : (
+          <button
+            onClick={() => setEditingName(true)}
+            className="text-left text-[14px] text-text hover:text-brass transition-colors"
+            title="Kliknij, aby edytować nazwę"
+          >
+            {def.name}
+          </button>
+        )}
+      </div>
+
+      {/* Amount */}
+      <div className="shrink-0">
+        {editingAmount ? (
+          <input
+            ref={amountRef}
+            type="text"
+            inputMode="decimal"
+            value={amountValue}
+            onChange={(e) => setAmountValue(e.target.value)}
+            onBlur={commitAmount}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitAmount();
+              if (e.key === "Escape") {
+                setAmountValue(formatAmount(def.defaultPlanned));
+                setEditingAmount(false);
+              }
+            }}
+            className="w-[90px] rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-[12px] tabular-nums text-text outline-none focus:border-brass"
+          />
+        ) : (
+          <button
+            onClick={() => setEditingAmount(true)}
+            className="font-mono text-[12px] tabular-nums text-muted hover:text-brass transition-colors"
+            title="Kliknij, aby edytować kwotę"
+          >
+            {formatAmount(def.defaultPlanned)} zł
+          </button>
+        )}
+      </div>
+
+      {/* Archive button */}
+      <button
+        onClick={onArchive}
+        className="shrink-0 text-[12px] text-muted hover:text-bad transition-colors"
+      >
+        Archiwizuj
+      </button>
+    </div>
+  );
+}
