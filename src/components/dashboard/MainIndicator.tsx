@@ -67,8 +67,8 @@ export function MainIndicator({
           </div>
           <div className="mb-3 text-center">
             <span
-              className={`font-display text-hero font-semibold leading-none tracking-[-0.02em] tabular-nums md:text-[4.5rem] ${
-                isNegative ? "text-bad" : "text-text"
+              className={`font-display text-hero font-bold leading-none tracking-[-0.02em] tabular-nums md:text-[4.5rem] ${
+                isNegative ? "text-bad" : "text-white"
               } amount-enter`}
               style={{ fontOpticalSizing: "auto" }}
             >
@@ -77,7 +77,7 @@ export function MainIndicator({
             </span>
             <span
               className={`ml-2 font-display text-title font-medium md:text-[1.75rem] ${
-                isNegative ? "text-bad/60" : "text-muted"
+                isNegative ? "text-bad/60" : "text-white/50"
               }`}
             >
               zł
