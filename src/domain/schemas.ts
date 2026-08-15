@@ -122,4 +122,7 @@ export const UserSettingsSchema = z.object({
   currency: z.literal("PLN"),
   createdAt: isoDateString,
   lastBackupAt: isoDateString.nullable(),
+  // E2E encryption
+  encryptionSalt: z.string().nullable().optional(),
+  encryptionVerify: z.string().nullable().optional(),
 });

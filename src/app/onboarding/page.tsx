@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { initializeUserData } from "@/lib/firebase/db";
 import { hashPin, isValidPin } from "@/lib/pin";
+import { getEncryptionSalt, getEncryptionKey } from "@/lib/crypto/key-store";
+import { saltToBase64, createVerificationToken } from "@/lib/crypto/crypto";
 import { createInitialPeriod } from "@/domain/operations";
 import {
   DEFAULT_FIXED_EXPENSE_DEFS,
@@ -137,6 +139,16 @@ export default function OnboardingPage() {
       const now = new Date().toISOString();
       const today = now.split("T")[0];
 
+      // Encryption metadata (key was derived during signUp)
+      const encSalt = getEncryptionSalt();
+      const encKey = getEncryptionKey();
+      let encryptionSalt: string | null = null;
+      let encryptionVerify: string | null = null;
+      if (encSalt && encKey) {
+        encryptionSalt = saltToBase64(encSalt);
+        encryptionVerify = await createVerificationToken(encKey);
+      }
+
       // Settings
       const settings: UserSettings = {
         paydayDay,
@@ -144,6 +156,8 @@ export default function OnboardingPage() {
         currency: "PLN",
         createdAt: now,
         lastBackupAt: null,
+        encryptionSalt,
+        encryptionVerify,
       };
 
       // Income in grosze

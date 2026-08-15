@@ -24,6 +24,23 @@ import type {
   TransferTask,
   UserSettings,
 } from "@/domain/types";
+import {
+  encryptPeriod,
+  decryptPeriod,
+  encryptFixedExpenseDef,
+  decryptFixedExpenseDef,
+  encryptFixedExpenseInstance,
+  decryptFixedExpenseInstance,
+  encryptEnvelope,
+  decryptEnvelope,
+  encryptTransaction,
+  decryptTransaction,
+  encryptTransferTask,
+  decryptTransferTask,
+  encryptSettings,
+  decryptSettings,
+} from "@/lib/crypto/encrypt-fields";
+import { isEncryptionReady } from "@/lib/crypto/key-store";
 
 // ─── Generic helpers ─────────────────────────────────────────────────────────
 
@@ -40,11 +57,17 @@ function collRef(path: string) {
 export async function getSettings(budgetId: string): Promise<UserSettings | null> {
   const snap = await getDoc(docRef(paths.settingsPath(budgetId)));
   if (!snap.exists()) return null;
-  return snap.data() as UserSettings;
+  const data = snap.data() as UserSettings;
+  // Don't decrypt settings during getSettings - it's called before key is ready
+  // Only pinHash is encrypted, and it's compared as encrypted value
+  return data;
 }
 
 export async function saveSettings(budgetId: string, settings: UserSettings): Promise<void> {
-  await setDoc(docRef(paths.settingsPath(budgetId)), settings);
+  const encrypted = isEncryptionReady()
+    ? await encryptSettings(settings as unknown as Record<string, unknown>)
+    : settings;
+  await setDoc(docRef(paths.settingsPath(budgetId)), encrypted);
 }
 
 export async function updateSettings(
@@ -58,15 +81,28 @@ export function subscribeSettings(
   budgetId: string,
   callback: (settings: UserSettings | null) => void
 ): Unsubscribe {
-  return onSnapshot(docRef(paths.settingsPath(budgetId)), (snap) => {
-    callback(snap.exists() ? (snap.data() as UserSettings) : null);
+  return onSnapshot(docRef(paths.settingsPath(budgetId)), async (snap) => {
+    if (!snap.exists()) {
+      callback(null);
+      return;
+    }
+    const data = snap.data() as UserSettings;
+    if (isEncryptionReady()) {
+      const decrypted = await decryptSettings(data as unknown as Record<string, unknown>);
+      callback(decrypted as unknown as UserSettings);
+    } else {
+      callback(data);
+    }
   });
 }
 
 // ─── Periods ─────────────────────────────────────────────────────────────────
 
 export async function savePeriod(budgetId: string, period: Period): Promise<void> {
-  await setDoc(docRef(paths.periodDoc(budgetId, period.id)), period);
+  const data = isEncryptionReady()
+    ? await encryptPeriod(period as unknown as Record<string, unknown>)
+    : period;
+  await setDoc(docRef(paths.periodDoc(budgetId, period.id)), data);
 }
 
 export async function updatePeriod(
@@ -74,7 +110,10 @@ export async function updatePeriod(
   periodId: string,
   updates: Partial<Period>
 ): Promise<void> {
-  await updateDoc(docRef(paths.periodDoc(budgetId, periodId)), updates as DocumentData);
+  const data = isEncryptionReady()
+    ? await encryptPeriod(updates as unknown as Record<string, unknown>)
+    : updates;
+  await updateDoc(docRef(paths.periodDoc(budgetId, periodId)), data as DocumentData);
 }
 
 export function subscribePeriods(
@@ -82,9 +121,16 @@ export function subscribePeriods(
   callback: (periods: Period[]) => void
 ): Unsubscribe {
   const q = query(collRef(paths.periodsCollection(budgetId)));
-  return onSnapshot(q, (snap) => {
+  return onSnapshot(q, async (snap) => {
     const periods = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Period);
-    callback(periods);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        periods.map((p) => decryptPeriod(p as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as Period[]);
+    } else {
+      callback(periods);
+    }
   });
 }
 
@@ -94,7 +140,10 @@ export async function saveFixedExpenseDef(
   budgetId: string,
   def: FixedExpenseDef
 ): Promise<void> {
-  await setDoc(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), def);
+  const data = isEncryptionReady()
+    ? await encryptFixedExpenseDef(def as unknown as Record<string, unknown>)
+    : def;
+  await setDoc(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), data);
 }
 
 export async function updateFixedExpenseDef(
@@ -102,9 +151,12 @@ export async function updateFixedExpenseDef(
   defId: string,
   updates: Partial<FixedExpenseDef>
 ): Promise<void> {
+  const data = isEncryptionReady()
+    ? await encryptFixedExpenseDef(updates as unknown as Record<string, unknown>)
+    : updates;
   await updateDoc(
     docRef(paths.fixedExpenseDefDoc(budgetId, defId)),
-    updates as DocumentData
+    data as DocumentData
   );
 }
 
@@ -121,7 +173,10 @@ export async function saveFixedExpenseDefs(
 ): Promise<void> {
   const batch = writeBatch(db());
   for (const def of defs) {
-    batch.set(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), def);
+    const data = isEncryptionReady()
+      ? await encryptFixedExpenseDef(def as unknown as Record<string, unknown>)
+      : def;
+    batch.set(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), data as DocumentData);
   }
   await batch.commit();
 }
@@ -134,8 +189,16 @@ export function subscribeFixedExpenseDefs(
     collRef(paths.fixedExpenseDefsCollection(budgetId)),
     orderBy("order")
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as FixedExpenseDef));
+  return onSnapshot(q, async (snap) => {
+    const defs = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as FixedExpenseDef);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        defs.map((d) => decryptFixedExpenseDef(d as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as FixedExpenseDef[]);
+    } else {
+      callback(defs);
+    }
   });
 }
 
@@ -145,9 +208,12 @@ export async function saveFixedExpenseInstance(
   budgetId: string,
   instance: FixedExpenseInstance
 ): Promise<void> {
+  const data = isEncryptionReady()
+    ? await encryptFixedExpenseInstance(instance as unknown as Record<string, unknown>)
+    : instance;
   await setDoc(
     docRef(paths.fixedExpenseInstanceDoc(budgetId, instance.id)),
-    instance
+    data as DocumentData
   );
 }
 
@@ -157,7 +223,13 @@ export async function saveFixedExpenseInstances(
 ): Promise<void> {
   const batch = writeBatch(db());
   for (const inst of instances) {
-    batch.set(docRef(paths.fixedExpenseInstanceDoc(budgetId, inst.id)), inst);
+    const data = isEncryptionReady()
+      ? await encryptFixedExpenseInstance(inst as unknown as Record<string, unknown>)
+      : inst;
+    batch.set(
+      docRef(paths.fixedExpenseInstanceDoc(budgetId, inst.id)),
+      data as DocumentData
+    );
   }
   await batch.commit();
 }
@@ -167,9 +239,12 @@ export async function updateFixedExpenseInstance(
   instanceId: string,
   updates: Partial<FixedExpenseInstance>
 ): Promise<void> {
+  const data = isEncryptionReady()
+    ? await encryptFixedExpenseInstance(updates as unknown as Record<string, unknown>)
+    : updates;
   await updateDoc(
     docRef(paths.fixedExpenseInstanceDoc(budgetId, instanceId)),
-    updates as DocumentData
+    data as DocumentData
   );
 }
 
@@ -182,10 +257,20 @@ export function subscribeFixedExpenseInstances(
     collRef(paths.fixedExpenseInstancesCollection(budgetId)),
     where("periodId", "==", periodId)
   );
-  return onSnapshot(q, (snap) => {
-    callback(
-      snap.docs.map((d) => ({ ...d.data(), id: d.id }) as FixedExpenseInstance)
+  return onSnapshot(q, async (snap) => {
+    const instances = snap.docs.map(
+      (d) => ({ ...d.data(), id: d.id }) as FixedExpenseInstance
     );
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        instances.map((i) =>
+          decryptFixedExpenseInstance(i as unknown as Record<string, unknown>)
+        )
+      );
+      callback(decrypted as unknown as FixedExpenseInstance[]);
+    } else {
+      callback(instances);
+    }
   });
 }
 
@@ -195,12 +280,20 @@ export function subscribeAllFixedExpenseInstances(
 ): Unsubscribe {
   return onSnapshot(
     collRef(paths.fixedExpenseInstancesCollection(budgetId)),
-    (snap) => {
-      callback(
-        snap.docs.map(
-          (d) => ({ ...d.data(), id: d.id }) as FixedExpenseInstance
-        )
+    async (snap) => {
+      const instances = snap.docs.map(
+        (d) => ({ ...d.data(), id: d.id }) as FixedExpenseInstance
       );
+      if (isEncryptionReady()) {
+        const decrypted = await Promise.all(
+          instances.map((i) =>
+            decryptFixedExpenseInstance(i as unknown as Record<string, unknown>)
+          )
+        );
+        callback(decrypted as unknown as FixedExpenseInstance[]);
+      } else {
+        callback(instances);
+      }
     }
   );
 }
@@ -211,7 +304,10 @@ export async function saveEnvelope(
   budgetId: string,
   envelope: Envelope
 ): Promise<void> {
-  await setDoc(docRef(paths.envelopeDoc(budgetId, envelope.id)), envelope);
+  const data = isEncryptionReady()
+    ? await encryptEnvelope(envelope as unknown as Record<string, unknown>)
+    : envelope;
+  await setDoc(docRef(paths.envelopeDoc(budgetId, envelope.id)), data as DocumentData);
 }
 
 export async function saveEnvelopes(
@@ -220,7 +316,10 @@ export async function saveEnvelopes(
 ): Promise<void> {
   const batch = writeBatch(db());
   for (const env of envelopes) {
-    batch.set(docRef(paths.envelopeDoc(budgetId, env.id)), env);
+    const data = isEncryptionReady()
+      ? await encryptEnvelope(env as unknown as Record<string, unknown>)
+      : env;
+    batch.set(docRef(paths.envelopeDoc(budgetId, env.id)), data as DocumentData);
   }
   await batch.commit();
 }
@@ -230,9 +329,12 @@ export async function updateEnvelope(
   envelopeId: string,
   updates: Partial<Envelope>
 ): Promise<void> {
+  const data = isEncryptionReady()
+    ? await encryptEnvelope(updates as unknown as Record<string, unknown>)
+    : updates;
   await updateDoc(
     docRef(paths.envelopeDoc(budgetId, envelopeId)),
-    updates as DocumentData
+    data as DocumentData
   );
 }
 
@@ -251,8 +353,16 @@ export function subscribeEnvelopes(
     collRef(paths.envelopesCollection(budgetId)),
     orderBy("order")
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Envelope));
+  return onSnapshot(q, async (snap) => {
+    const envelopes = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Envelope);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        envelopes.map((e) => decryptEnvelope(e as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as Envelope[]);
+    } else {
+      callback(envelopes);
+    }
   });
 }
 
@@ -266,10 +376,13 @@ export async function saveTransaction(
     ? docRef(paths.transactionDoc(budgetId, transaction.id))
     : doc(collRef(paths.transactionsCollection(budgetId)));
   // Strip undefined values - Firestore rejects them
-  const data: Record<string, unknown> = { ...transaction, id: ref.id };
-  for (const key of Object.keys(data)) {
-    if (data[key] === undefined) delete data[key];
+  const raw: Record<string, unknown> = { ...transaction, id: ref.id };
+  for (const key of Object.keys(raw)) {
+    if (raw[key] === undefined) delete raw[key];
   }
+  const data = isEncryptionReady()
+    ? await encryptTransaction(raw)
+    : raw;
   await setDoc(ref, data);
   return ref.id;
 }
@@ -279,9 +392,12 @@ export async function updateTransaction(
   transactionId: string,
   updates: Partial<Transaction>
 ): Promise<void> {
+  const data = isEncryptionReady()
+    ? await encryptTransaction(updates as unknown as Record<string, unknown>)
+    : updates;
   await updateDoc(
     docRef(paths.transactionDoc(budgetId, transactionId)),
-    updates as DocumentData
+    data as DocumentData
   );
 }
 
@@ -302,8 +418,16 @@ export function subscribeTransactions(
     where("periodId", "==", periodId),
     orderBy("date", "desc")
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Transaction));
+  return onSnapshot(q, async (snap) => {
+    const txs = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Transaction);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        txs.map((t) => decryptTransaction(t as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as Transaction[]);
+    } else {
+      callback(txs);
+    }
   });
 }
 
@@ -315,8 +439,16 @@ export function subscribeAllTransactions(
     collRef(paths.transactionsCollection(budgetId)),
     orderBy("date", "desc")
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Transaction));
+  return onSnapshot(q, async (snap) => {
+    const txs = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Transaction);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        txs.map((t) => decryptTransaction(t as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as Transaction[]);
+    } else {
+      callback(txs);
+    }
   });
 }
 
@@ -330,8 +462,16 @@ export function subscribeEnvelopeTransactions(
     where("envelopeId", "==", envelopeId),
     orderBy("date", "desc")
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Transaction));
+  return onSnapshot(q, async (snap) => {
+    const txs = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Transaction);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        txs.map((t) => decryptTransaction(t as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as Transaction[]);
+    } else {
+      callback(txs);
+    }
   });
 }
 
@@ -344,7 +484,11 @@ export async function saveTransferTask(
   const ref = task.id
     ? docRef(paths.transferTaskDoc(budgetId, task.id))
     : doc(collRef(paths.transferTasksCollection(budgetId)));
-  await setDoc(ref, { ...task, id: ref.id });
+  const raw = { ...task, id: ref.id };
+  const data = isEncryptionReady()
+    ? await encryptTransferTask(raw as unknown as Record<string, unknown>)
+    : raw;
+  await setDoc(ref, data as DocumentData);
   return ref.id;
 }
 
@@ -353,9 +497,12 @@ export async function updateTransferTask(
   taskId: string,
   updates: Partial<TransferTask>
 ): Promise<void> {
+  const data = isEncryptionReady()
+    ? await encryptTransferTask(updates as unknown as Record<string, unknown>)
+    : updates;
   await updateDoc(
     docRef(paths.transferTaskDoc(budgetId, taskId)),
-    updates as DocumentData
+    data as DocumentData
   );
 }
 
@@ -367,8 +514,16 @@ export function subscribeTransferTasks(
     collRef(paths.transferTasksCollection(budgetId)),
     where("isDone", "==", false)
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as TransferTask));
+  return onSnapshot(q, async (snap) => {
+    const tasks = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as TransferTask);
+    if (isEncryptionReady()) {
+      const decrypted = await Promise.all(
+        tasks.map((t) => decryptTransferTask(t as unknown as Record<string, unknown>))
+      );
+      callback(decrypted as unknown as TransferTask[]);
+    } else {
+      callback(tasks);
+    }
   });
 }
 
@@ -383,18 +538,35 @@ export async function initializeUserData(
   envelopes: Envelope[]
 ): Promise<void> {
   const batch = writeBatch(db());
+  const ready = isEncryptionReady();
 
-  batch.set(docRef(paths.settingsPath(budgetId)), settings);
-  batch.set(docRef(paths.periodDoc(budgetId, period.id)), period);
+  const encSettings = ready
+    ? await encryptSettings(settings as unknown as Record<string, unknown>)
+    : settings;
+  batch.set(docRef(paths.settingsPath(budgetId)), encSettings as DocumentData);
+
+  const encPeriod = ready
+    ? await encryptPeriod(period as unknown as Record<string, unknown>)
+    : period;
+  batch.set(docRef(paths.periodDoc(budgetId, period.id)), encPeriod as DocumentData);
 
   for (const def of fixedExpenseDefs) {
-    batch.set(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), def);
+    const enc = ready
+      ? await encryptFixedExpenseDef(def as unknown as Record<string, unknown>)
+      : def;
+    batch.set(docRef(paths.fixedExpenseDefDoc(budgetId, def.id)), enc as DocumentData);
   }
   for (const inst of fixedExpenseInstances) {
-    batch.set(docRef(paths.fixedExpenseInstanceDoc(budgetId, inst.id)), inst);
+    const enc = ready
+      ? await encryptFixedExpenseInstance(inst as unknown as Record<string, unknown>)
+      : inst;
+    batch.set(docRef(paths.fixedExpenseInstanceDoc(budgetId, inst.id)), enc as DocumentData);
   }
   for (const env of envelopes) {
-    batch.set(docRef(paths.envelopeDoc(budgetId, env.id)), env);
+    const enc = ready
+      ? await encryptEnvelope(env as unknown as Record<string, unknown>)
+      : env;
+    batch.set(docRef(paths.envelopeDoc(budgetId, env.id)), enc as DocumentData);
   }
 
   await batch.commit();

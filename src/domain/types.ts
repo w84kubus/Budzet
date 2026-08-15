@@ -116,4 +116,7 @@ export type UserSettings = {
   currency: string; // always "PLN"
   createdAt: string;
   lastBackupAt: string | null;
+  // E2E encryption
+  encryptionSalt: string | null; // base64-encoded PBKDF2 salt
+  encryptionVerify: string | null; // encrypted verification token
 };
