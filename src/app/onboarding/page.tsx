@@ -205,7 +205,7 @@ export default function OnboardingPage() {
         finalEnvelopes
       );
 
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       console.error("Onboarding save error:", err);
       setError("Nie udało się zapisać danych. Spróbuj ponownie.");

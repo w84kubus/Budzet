@@ -9,7 +9,7 @@ import { useSheets } from "@/lib/contexts/sheet-context";
 type NavItem = "dashboard" | "expenses" | "envelopes" | "stats";
 
 const NAV_TABS: { key: NavItem; label: string; href: string }[] = [
-  { key: "dashboard", label: "Pulpit", href: "/" },
+  { key: "dashboard", label: "Pulpit", href: "/dashboard" },
   { key: "expenses", label: "Wydatki", href: "/expenses" },
   { key: "envelopes", label: "Koperty", href: "/envelopes" },
   { key: "stats", label: "Statystyki", href: "/stats" },
@@ -19,6 +19,7 @@ function pathnameToNav(pathname: string): NavItem {
   if (pathname.startsWith("/expenses")) return "expenses";
   if (pathname.startsWith("/envelopes")) return "envelopes";
   if (pathname.startsWith("/stats")) return "stats";
+  if (pathname.startsWith("/dashboard")) return "dashboard";
   return "dashboard";
 }
 

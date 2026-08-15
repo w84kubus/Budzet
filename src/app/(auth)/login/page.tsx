@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       const code = (err as { code?: string }).code;
       if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
