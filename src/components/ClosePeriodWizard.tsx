@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { formatAmount } from "@/domain/money";
+import { useState, useEffect } from "react";
+import { formatAmount, groszeToCurrencyInput } from "@/domain/money";
 import {
   calculateFreeFunds,
   calculateImpulseTotal,
   calculateAllEnvelopeBalances,
-  calculateAllocationBreakdown,
 } from "@/domain/calculations";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { AmountInput } from "@/components/ui/AmountInput";
 import type {
   Period,
   Transaction,
@@ -63,16 +65,15 @@ export function ClosePeriodWizard({
   const [newDate, setNewDate] = useState("");
   const [newIncome, setNewIncome] = useState("");
 
+  // Suppress unused variable warning — defaultPaydayDay reserved for future auto-fill
+  void defaultPaydayDay;
+
   useEffect(() => {
     if (open) {
       setStep("summary");
       const today = new Date().toISOString().split("T")[0];
       setNewDate(today);
-      setNewIncome(
-        defaultIncome > 0
-          ? (defaultIncome / 100).toFixed(2).replace(".", ",")
-          : ""
-      );
+      setNewIncome(groszeToCurrencyInput(defaultIncome));
     }
   }, [open, defaultIncome]);
 
@@ -106,9 +107,6 @@ export function ClosePeriodWizard({
 
   // ── Issues ──
   const unpaidInstances = fixedExpenseInstances.filter((i) => !i.isPaid);
-  const unpaidDefs = unpaidInstances
-    .map((i) => fixedExpenseDefs.find((d) => d.id === i.defId))
-    .filter(Boolean);
 
   const openTransferTasks = transferTasks.filter(
     (t) => t.periodId === period.id && !t.isDone
@@ -318,31 +316,20 @@ export function ClosePeriodWizard({
               </h2>
 
               <div className="space-y-4">
-                <div>
-                  <label className="mb-1 block text-micro text-muted">
-                    Data wypłaty
-                  </label>
-                  <input
-                    type="date"
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text focus:border-brass/40 focus:outline-none"
-                  />
-                </div>
+                <Input
+                  label="Data wypłaty"
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                />
 
-                <div>
-                  <label className="mb-1 block text-micro text-muted">
-                    Kwota wypłaty (zł)
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={newIncome}
-                    onChange={(e) => setNewIncome(e.target.value)}
-                    placeholder="0,00"
-                    className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right font-mono text-body-lg tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
-                  />
-                </div>
+                <AmountInput
+                  label="Kwota wypłaty"
+                  value={newIncome}
+                  onChange={(e) => setNewIncome(e.target.value)}
+                  placeholder="0,00"
+                  className="text-right text-body-lg"
+                />
               </div>
             </div>
           )}
@@ -352,37 +339,36 @@ export function ClosePeriodWizard({
         <div className="border-t border-line px-5 pb-2 pt-3">
           <div className="flex gap-3">
             {step !== "summary" && (
-              <button
+              <Button
+                variant="secondary"
+                fullWidth
                 onClick={() => {
                   if (step === "issues") setStep("summary");
                   if (step === "newPeriod") setStep("issues");
                 }}
-                className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
               >
                 Wstecz
-              </button>
+              </Button>
             )}
             {step === "summary" && (
-              <button
-                onClick={onClose}
-                className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
-              >
+              <Button variant="secondary" fullWidth onClick={onClose}>
                 Anuluj
-              </button>
+              </Button>
             )}
             {step !== "newPeriod" && (
-              <button
+              <Button
+                fullWidth
                 onClick={() => {
                   if (step === "summary") setStep("issues");
                   if (step === "issues") setStep("newPeriod");
                 }}
-                className="flex-1 rounded-xl bg-brass py-3 text-sm font-semibold text-ink active:opacity-90"
               >
                 Dalej
-              </button>
+              </Button>
             )}
             {step === "newPeriod" && (
-              <button
+              <Button
+                fullWidth
                 onClick={() => {
                   if (canComplete) {
                     onComplete({
@@ -392,14 +378,9 @@ export function ClosePeriodWizard({
                   }
                 }}
                 disabled={!canComplete}
-                className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
-                  canComplete
-                    ? "bg-brass text-ink active:opacity-90"
-                    : "bg-panel-2 text-muted/30"
-                }`}
               >
                 Mam wypłatę — zamknij okres
-              </button>
+              </Button>
             )}
           </div>
         </div>

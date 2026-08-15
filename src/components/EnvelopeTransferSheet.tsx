@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatAmount } from "@/domain/money";
+import { formatAmount, groszeToCurrencyInput } from "@/domain/money";
 import { calculateEnvelopeBalance } from "@/domain/calculations";
+import { Button } from "@/components/ui/Button";
+import { AmountInput } from "@/components/ui/AmountInput";
 import type { Envelope, Transaction } from "@/domain/types";
 
 type Props = {
@@ -40,11 +42,7 @@ export function EnvelopeTransferSheet({
   useEffect(() => {
     if (open) {
       setSourceId(null);
-      setAmount(
-        suggestedAmount > 0
-          ? (suggestedAmount / 100).toFixed(2).replace(".", ",")
-          : ""
-      );
+      setAmount(groszeToCurrencyInput(suggestedAmount));
     }
   }, [open, suggestedAmount]);
 
@@ -99,7 +97,7 @@ export function EnvelopeTransferSheet({
 
           {/* Source picker */}
           <div className="mb-4">
-            <label className="mb-1.5 block text-micro text-muted">
+            <label className="mb-1.5 block text-caption font-medium text-muted">
               Pokryj z koperty
             </label>
             {sourceCandidates.length === 0 ? (
@@ -140,42 +138,27 @@ export function EnvelopeTransferSheet({
 
           {/* Amount */}
           <div className="mb-3">
-            <label className="mb-1 block text-micro text-muted">
-              Kwota (zł)
-            </label>
-            <input
-              type="text"
-              inputMode="decimal"
+            <AmountInput
+              label="Kwota"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0,00"
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right font-mono text-body-lg tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+              className="text-right text-body-lg"
+              error={
+                sourceId && grosze > sourceBalance
+                  ? `Przekracza saldo źródła (${formatAmount(sourceBalance)} zł)`
+                  : undefined
+              }
             />
-            {sourceId && grosze > sourceBalance && (
-              <p className="mt-1 text-micro text-bad">
-                Przekracza saldo źródła ({formatAmount(sourceBalance)} zł)
-              </p>
-            )}
           </div>
 
           <div className="mt-5 flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
-            >
+            <Button variant="secondary" fullWidth onClick={onClose}>
               Anuluj
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!canSave}
-              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
-                canSave
-                  ? "bg-brass text-ink active:opacity-90"
-                  : "bg-panel-2 text-muted/30"
-              }`}
-            >
+            </Button>
+            <Button fullWidth onClick={handleSave} disabled={!canSave}>
               Przenieś
-            </button>
+            </Button>
           </div>
         </div>
       </div>

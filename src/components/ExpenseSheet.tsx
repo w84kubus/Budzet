@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { formatAmount, terminalInputToGrosze } from "@/domain/money";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import type { Envelope, FixedExpenseDef, Transaction, TransactionKind } from "@/domain/types";
 
 type CategoryTarget =
@@ -184,7 +186,7 @@ export function ExpenseSheet({
                   if (e.key === "Enter" && canSave) handleSave();
                 }}
                 placeholder="0,00"
-                className="w-40 border-b-2 border-line bg-transparent text-center font-display text-display font-semibold tabular-nums tracking-[-0.02em] text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+                className="w-40 border-b-2 border-line bg-transparent text-center font-display text-display font-semibold tabular-nums tracking-[-0.02em] text-text placeholder:text-muted/30 focus:border-brass focus:outline-none"
                 style={{ fontOpticalSizing: "auto" }}
               />
               <span className="text-body-lg text-muted/50">zł</span>
@@ -194,8 +196,8 @@ export function ExpenseSheet({
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-5">
-          {/* Category grid */}
-          <div className="mb-4 grid grid-cols-4 gap-2">
+          {/* Category grid — 3 columns for readability on small screens */}
+          <div className="mb-4 grid grid-cols-3 gap-2">
             {categories.map((cat) => {
               const isSelected =
                 selectedCategory?.type === cat.type &&
@@ -205,7 +207,7 @@ export function ExpenseSheet({
                 <button
                   key={`${cat.type}-${cat.id}`}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`flex min-h-[64px] flex-col items-center justify-center rounded-xl border px-1 py-2 transition-colors ${
+                  className={`flex min-h-[72px] flex-col items-center justify-center rounded-xl border px-2 py-2.5 transition-colors ${
                     isSelected
                       ? "border-brass/40 bg-brass/10"
                       : "border-line bg-panel-2 active:bg-line"
@@ -215,7 +217,7 @@ export function ExpenseSheet({
                     <>
                       <span className="text-title leading-none">{cat.emoji}</span>
                       <span
-                        className={`mt-1 line-clamp-1 text-micro leading-tight ${
+                        className={`mt-1.5 line-clamp-2 text-center text-micro font-medium leading-tight ${
                           isSelected ? "text-brass" : "text-muted"
                         }`}
                       >
@@ -226,7 +228,7 @@ export function ExpenseSheet({
                     <>
                       <span className="text-sm leading-none text-muted">💸</span>
                       <span
-                        className={`mt-1 line-clamp-2 text-center text-micro leading-tight ${
+                        className={`mt-1.5 line-clamp-2 text-center text-micro font-medium leading-tight ${
                           isSelected ? "text-brass" : "text-muted"
                         }`}
                       >
@@ -250,12 +252,10 @@ export function ExpenseSheet({
           ) : (
             <div className="mb-4 space-y-3">
               {/* Note */}
-              <input
-                type="text"
+              <Input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Notatka (opcjonalne)"
-                className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
               />
 
               {/* Impulse toggle */}
@@ -284,7 +284,7 @@ export function ExpenseSheet({
               {/* Paid from */}
               {selectedCategory?.type === "envelope" && (
                 <div>
-                  <span className="mb-1.5 block text-micro text-muted">
+                  <span className="mb-1.5 block text-caption font-medium text-muted">
                     Zapłacone z
                   </span>
                   <div className="flex gap-[1px] overflow-hidden rounded-lg bg-line">
@@ -358,17 +358,14 @@ export function ExpenseSheet({
 
         {/* Save button */}
         <div className="px-5 pb-2">
-          <button
+          <Button
+            fullWidth
             onClick={handleSave}
             disabled={!canSave}
-            className={`mt-2 mb-1 w-full rounded-xl py-3.5 text-body font-semibold transition-all ${
-              canSave
-                ? "bg-brass text-ink active:opacity-90"
-                : "bg-panel-2 text-muted/30"
-            }`}
+            className="mt-2 mb-1"
           >
             Zapisz wydatek
-          </button>
+          </Button>
         </div>
       </div>
     </>

@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { groszeToCurrencyInput } from "@/domain/money";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { AmountInput } from "@/components/ui/AmountInput";
 import type { FixedExpenseDef, FixedExpenseInstance } from "@/domain/types";
 
 type Props = {
@@ -18,7 +22,7 @@ export function EditFixedExpenseSheet({ open, instance, def, onClose, onSave, on
 
   useEffect(() => {
     if (open && instance && def) {
-      setAmount(instance.planned > 0 ? (instance.planned / 100).toFixed(2).replace(".", ",") : "");
+      setAmount(groszeToCurrencyInput(instance.planned));
       setName(def.name);
     }
   }, [open, instance, def]);
@@ -60,52 +64,31 @@ export function EditFixedExpenseSheet({ open, instance, def, onClose, onSave, on
             Edytuj wydatek stały
           </h2>
 
-          <div className="mb-4">
-            <label className="mb-1 block text-micro text-muted">
-              Nazwa
-            </label>
-            <input
-              type="text"
+          <div className="space-y-4">
+            <Input
+              label="Nazwa"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nazwa wydatku"
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
               autoFocus
             />
-          </div>
 
-          <div>
-            <label className="mb-1 block text-micro text-muted">
-              Kwota planowana (zł)
-            </label>
-            <input
-              type="text"
-              inputMode="decimal"
+            <AmountInput
+              label="Kwota planowana"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0,00"
-              className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right text-body-lg font-mono text-text tabular-nums placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+              className="text-right text-body-lg"
             />
           </div>
 
           <div className="mt-6 flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
-            >
+            <Button variant="secondary" fullWidth onClick={onClose}>
               Anuluj
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!name.trim()}
-              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
-                name.trim()
-                  ? "bg-brass text-ink active:opacity-90"
-                  : "bg-panel-2 text-muted/30"
-              }`}
-            >
+            </Button>
+            <Button fullWidth onClick={handleSave} disabled={!name.trim()}>
               Zapisz
-            </button>
+            </Button>
           </div>
         </div>
       </div>

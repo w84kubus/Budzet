@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { AmountInput } from "@/components/ui/AmountInput";
 import type { FixedExpenseType } from "@/domain/types";
 
 type Props = {
@@ -64,20 +67,16 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
           </h2>
 
           <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-micro text-muted">Nazwa</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="np. Czynsz"
-                className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
-                autoFocus
-              />
-            </div>
+            <Input
+              label="Nazwa"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="np. Czynsz"
+              autoFocus
+            />
 
             <div>
-              <label className="mb-1.5 block text-micro text-muted">Typ</label>
+              <label className="mb-1.5 block text-caption font-medium text-muted">Typ</label>
               <div className="flex gap-[1px] overflow-hidden rounded-lg bg-line">
                 {(["single", "accumulating"] as const).map((t) => (
                   <button
@@ -97,53 +96,34 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
 
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="mb-1 block text-micro text-muted">
-                  Kwota planowana (zł)
-                </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
+                <AmountInput
+                  label="Kwota planowana"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
-                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-right text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+                  className="text-right"
                 />
               </div>
               <div className="w-20">
-                <label className="mb-1 block text-micro text-muted">
-                  Dzień
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={31}
+                <Input
+                  label="Dzień"
+                  inputMode="numeric"
                   value={dueDay}
                   onChange={(e) => setDueDay(e.target.value)}
                   placeholder="—"
-                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-center text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+                  className="text-center"
                 />
               </div>
             </div>
           </div>
 
           <div className="mt-6 flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:text-text"
-            >
+            <Button variant="secondary" fullWidth onClick={onClose}>
               Anuluj
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!name.trim()}
-              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
-                name.trim()
-                  ? "bg-brass text-ink active:opacity-90"
-                  : "bg-panel-2 text-muted/30"
-              }`}
-            >
+            </Button>
+            <Button fullWidth onClick={handleSave} disabled={!name.trim()}>
               Dodaj
-            </button>
+            </Button>
           </div>
         </div>
       </div>

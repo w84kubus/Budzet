@@ -59,6 +59,16 @@ export function parsePLN(input: string): number | null {
 }
 
 /**
+ * Convert grosze to a comma-separated string for form input pre-fill.
+ * 99000 → "990,00", 0 → ""
+ * Does NOT add thousand separators (would break input parsing).
+ */
+export function groszeToCurrencyInput(grosze: number): string {
+  if (grosze === 0) return "";
+  return (grosze / 100).toFixed(2).replace(".", ",");
+}
+
+/**
  * Terminal-style input: digits typed left-to-right build up grosze.
  * "3" → 3 (0,03 zł)
  * "35" → 35 (0,35 zł)

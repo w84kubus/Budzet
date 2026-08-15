@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { formatAmount } from "@/domain/money";
+import { formatAmount, groszeToCurrencyInput } from "@/domain/money";
 import { distributeProportionally } from "@/domain/operations";
+import { Button } from "@/components/ui/Button";
 import type { Envelope, TransferBreakdownItem } from "@/domain/types";
 
 type Props = {
@@ -35,19 +36,23 @@ export function DistributeFundsSheet({
 
   const [amounts, setAmounts] = useState<Record<string, string>>({});
 
+  const buildAmountsFromProportional = () => {
+    const proportional = distributeProportionally(active, available);
+    const init: Record<string, string> = {};
+    for (const env of active) {
+      const alloc = proportional.find((p) => p.envelopeId === env.id);
+      init[env.id] = alloc && alloc.amount > 0
+        ? groszeToCurrencyInput(alloc.amount)
+        : "";
+    }
+    return init;
+  };
+
   useEffect(() => {
     if (open) {
-      // Pre-fill with monthlyPlan, capped at available
-      const proportional = distributeProportionally(active, available);
-      const init: Record<string, string> = {};
-      for (const env of active) {
-        const alloc = proportional.find((p) => p.envelopeId === env.id);
-        init[env.id] = alloc && alloc.amount > 0
-          ? (alloc.amount / 100).toFixed(2).replace(".", ",")
-          : "";
-      }
-      setAmounts(init);
+      setAmounts(buildAmountsFromProportional());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, active, available]);
 
   if (!open) return null;
@@ -65,15 +70,7 @@ export function DistributeFundsSheet({
   };
 
   const handleProportional = () => {
-    const proportional = distributeProportionally(active, available);
-    const newAmounts: Record<string, string> = {};
-    for (const env of active) {
-      const alloc = proportional.find((p) => p.envelopeId === env.id);
-      newAmounts[env.id] = alloc && alloc.amount > 0
-        ? (alloc.amount / 100).toFixed(2).replace(".", ",")
-        : "";
-    }
-    setAmounts(newAmounts);
+    setAmounts(buildAmountsFromProportional());
   };
 
   const handleZero = () => {
@@ -88,7 +85,6 @@ export function DistributeFundsSheet({
     );
     if (!poduszka) return;
 
-    // Calculate current total minus poduszka
     const otherTotal = active
       .filter((e) => e.id !== poduszka.id)
       .reduce((sum, e) => sum + parseInput(amounts[e.id] ?? ""), 0);
@@ -97,7 +93,7 @@ export function DistributeFundsSheet({
     setAmounts((prev) => ({
       ...prev,
       [poduszka.id]: restForPoduszka > 0
-        ? (restForPoduszka / 100).toFixed(2).replace(".", ",")
+        ? groszeToCurrencyInput(restForPoduszka)
         : "",
     }));
   };
@@ -143,25 +139,16 @@ export function DistributeFundsSheet({
 
         {/* Shortcuts */}
         <div className="flex gap-2 px-5 pb-3">
-          <button
-            onClick={handleProportional}
-            className="rounded-lg bg-panel-2 px-3 py-1.5 text-micro font-medium text-muted transition-colors hover:text-text"
-          >
+          <Button variant="ghost" size="sm" onClick={handleProportional}>
             Proporcjonalnie
-          </button>
-          <button
-            onClick={handleZero}
-            className="rounded-lg bg-panel-2 px-3 py-1.5 text-micro font-medium text-muted transition-colors hover:text-text"
-          >
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleZero}>
             Wyzeruj
-          </button>
+          </Button>
           {hasPoduszka && (
-            <button
-              onClick={handleRestToPoduszka}
-              className="rounded-lg bg-panel-2 px-3 py-1.5 text-micro font-medium text-muted transition-colors hover:text-text"
-            >
+            <Button variant="ghost" size="sm" onClick={handleRestToPoduszka}>
               Resztę do Poduszki
-            </button>
+            </Button>
           )}
         </div>
 
@@ -187,7 +174,7 @@ export function DistributeFundsSheet({
                     value={amounts[env.id] ?? ""}
                     onChange={(e) => handleChange(env.id, e.target.value)}
                     placeholder="0,00"
-                    className="w-20 rounded-lg border border-line bg-ink px-2 py-1.5 text-right font-mono text-sm tabular-nums text-text placeholder:text-muted/30 focus:border-brass/40 focus:outline-none"
+                    className="w-20 rounded-lg border border-line bg-ink px-2 py-1.5 text-right font-mono text-sm tabular-nums text-text placeholder:text-muted/30 focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass"
                   />
                   <span className="text-micro text-muted">zł</span>
                 </div>
@@ -215,17 +202,9 @@ export function DistributeFundsSheet({
               {formatAmount(Math.abs(remaining))} zł
             </p>
           )}
-          <button
-            onClick={handleSave}
-            disabled={!canSave}
-            className={`mb-1 w-full rounded-xl py-3.5 text-body font-semibold transition-all ${
-              canSave
-                ? "bg-brass text-ink active:opacity-90"
-                : "bg-panel-2 text-muted/30"
-            }`}
-          >
+          <Button fullWidth onClick={handleSave} disabled={!canSave} className="mb-1">
             Rozdysponuj
-          </button>
+          </Button>
         </div>
       </div>
     </>

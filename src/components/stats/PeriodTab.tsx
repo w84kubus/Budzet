@@ -46,7 +46,8 @@ export function PeriodTab({
   envelopes,
   today,
 }: Props) {
-  const [isMobile, setIsMobile] = useState(false);
+  // TODO: isMobile state prepared for responsive chart swap (horizontal bars on mobile)
+  const [_isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
