@@ -3,7 +3,7 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 const variants = {
-  primary: "bg-brass text-ink font-medium hover:brightness-110 active:brightness-95",
+  primary: "bg-brass text-white font-medium hover:brightness-110 active:brightness-95",
   secondary: "bg-panel-2 text-text border border-line hover:bg-line/30 active:bg-line/50",
   ghost: "text-muted hover:text-text hover:bg-panel-2 active:bg-line/30",
   destructive: "bg-bad/10 text-bad border border-bad/20 hover:bg-bad/15 active:bg-bad/20",

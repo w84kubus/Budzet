@@ -368,7 +368,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSavePin}
                   disabled={pinInput.length < 4}
-                  className="rounded-lg bg-brass px-4 py-2 text-caption font-semibold text-ink disabled:opacity-30"
+                  className="rounded-lg bg-brass px-4 py-2 text-caption font-semibold text-white disabled:opacity-30"
                 >
                   Zapisz
                 </button>
@@ -420,7 +420,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSavePin}
                   disabled={pinInput.length < 4}
-                  className="rounded-lg bg-brass px-4 py-2 text-caption font-semibold text-ink disabled:opacity-30"
+                  className="rounded-lg bg-brass px-4 py-2 text-caption font-semibold text-white disabled:opacity-30"
                 >
                   Zapisz
                 </button>

@@ -4,8 +4,8 @@
   "description": "Osobisty budżet kopertowy",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0E1214",
-  "theme_color": "#0E1214",
+  "background_color": "#0B0B14",
+  "theme_color": "#0B0B14",
   "orientation": "portrait",
   "icons": [
     {

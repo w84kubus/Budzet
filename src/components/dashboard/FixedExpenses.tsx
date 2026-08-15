@@ -49,7 +49,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
         {onAddDef && (
           <button
             onClick={onAddDef}
-            className="flex h-7 items-center gap-1 rounded-lg px-2 text-micro font-medium text-muted transition-colors hover:bg-panel hover:text-text"
+            className="flex h-7 items-center gap-1 rounded-lg px-2 text-micro font-medium text-muted transition-colors hover:bg-panel-2 hover:text-text"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M7 3V11M3 7H11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -60,7 +60,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
       </div>
 
       {validInstances.length === 0 ? (
-        <div className="rounded-xl bg-panel p-5 text-center">
+        <div className="rounded-2xl bg-panel p-5 text-center">
           <p className="text-sm text-muted">Brak zobowiązań stałych.</p>
           {onAddDef && (
             <button
@@ -72,33 +72,35 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
           )}
         </div>
       ) : (
-        <div className="space-y-[1px] overflow-hidden rounded-xl bg-line">
-          {sorted.map((inst) => {
+        <div className="overflow-hidden rounded-2xl bg-panel">
+          {sorted.map((inst, i) => {
             const def = defMap.get(inst.defId);
             if (!def) return null;
 
             return (
               <div
                 key={inst.id}
-                className="flex items-center gap-3 bg-panel px-4 py-3"
+                className={`flex items-center gap-3 px-4 py-3 ${
+                  i < sorted.length - 1 ? "border-b border-line/50" : ""
+                }`}
               >
-                {/* Checkbox — 44×44 touch target, 22×22 visual */}
+                {/* Checkbox — 44×44 touch target */}
                 <button
                   onClick={() => onTogglePaid(inst)}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center -ml-2.5"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center -ml-2"
                   aria-label={inst.isPaid ? "Oznacz jako niezapłacone" : "Oznacz jako zapłacone"}
                 >
                   <span
-                    className={`flex h-[22px] w-[22px] items-center justify-center rounded-md border-[1.5px] transition-colors ${
+                    className={`flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] transition-colors ${
                       inst.isPaid
                         ? "border-good/60 bg-good/15"
-                        : "border-muted/40 bg-panel-2"
+                        : "border-muted/30 bg-panel-2"
                     }`}
                   >
                     {inst.isPaid && (
-                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                         <path
-                          d="M2.5 6.5L5.5 9.5L10.5 3.5"
+                          d="M2.5 6L5 8.5L9.5 3.5"
                           stroke="var(--color-good)"
                           strokeWidth="1.5"
                           strokeLinecap="round"
@@ -120,11 +122,11 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
                   </span>
                 </div>
 
-                {/* Amount — clickable to edit */}
+                {/* Amount */}
                 <button
                   onClick={() => onEditInstance?.(inst, def)}
-                  className={`shrink-0 rounded-md px-1.5 py-0.5 font-mono text-caption tabular-nums transition-colors hover:bg-panel-2 ${
-                    inst.isPaid ? "text-muted/50" : "text-text/80"
+                  className={`shrink-0 rounded-lg px-2 py-1 font-mono text-caption tabular-nums transition-colors hover:bg-panel-2 ${
+                    inst.isPaid ? "text-muted/40" : "text-text/80"
                   }`}
                 >
                   {formatAmount(inst.planned)} zł
@@ -137,7 +139,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
 
       {/* Summary */}
       {validInstances.length > 0 && (
-        <div className="mt-2 px-1 text-micro text-muted">
+        <div className="mt-2.5 px-1 text-micro text-muted">
           {paidCount === validInstances.length ? (
             <>
               Wszystko opłacone ·{" "}

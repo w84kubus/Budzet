@@ -334,7 +334,7 @@ function StepPayday({
       </div>
       <button
         onClick={onNext}
-        className="w-full rounded-lg bg-brass py-2.5 text-sm font-medium text-ink"
+        className="w-full rounded-lg bg-brass py-2.5 text-sm font-medium text-white"
       >
         Dalej
       </button>
@@ -491,7 +491,7 @@ function StepFixedExpenses({
             <button
               onClick={addDef}
               disabled={!newName.trim()}
-              className="flex-1 rounded-lg bg-brass py-2 text-micro font-medium text-ink disabled:opacity-40"
+              className="flex-1 rounded-lg bg-brass py-2 text-micro font-medium text-white disabled:opacity-40"
             >
               Dodaj
             </button>
@@ -717,7 +717,7 @@ function StepEnvelopes({
             <button
               onClick={addEnvelope}
               disabled={!newName.trim()}
-              className="flex-1 rounded-lg bg-brass py-2 text-micro font-medium text-ink disabled:opacity-40"
+              className="flex-1 rounded-lg bg-brass py-2 text-micro font-medium text-white disabled:opacity-40"
             >
               Dodaj
             </button>
@@ -1122,7 +1122,7 @@ function StepPin({
         <button
           onClick={onFinish}
           disabled={saving}
-          className="flex-1 rounded-lg bg-brass py-2.5 text-sm font-medium text-ink transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="flex-1 rounded-lg bg-brass py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {saving ? "Zapisywanie…" : "Rozpocznij 🚀"}
         </button>
@@ -1152,7 +1152,7 @@ function NavButtons({
       </button>
       <button
         onClick={onNext}
-        className="flex-1 rounded-lg bg-brass py-2.5 text-sm font-medium text-ink"
+        className="flex-1 rounded-lg bg-brass py-2.5 text-sm font-medium text-white"
       >
         {nextLabel}
       </button>

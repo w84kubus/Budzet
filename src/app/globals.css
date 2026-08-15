@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Kolory bazowe ─────────────────────────────── */
-  --color-ink: #0E1214;
-  --color-panel: #161B1E;
-  --color-panel-2: #1E2529;
-  --color-line: #2A3338;
-  --color-text: #ECE7DF;
-  --color-muted: #8A979E;
-  --color-brass: #D9A441;
-  --color-good: #6FBF8B;
-  --color-bad: #E0645A;
+  /* ── Kolory bazowe (PhonePe-inspired dark purple) ── */
+  --color-ink: #0B0B14;
+  --color-panel: #13132A;
+  --color-panel-2: #1C1C38;
+  --color-line: #2A2A4A;
+  --color-text: #F0F0F8;
+  --color-muted: #8585A0;
+  --color-brass: #7C5CFC;
+  --color-good: #4ADE80;
+  --color-bad: #F87171;
 
   /* ── Kolory semantyczne domenowe ───────────────── */
-  --color-income: #6FBF8B;
-  --color-expense: #ECE7DF;
-  --color-envelope-ok: #6FBF8B;
-  --color-envelope-warn: #D9A441;
-  --color-envelope-over: #E0645A;
-  --color-unassigned: #D9A441;
+  --color-income: #4ADE80;
+  --color-expense: #F0F0F8;
+  --color-envelope-ok: #4ADE80;
+  --color-envelope-warn: #FBBF24;
+  --color-envelope-over: #F87171;
+  --color-unassigned: #FBBF24;
 
   /* ── Typografia — rodziny ──────────────────────── */
   --font-display: var(--font-fraunces), "Fraunces", serif;

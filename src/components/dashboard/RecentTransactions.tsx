@@ -79,6 +79,62 @@ function getColor(kind: Transaction["kind"]): string {
   }
 }
 
+/** Icon background color per transaction kind */
+function getIconBg(kind: Transaction["kind"]): string {
+  switch (kind) {
+    case "income":
+      return "bg-good/15 text-good";
+    case "fixedExpense":
+      return "bg-brass/15 text-brass";
+    case "envelopeExpense":
+      return "bg-bad/10 text-bad";
+    case "allocation":
+      return "bg-brass/10 text-brass";
+    case "withdrawal":
+      return "bg-good/10 text-good";
+    default:
+      return "bg-muted/10 text-muted";
+  }
+}
+
+/** Icon SVG per transaction kind */
+function TxIcon({ kind }: { kind: Transaction["kind"] }) {
+  const cls = `flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${getIconBg(kind)}`;
+
+  switch (kind) {
+    case "income":
+      return (
+        <div className={cls}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 12V4M5 7L8 4L11 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      );
+    case "fixedExpense":
+      return (
+        <div className={cls}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 5H13M3 8H13M3 11H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        </div>
+      );
+    case "envelopeExpense":
+      return (
+        <div className={cls}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 4V12M11 9L8 12L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      );
+    case "allocation":
+      return (
+        <div className={cls}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8H12M9 5L12 8L9 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      );
+    default:
+      return (
+        <div className={cls}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.5"/></svg>
+        </div>
+      );
+  }
+}
+
 export function RecentTransactions({
   transactions,
   fixedExpenseDefs,
@@ -96,7 +152,7 @@ export function RecentTransactions({
       </h2>
 
       {recent.length === 0 ? (
-        <div className="rounded-xl bg-panel p-6 text-center">
+        <div className="rounded-2xl bg-panel p-6 text-center">
           <p className="text-sm text-muted">
             Brak transakcji w tym okresie.
           </p>
@@ -105,8 +161,8 @@ export function RecentTransactions({
           </p>
         </div>
       ) : (
-        <div className="space-y-[1px] overflow-hidden rounded-xl bg-line">
-          {recent.map((tx) => {
+        <div className="overflow-hidden rounded-2xl bg-panel">
+          {recent.map((tx, i) => {
             const sign = getSign(tx.kind);
             const color = getColor(tx.kind);
             const label = getLabel(tx, defMap, envMap);
@@ -114,8 +170,11 @@ export function RecentTransactions({
             return (
               <div
                 key={tx.id}
-                className="flex items-center justify-between bg-panel px-4 py-3"
+                className={`flex items-center gap-3 px-4 py-3 ${
+                  i < recent.length - 1 ? "border-b border-line/50" : ""
+                }`}
               >
+                <TxIcon kind={tx.kind} />
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-sm leading-tight text-text">
                     {label}

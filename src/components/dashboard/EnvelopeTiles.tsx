@@ -97,7 +97,7 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
             return (
               <div
                 key={env.id}
-                className="relative flex w-[130px] shrink-0 flex-col overflow-hidden rounded-xl bg-panel md:w-auto"
+                className="relative flex w-[130px] shrink-0 flex-col overflow-hidden rounded-2xl bg-panel md:w-auto"
                 style={{ height: 100 }}
               >
                 {/* Fill from bottom — flat color, the signature element */}

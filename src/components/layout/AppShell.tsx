@@ -88,7 +88,7 @@ export function AppShell({ children }: AppShellProps) {
         aria-label="Dodaj wydatek"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 5V19M5 12H19" stroke="var(--color-ink)" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       </button>
     </div>

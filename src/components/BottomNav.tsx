@@ -87,7 +87,7 @@ export function BottomNav({ active, onNavigate, onFab }: Props) {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M12 5V19M5 12H19"
-                stroke="var(--color-ink)"
+                stroke="white"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
