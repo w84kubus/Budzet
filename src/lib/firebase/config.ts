@@ -18,7 +18,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Lazy singletons — Firebase initializes only on first access (client-side).
+// Lazy singletons - Firebase initializes only on first access (client-side).
 // This prevents SSR/build-time initialization errors.
 
 let _app: FirebaseApp | null = null;
@@ -64,7 +64,7 @@ function getStorageInstance(): FirebaseStorage {
   return _storage;
 }
 
-// Export getters — access triggers lazy init
+// Export getters - access triggers lazy init
 export {
   getApp as app,
   getDb as db,

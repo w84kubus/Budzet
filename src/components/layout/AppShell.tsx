@@ -46,7 +46,7 @@ export function AppShell({ children }: AppShellProps) {
         <OnlineIndicator />
       </div>
 
-      {/* Desktop top nav — hidden on mobile */}
+      {/* Desktop top nav - hidden on mobile */}
       <nav className="mx-auto hidden max-w-[960px] px-4 pt-2 md:block md:px-8">
         <div className="flex gap-1 rounded-xl bg-panel p-1" role="tablist">
           {NAV_TABS.map((tab) => (
@@ -72,7 +72,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Content */}
       {children}
 
-      {/* Bottom navigation — mobile only */}
+      {/* Bottom navigation - mobile only */}
       <div className="md:hidden">
         <BottomNav
           active={activeNav}

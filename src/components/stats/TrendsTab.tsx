@@ -99,7 +99,7 @@ export function TrendsTab({
     return (
       <div className="rounded-xl bg-panel p-8 text-center">
         <p className="text-sm text-muted">
-          Brak danych — zamknij przynajmniej jeden okres.
+          Brak danych - zamknij przynajmniej jeden okres.
         </p>
       </div>
     );

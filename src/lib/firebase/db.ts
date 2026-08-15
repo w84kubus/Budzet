@@ -265,7 +265,7 @@ export async function saveTransaction(
   const ref = transaction.id
     ? docRef(paths.transactionDoc(budgetId, transaction.id))
     : doc(collRef(paths.transactionsCollection(budgetId)));
-  // Strip undefined values — Firestore rejects them
+  // Strip undefined values - Firestore rejects them
   const data: Record<string, unknown> = { ...transaction, id: ref.id };
   for (const key of Object.keys(data)) {
     if (data[key] === undefined) delete data[key];

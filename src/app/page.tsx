@@ -39,7 +39,7 @@ function PhoneMockup() {
           <div className="h-[22px] w-[100px] rounded-full bg-line/30" />
         </div>
 
-        {/* Screen content — fake dashboard */}
+        {/* Screen content - fake dashboard */}
         <div className="space-y-3 px-4 pb-6 pt-2">
           {/* Period header */}
           <div className="flex items-center justify-between">
@@ -203,7 +203,7 @@ export default function LandingPage() {
       {/* ─── Hero ─── */}
       <section className="relative z-10 mx-auto max-w-6xl px-5 pt-16 pb-10 md:px-10 md:pt-24 md:pb-16">
         <div className="grid items-center gap-12 md:grid-cols-2 md:gap-8">
-          {/* Left — copy */}
+          {/* Left - copy */}
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line/50 bg-panel px-4 py-1.5">
               <span className="h-2 w-2 rounded-full bg-good animate-pulse" />
@@ -219,7 +219,7 @@ export default function LandingPage() {
 
             <p className="mb-8 max-w-md text-body-lg leading-relaxed text-muted">
               Budżet kopertowy w Twojej kieszeni. Wiesz ile masz, ile możesz
-              wydać dziennie i gdzie uciekają pieniądze — zanim będzie za późno.
+              wydać dziennie i gdzie uciekają pieniądze - zanim będzie za późno.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -265,7 +265,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right — phone mockup */}
+          {/* Right - phone mockup */}
           <div className="relative flex justify-center">
             <div className="absolute top-[10%] left-[10%] h-[200px] w-[200px] rounded-full bg-brass/10 blur-[80px]" />
             <PhoneMockup />
@@ -298,7 +298,7 @@ export default function LandingPage() {
           <FeatureCard
             emoji="💎"
             title="Ile mam odłożone?"
-            description="System kopert z wizualnym poziomem napełnienia. Wakacje, poduszka, ubrania — wszystko pod kontrolą."
+            description="System kopert z wizualnym poziomem napełnienia. Wakacje, poduszka, ubrania - wszystko pod kontrolą."
           />
           <FeatureCard
             emoji="⚡"
@@ -326,7 +326,7 @@ export default function LandingPage() {
             {
               step: "02",
               title: "Wpisuj wydatki na bieżąco",
-              desc: "W sklepie, na stacji, w kawiarni — 5 sekund jedną ręką. Kategoria wykrywana automatycznie.",
+              desc: "W sklepie, na stacji, w kawiarni - 5 sekund jedną ręką. Kategoria wykrywana automatycznie.",
             },
             {
               step: "03",

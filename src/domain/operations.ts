@@ -122,7 +122,7 @@ export function createInitialPeriod(
 
 export type DistributeFundsInput = {
   periodId: string;
-  available: number; // grosze — wolne środki
+  available: number; // grosze - wolne środki
   allocations: TransferBreakdownItem[]; // envelope → amount
   date: string; // ISO date
 };
@@ -152,7 +152,7 @@ export function distributeFunds(
   const now = new Date().toISOString();
 
   const transactions: Transaction[] = nonZero.map((alloc, i) => ({
-    id: `alloc_${periodId}_${i}`, // placeholder — real id from Firestore
+    id: `alloc_${periodId}_${i}`, // placeholder - real id from Firestore
     periodId,
     kind: "allocation" as const,
     amount: alloc.amount,

@@ -52,7 +52,7 @@ export function PinLock() {
     pinStore.setPinHash(null);
   }, [pinStore]);
 
-  // Keyboard support — listen for digit keys and backspace
+  // Keyboard support - listen for digit keys and backspace
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key >= "0" && e.key <= "9") {

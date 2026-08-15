@@ -89,7 +89,7 @@ export function EnvelopeTransferSheet({
             Pokryj przekroczenie
           </h2>
           <p className="mb-4 text-caption text-muted">
-            {targetEnvelope.emoji} {targetEnvelope.name} — przekroczone o{" "}
+            {targetEnvelope.emoji} {targetEnvelope.name} - przekroczone o{" "}
             <span className="font-mono text-bad">
               {formatAmount(suggestedAmount)} zł
             </span>

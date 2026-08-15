@@ -99,7 +99,7 @@ export default function LoginPage() {
             href="/register"
             className="block text-muted hover:text-text"
           >
-            Nie mam konta — <span className="text-brass">zarejestruj się</span>
+            Nie mam konta - <span className="text-brass">zarejestruj się</span>
           </Link>
         </div>
       </div>

@@ -128,7 +128,7 @@ export default function PrintPeriodPage() {
       `}</style>
 
       <div className="print-page">
-        {/* Print button — hidden on print */}
+        {/* Print button - hidden on print */}
         <div className="no-print mb-8 flex gap-3">
           <button
             onClick={() => window.print()}
@@ -149,7 +149,7 @@ export default function PrintPeriodPage() {
           <h1 className="text-2xl font-bold">{period.label}</h1>
           <p className="mt-1 text-sm text-gray-500">
             {period.startDate}
-            {period.endDate ? ` — ${period.endDate}` : " — w trakcie"}
+            {period.endDate ? ` - ${period.endDate}` : " - w trakcie"}
           </p>
         </div>
 
@@ -182,14 +182,14 @@ export default function PrintPeriodPage() {
                 const def = defMap.get(inst.defId);
                 return (
                   <tr key={inst.id} className="border-b border-gray-100">
-                    <td className="py-1.5">{def?.name ?? "—"}</td>
+                    <td className="py-1.5">{def?.name ?? "-"}</td>
                     <td className="py-1.5 text-right tabular-nums text-gray-500">
                       {formatAmount(inst.planned)} zł
                     </td>
                     <td className="py-1.5 text-right tabular-nums">
                       {inst.isPaid
                         ? `${formatAmount(inst.actual > 0 ? inst.actual : inst.planned)} zł`
-                        : "—"}
+                        : "-"}
                     </td>
                     <td className="py-1.5 text-center">
                       {inst.isPaid ? "✓" : "○"}

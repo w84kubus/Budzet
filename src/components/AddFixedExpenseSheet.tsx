@@ -105,7 +105,7 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
                   inputMode="numeric"
                   value={dueDay}
                   onChange={(e) => setDueDay(e.target.value)}
-                  placeholder="—"
+                  placeholder="-"
                   className="text-center"
                 />
               </div>

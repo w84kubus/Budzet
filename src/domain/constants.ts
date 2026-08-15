@@ -27,7 +27,7 @@ export type ExpenseCategory = {
   id: string;
   emoji: string;
   name: string;
-  keywords: string[]; // lowercase — matched against note for auto-detection
+  keywords: string[]; // lowercase - matched against note for auto-detection
 };
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
@@ -172,7 +172,7 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
     id: "other",
     emoji: "💡",
     name: "Inne",
-    keywords: [], // fallback — no auto-detection
+    keywords: [], // fallback - no auto-detection
   },
 ];
 
@@ -195,7 +195,7 @@ export function detectCategory(note: string): string | null {
 }
 
 /**
- * Get category by id — returns "Inne" as fallback.
+ * Get category by id - returns "Inne" as fallback.
  */
 export function getCategoryById(id: string): ExpenseCategory {
   return (

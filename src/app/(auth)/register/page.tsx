@@ -119,7 +119,7 @@ export default function RegisterPage() {
 
         <div className="mt-6 text-center text-sm">
           <Link href="/login" className="text-muted hover:text-text">
-            Mam już konto — <span className="text-brass">zaloguj się</span>
+            Mam już konto - <span className="text-brass">zaloguj się</span>
           </Link>
         </div>
       </div>

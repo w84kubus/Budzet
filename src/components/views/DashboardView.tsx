@@ -97,7 +97,7 @@ export function DashboardView({
 
       {/* ── Main content ── */}
       <div className="mt-4 space-y-4 md:space-y-5">
-        {/* Main indicator — full width */}
+        {/* Main indicator - full width */}
         <MainIndicator
           period={activePeriod}
           transactions={transactions}
@@ -137,7 +137,7 @@ export function DashboardView({
           </div>
         )}
 
-        {/* Zobowiązania stałe | Wydatki w tym okresie — side by side on desktop */}
+        {/* Zobowiązania stałe | Wydatki w tym okresie - side by side on desktop */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <FixedExpenses
             defs={fixedExpenseDefs}

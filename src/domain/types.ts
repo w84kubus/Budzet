@@ -21,7 +21,7 @@ export type FixedExpenseDef = {
   type: FixedExpenseType;
   defaultPlanned: number; // grosze
   dueDay: number | null;
-  endDate: string | null; // ISO date "YYYY-MM" — last month this expense is active, null = no end
+  endDate: string | null; // ISO date "YYYY-MM" - last month this expense is active, null = no end
   subcategories: string[];
   order: number;
   archived: boolean;
@@ -32,7 +32,7 @@ export type FixedExpenseInstance = {
   periodId: string;
   defId: string;
   planned: number; // grosze
-  actual: number; // grosze — for 'single' set on mark-paid, for 'accumulating' = sum of txns
+  actual: number; // grosze - for 'single' set on mark-paid, for 'accumulating' = sum of txns
   isPaid: boolean;
   paidAt: string | null;
 };
@@ -67,7 +67,7 @@ export type Transaction = {
   id: string;
   periodId: string;
   kind: TransactionKind;
-  amount: number; // ALWAYS positive, grosze — direction implied by kind
+  amount: number; // ALWAYS positive, grosze - direction implied by kind
   date: string; // ISO date
   fixedExpenseDefId?: string;
   envelopeId?: string; // for envelope movements; for transfer = source

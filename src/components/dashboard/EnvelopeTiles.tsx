@@ -100,20 +100,20 @@ export function EnvelopeTiles({ envelopes, allTransactions, onAdd }: Props) {
                 className="relative flex w-[130px] shrink-0 flex-col overflow-hidden rounded-2xl bg-panel md:w-auto"
                 style={{ height: 100 }}
               >
-                {/* Fill from bottom — flat color, the signature element */}
+                {/* Fill from bottom - flat color, the signature element */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0">
                   <div
                     className={`fill-animate w-full ${fillColors[state]}`}
                     style={{ height: `${fillPct}%` }}
                   >
-                    {/* Meniscus — 1px line at top of fill */}
+                    {/* Meniscus - 1px line at top of fill */}
                     <div
                       className={`absolute inset-x-0 top-0 h-px ${meniscusColors[state]}`}
                     />
                   </div>
                 </div>
 
-                {/* Overdraft stripe — red line at bottom */}
+                {/* Overdraft stripe - red line at bottom */}
                 {state === "over" && (
                   <div className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-bad/60" />
                 )}

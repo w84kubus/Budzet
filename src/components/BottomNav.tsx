@@ -76,7 +76,7 @@ export function BottomNav({ active, onNavigate, onFab }: Props) {
           </div>
         ))}
 
-        {/* FAB — center, raised */}
+        {/* FAB - center, raised */}
         <div className="flex flex-col items-center" style={{ order: 2 }}>
           <button
             onClick={onFab}

@@ -430,7 +430,7 @@ function StepFixedExpenses({
         Wydatki stałe
       </h2>
       <p className="mb-4 text-sm text-muted">
-        Dodaj swoje comiesięczne rachunki i zobowiązania — czynsz, raty,
+        Dodaj swoje comiesięczne rachunki i zobowiązania - czynsz, raty,
         subskrypcje. Kwoty możesz uzupełnić teraz lub później.
       </p>
 
@@ -574,7 +574,7 @@ function FixedDefRow({
           >
             {def.defaultPlanned > 0
               ? `${formatAmount(def.defaultPlanned)} zł`
-              : "— zł"}
+              : "- zł"}
           </button>
         )}
       </div>
@@ -661,7 +661,7 @@ function StepEnvelopes({
       </h2>
       <p className="mb-4 text-sm text-muted">
         Koperty to Twoje cele oszczędnościowe. Przydzielaj im pieniądze co
-        miesiąc — wydatki z kopert nie obciążają dziennego limitu.
+        miesiąc - wydatki z kopert nie obciążają dziennego limitu.
       </p>
 
       <div className="mb-4 max-h-[340px] space-y-1.5 overflow-y-auto">
@@ -803,7 +803,7 @@ function EnvelopeRow({
           >
             {env.monthlyPlan > 0
               ? `${formatAmount(env.monthlyPlan)} zł`
-              : "— zł"}
+              : "- zł"}
           </button>
         )}
       </div>
@@ -930,7 +930,7 @@ function StepSummary({
         <div className="rounded-lg bg-panel px-3 py-2.5">
           <p className="text-micro text-muted">Wypłata</p>
           <p className="font-mono text-body font-medium tabular-nums text-text">
-            {incomeGrosze > 0 ? `${formatAmount(incomeGrosze)} zł` : "—"}
+            {incomeGrosze > 0 ? `${formatAmount(incomeGrosze)} zł` : "-"}
           </p>
         </div>
         <div className="rounded-lg bg-panel px-3 py-2.5">
@@ -968,7 +968,7 @@ function StepSummary({
           </p>
           {remaining < 0 && (
             <p className="mt-1 text-micro text-bad">
-              Wydatki przekraczają wypłatę — zmniejsz kwoty lub wróć i popraw.
+              Wydatki przekraczają wypłatę - zmniejsz kwoty lub wróć i popraw.
             </p>
           )}
         </div>
@@ -989,7 +989,7 @@ function StepSummary({
               <span className="font-mono text-micro tabular-nums text-muted">
                 {d.defaultPlanned > 0
                   ? `${formatAmount(d.defaultPlanned)} zł`
-                  : "—"}
+                  : "-"}
               </span>
             </div>
           ))}
@@ -1012,7 +1012,7 @@ function StepSummary({
               <span className="font-mono text-micro tabular-nums text-muted">
                 {e.monthlyPlan > 0
                   ? `${formatAmount(e.monthlyPlan)} zł/mies.`
-                  : "—"}
+                  : "-"}
               </span>
             </div>
           ))}
@@ -1107,7 +1107,7 @@ function StepPin({
           }}
           className="rounded border-line"
         />
-        Pomiń — ustawię PIN później
+        Pomiń - ustawię PIN później
       </label>
 
       {error && <p className="mb-4 text-sm text-bad">{error}</p>}

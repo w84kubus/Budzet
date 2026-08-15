@@ -24,7 +24,7 @@ type Props = {
   today: string;
 };
 
-// Pie chart colors — muted palette fitting dark theme
+// Pie chart colors - muted palette fitting dark theme
 const PIE_COLORS = [
   "#D9A441", // brass
   "#6FBF8B", // good
@@ -107,7 +107,7 @@ export function PeriodTab({
         />
       </div>
 
-      {/* Category breakdown — horizontal bars (works on all sizes) */}
+      {/* Category breakdown - horizontal bars (works on all sizes) */}
       {categories.length > 0 && (
         <div className="rounded-xl bg-panel p-4">
           <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">

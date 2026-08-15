@@ -8,7 +8,7 @@ import type { Envelope, TransferBreakdownItem } from "@/domain/types";
 
 type Props = {
   open: boolean;
-  available: number; // grosze — free funds
+  available: number; // grosze - free funds
   envelopes: Envelope[];
   onClose: () => void;
   onSave: (allocations: TransferBreakdownItem[]) => void;

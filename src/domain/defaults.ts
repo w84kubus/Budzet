@@ -1,7 +1,7 @@
 import type { FixedExpenseDef, Envelope } from "./types";
 
 /**
- * Startowy zestaw wydatków stałych — pusty.
+ * Startowy zestaw wydatków stałych - pusty.
  * Użytkownik dodaje własne podczas onboardingu.
  */
 export const DEFAULT_FIXED_EXPENSE_DEFS: Omit<FixedExpenseDef, "id">[] = [];
@@ -50,7 +50,7 @@ export const DEFAULT_ENVELOPES: Omit<Envelope, "id">[] = [
     name: "Wakacje",
     emoji: "✈️",
     monthlyPlan: 0,
-    targetAmount: 500000, // 5 000,00 zł — placeholder goal
+    targetAmount: 500000, // 5 000,00 zł - placeholder goal
     subcategories: [],
     order: 4,
     archived: false,
@@ -59,7 +59,7 @@ export const DEFAULT_ENVELOPES: Omit<Envelope, "id">[] = [
     name: "Poduszka finansowa",
     emoji: "🛟",
     monthlyPlan: 0,
-    targetAmount: 1000000, // 10 000,00 zł — placeholder goal
+    targetAmount: 1000000, // 10 000,00 zł - placeholder goal
     subcategories: [],
     order: 5,
     archived: false,

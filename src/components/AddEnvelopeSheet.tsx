@@ -114,7 +114,7 @@ export function AddEnvelopeSheet({ open, onClose, onSave }: Props) {
                   label="Cel (opcjonalnie)"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
-                  placeholder="—"
+                  placeholder="-"
                   className="text-right"
                 />
               </div>

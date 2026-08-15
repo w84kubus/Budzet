@@ -34,7 +34,7 @@ export function calculateEnvelopeBalance(
         break;
       case "adjustment":
         if (tx.envelopeId === envelopeId) {
-          // adjustment amount is signed conceptually — but spec says amount is ALWAYS positive.
+          // adjustment amount is signed conceptually - but spec says amount is ALWAYS positive.
           // We need a way to distinguish positive/negative adjustments.
           // Convention: adjustment with envelopeId = increase, adjustment with targetEnvelopeId would be decrease.
           // Simpler: use note or separate. For now: adjustment to envelope = positive.
@@ -281,7 +281,7 @@ export function calculateDailyAllowance(
   daysUntilPayday: number
 ): number {
   if (daysUntilPayday <= 0) return 0;
-  // Integer division — truncate, don't round up
+  // Integer division - truncate, don't round up
   return Math.floor(freeFunds / daysUntilPayday);
 }
 

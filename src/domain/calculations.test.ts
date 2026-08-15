@@ -456,7 +456,7 @@ describe("property: envelope balances consistency", () => {
           }
           break;
         case "envelopeTransfer":
-          // Net zero on total (source -X, target +X) — but only if both are tracked
+          // Net zero on total (source -X, target +X) - but only if both are tracked
           break;
         case "withdrawal":
           if (t.envelopeId && envelopeIds.includes(t.envelopeId)) {

@@ -177,7 +177,7 @@ export function calculateFixedExpenseComparison(
         : 0;
       return {
         id: inst.id,
-        name: def?.name ?? "—",
+        name: def?.name ?? "-",
         planned: inst.planned,
         actual,
         percentage: inst.planned > 0 ? Math.round((actual / inst.planned) * 100) : 0,
@@ -286,7 +286,7 @@ export function calculateCategoryHistory(
 
   const currentIdx = sorted.findIndex((p) => p.id === currentPeriodId);
 
-  // Build per-period per-category amounts — group by subcategory (expense category)
+  // Build per-period per-category amounts - group by subcategory (expense category)
   const categoryAmounts = new Map<string, number[]>();
   const categoryMeta = new Map<
     string,

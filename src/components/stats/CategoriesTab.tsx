@@ -102,7 +102,7 @@ export function CategoriesTab({
     );
   }
 
-  // Top chart data — top 8 categories
+  // Top chart data - top 8 categories
   const top8 = categoryHistory.slice(0, 8);
   const chartData = top8.map((cat) => ({
     name: cat.emoji + " " + (cat.name.length > 10 ? cat.name.substring(0, 10) + "…" : cat.name),
@@ -122,7 +122,7 @@ export function CategoriesTab({
 
   return (
     <div className="space-y-4">
-      {/* Bar chart — top categories */}
+      {/* Bar chart - top categories */}
       {mounted && chartData.length > 0 && (
         <div className="rounded-xl bg-panel p-4">
           <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">

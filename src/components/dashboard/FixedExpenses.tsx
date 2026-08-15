@@ -84,7 +84,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
                   i < sorted.length - 1 ? "border-b border-line/50" : ""
                 }`}
               >
-                {/* Checkbox — 44×44 touch target */}
+                {/* Checkbox - 44×44 touch target */}
                 <button
                   onClick={() => onTogglePaid(inst)}
                   className="flex h-11 w-11 shrink-0 items-center justify-center -ml-2"

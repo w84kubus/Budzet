@@ -122,7 +122,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
       if (tx.note) {
         parts.push(`„${tx.note}"`);
       }
-      const detail = parts.length > 0 ? parts.join(" · ") + " — " : "";
+      const detail = parts.length > 0 ? parts.join(" · ") + " - " : "";
 
       showToast({
         message: `${detail}${formatAmount(tx.amount)} zł`,
@@ -163,7 +163,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
         try {
           await deleteTransaction(budgetId, txId);
         } catch {
-          // Transaction may not exist (legacy data) — ignore
+          // Transaction may not exist (legacy data) - ignore
         }
         await updateFixedExpenseInstance(budgetId, instance.id, {
           isPaid: false,

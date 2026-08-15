@@ -249,7 +249,7 @@ export function ExpenseSheet({
           </button>
         </div>
 
-        {/* Keypad — mobile only */}
+        {/* Keypad - mobile only */}
         {isMobile && (
           <div className="border-t border-line px-5 pb-2 pt-3">
             <div className="grid grid-cols-3 gap-[1px]">

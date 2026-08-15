@@ -392,7 +392,7 @@ export function ExpensesList({
             </select>
           </div>
 
-          {/* Category filter — chips */}
+          {/* Category filter - chips */}
           <div>
             <label className="mb-1.5 block text-micro text-muted">
               Kategoria
@@ -469,7 +469,7 @@ export function ExpensesList({
         ) : (
           visibleGroups.map((group) => (
             <div key={group.date} className="mb-1">
-              {/* Date header — sticky */}
+              {/* Date header - sticky */}
               <div className="sticky top-0 z-10 flex items-baseline justify-between bg-ink/90 px-1 py-2 backdrop-blur-sm">
                 <span className="text-caption font-medium text-text">
                   {formatGroupDate(group.date)}

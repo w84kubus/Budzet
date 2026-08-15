@@ -65,7 +65,7 @@ export function ClosePeriodWizard({
   const [newDate, setNewDate] = useState("");
   const [newIncome, setNewIncome] = useState("");
 
-  // Suppress unused variable warning — defaultPaydayDay reserved for future auto-fill
+  // Suppress unused variable warning - defaultPaydayDay reserved for future auto-fill
   void defaultPaydayDay;
 
   useEffect(() => {
@@ -240,7 +240,7 @@ export function ClosePeriodWizard({
                               className="flex items-center justify-between rounded-lg bg-panel-2 px-3 py-2"
                             >
                               <span className="text-caption text-text">
-                                {def?.name ?? "—"}
+                                {def?.name ?? "-"}
                               </span>
                               <span className="font-mono text-caption tabular-nums text-muted">
                                 {formatAmount(inst.planned)} zł
@@ -300,7 +300,7 @@ export function ClosePeriodWizard({
                   )}
 
                   <p className="text-micro text-muted/70">
-                    Możesz zamknąć okres mimo niedokończonych spraw — przejdą do
+                    Możesz zamknąć okres mimo niedokończonych spraw - przejdą do
                     następnego.
                   </p>
                 </div>
@@ -379,7 +379,7 @@ export function ClosePeriodWizard({
                 }}
                 disabled={!canComplete}
               >
-                Mam wypłatę — zamknij okres
+                Mam wypłatę - zamknij okres
               </Button>
             )}
           </div>

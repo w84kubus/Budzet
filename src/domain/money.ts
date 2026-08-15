@@ -54,7 +54,7 @@ export function parsePLN(input: string): number | null {
     return null;
   }
 
-  // Convert to grosze — round to handle floating-point imprecision
+  // Convert to grosze - round to handle floating-point imprecision
   return Math.round(parsed * 100);
 }
 
