@@ -1,6 +1,7 @@
 # Raport — UI/UX Upgrade
 
-Data: 2026-08-14
+Data: 2026-08-15 (aktualizacja)
+Pierwotny raport: 2026-08-14
 
 ---
 
@@ -8,8 +9,9 @@ Data: 2026-08-14
 
 ### Dashboard (Pulpit)
 
-- **Rozbicie god component**: `page.tsx` zmniejszony z 861 → 575 linii. Wydzielone 3 widoki do osobnych plików: `DashboardView`, `EnvelopesView`, `StatsView`.
-- **AppShell**: Nowy komponent layoutu (`components/layout/AppShell.tsx`) — desktop top nav (role="tablist"), mobile BottomNav, OnlineIndicator, desktop FAB.
+- **Routing migration**: Monolityczny `page.tsx` zastąpiony osobnymi trasami App Router: `/` (dashboard), `/expenses`, `/envelopes`, `/stats`. Każda trasa to osobna strona z lazy-loadingiem.
+- **SheetProvider context**: Stan i handlery 13+ sheet'ów przeniesione do `SheetProvider` (`src/lib/contexts/sheet-context.tsx`), współdzielone między trasami.
+- **AppShell**: Komponent layoutu (`components/layout/AppShell.tsx`) używa `usePathname()` i `useRouter()` zamiast prop-based navigation.
 - **Typografia**: Wszystkie 293 arbitralne rozmiary tekstu (`text-[Npx]`) zamienione na 8 tokenów skali: `hero`/`display`/`title`/`body-lg`/`body`/`sm`/`caption`/`micro`.
 - **Envelope tiles**: Sygnaturowy element — płaski fill z linią menisku, kolory semantyczne (`envelope-ok`/`warn`/`over`), overdraft stripe, animowany poziom.
 - **BottomNav**: Dodany `focus-visible:ring`, `aria-label` na każdym elemencie, `aria-hidden` na SVG ikonach. FAB zmieniony na `rounded-2xl`.
@@ -37,7 +39,9 @@ Data: 2026-08-14
 ### Wszystkie formularze (sheety)
 
 - Rozmiary tekstu i nagłówków zunifikowane do tokenów.
-- Wciąż używają inline Tailwind classes (nie prymitywów UI) — zachowana kompatybilność, migracja na prymitywy planowana jako follow-up.
+- **Zmigrowane na prymitywy UI**: 7 sheetów (`AddFixedExpenseSheet`, `AddEnvelopeSheet`, `EditFixedExpenseSheet`, `WithdrawalSheet`, `EnvelopeTransferSheet`, `DistributeFundsSheet`, `ClosePeriodWizard`) używa teraz `Button`, `Input`, `AmountInput` z `@/components/ui/`.
+- **ExpenseSheet**: Grid kategorii zmieniony z `grid-cols-4` na `grid-cols-3`, kafelki powiększone (min-h 64→72px), tekst `font-medium` — czytelne na 360px ekranach.
+- Centralny helper `groszeToCurrencyInput()` w `domain/money.ts` zastąpił 6 miejsc z manualnym `(value / 100).toFixed(2).replace(".", ",")`.
 
 ---
 
@@ -66,11 +70,17 @@ Data: 2026-08-14
 | `ErrorState` | `ErrorState.tsx` | Komunikat błędu + akcja, border-bad |
 | `index.ts` | `index.ts` | Barrel export wszystkich 16 komponentów |
 
-### Layout
+### Layout i routing
 
 | Komponent | Plik | Opis |
 |---|---|---|
-| `AppShell` | `layout/AppShell.tsx` | Shell aplikacji — desktop nav, mobile nav, routing widoków |
+| `AppShell` | `layout/AppShell.tsx` | Shell aplikacji — desktop nav, mobile nav, `usePathname()`-based routing |
+| `SheetProvider` | `lib/contexts/sheet-context.tsx` | Context provider — 13+ sheet states + handlers, współdzielony między trasami |
+| `(main)/layout.tsx` | `app/(main)/layout.tsx` | Shared layout — auth guard, data loading, PIN lock, SheetProvider + AppShell |
+| `DashboardPage` | `app/(main)/page.tsx` | Route: `/` |
+| `ExpensesPage` | `app/(main)/expenses/page.tsx` | Route: `/expenses` |
+| `EnvelopesPage` | `app/(main)/envelopes/page.tsx` | Route: `/envelopes` |
+| `StatsPage` | `app/(main)/stats/page.tsx` | Route: `/stats` |
 
 ### Widoki (wydzielone z page.tsx)
 
@@ -105,27 +115,27 @@ Data: 2026-08-14
 
 | # | Problem | Status | Uwagi |
 |---|---|---|---|
-| 1 | God component 861 linii | ✅ **Rozwiązany** | Rozbity na AppShell + 3 widoki. page.tsx: 575 linii (handler'y + stan sheet'ów pozostają). |
-| 2 | Brak URL-ów dla widoków | ⚠️ **Poza zakresem** | Wymaga zmiany routingu (App Router routes). Rekomendacja w sekcji 6. |
+| 1 | God component 861 linii | ✅ **Rozwiązany** | Rozbity na AppShell + 3 widoki + 4 trasy App Router. Monolityczny page.tsx usunięty. |
+| 2 | Brak URL-ów dla widoków | ✅ **Rozwiązany** | Trasy: `/`, `/expenses`, `/envelopes`, `/stats`. Przycisk wstecz działa. Lazy-loading Recharts (125kB) tylko na `/stats`. |
 | 3 | Brak `error.tsx` / ErrorBoundary | ⚠️ **Częściowo** | Stworzony komponent `ErrorState`, ale nie dodany jako granica błędów w App Router (wymaga pliku `error.tsx`). |
 | 4 | Brak natywnego PWA feel | ✅ **Rozwiązany** | Dodane: tap highlight suppression, `overscroll-behavior: none`, `user-select: none` na UI, `font-size: max(16px, 1em)` na inputach, momentum scrolling. |
-| 5 | Kategorie grid 4×N nieczytelny na 360px | ❌ **Nie rozwiązany** | Wymaga redesignu layoutu kategorii w `ExpenseSheet`. |
+| 5 | Kategorie grid 4×N nieczytelny na 360px | ✅ **Rozwiązany** | Grid zmieniony na 3×N, kafelki powiększone (72px), tekst font-medium. |
 
 ### P1 — Znaczące
 
 | # | Problem | Status | Uwagi |
 |---|---|---|---|
-| 6 | Brak biblioteki prymitywów | ✅ **Rozwiązany** | 16 komponentów w `src/components/ui/`. Sheety jeszcze nie zmigrowane. |
+| 6 | Brak biblioteki prymitywów | ✅ **Rozwiązany** | 16 komponentów w `src/components/ui/`. 7 sheetów zmigrowanych na prymitywy. |
 | 7 | 293 arbitralnych rozmiarów tekstu | ✅ **Rozwiązany** | 0 pozostało. 8-tokenowa skala typograficzna. |
-| 8 | Manualne formatowanie kwot | ✅ **Częściowo** | Naprawione w stats (tick formattery). Sheety używają `toFixed(2)` do pre-fill inputów — to celowe (brak separatora tysięcy w edytowalnym polu). Rekomendacja: helper `groszeToCurrencyInput()`. |
-| 9 | `focus:outline-none` bez `focus-visible:ring` | ✅ **Częściowo** | Dodane w BottomNav, FAB, wszystkich prymitywach UI. Sheety i formularze — do migracji na prymitywy. |
+| 8 | Manualne formatowanie kwot | ✅ **Rozwiązany** | Helper `groszeToCurrencyInput()` w `domain/money.ts` zastąpił 6 miejsc w sheetach. Tick formattery w stats też naprawione. |
+| 9 | `focus:outline-none` bez `focus-visible:ring` | ✅ **Rozwiązany** | Dodane w BottomNav, FAB, wszystkich prymitywach UI. 7 sheetów zmigrowanych na prymitywy z `focus-visible:ring`. |
 | 10 | Label nav 10px | ✅ **Rozwiązany** | Zmienione na `text-micro` (12px). |
 | 11 | Brak skeletonów | ✅ **Częściowo** | Komponent `Skeleton` + preset `DashboardSkeleton` utworzone. Nie wdrożone w `page.tsx` (zamiana „Ładowanie…" → skeleton). |
 | 12 | Hardcoded kolory wykresu | ❌ **Nie rozwiązany** | Kolory w `PeriodTab` pozostają jako tablica hex — pasują do ciemnego motywu. Do zmiany przy wdrożeniu jasnego motywu. |
 | 13 | Dzień wypłaty `type="number"` | ❌ **Nie rozwiązany** | W `settings/page.tsx`. Komponent `Input` z prymitywów wspiera `inputMode`, ale settings nie zmigrowane. |
 | 14 | Martwy `AuthProvider.tsx` | ⚠️ **Zidentyfikowany** | Do usunięcia w osobnym PR. |
 | 15 | `text-gray-*` w print | ❌ **Nie rozwiązany** | `print/[periodId]/page.tsx` — osobna trasa, poza zakresem tego upgrade'u. |
-| 16 | Grid kategorii w ExpenseSheet | ❌ **Nie rozwiązany** | Wymaga redesignu (j.w. P0 #5). |
+| 16 | Grid kategorii w ExpenseSheet | ✅ **Rozwiązany** | Grid 4×N → 3×N, kafelki 72px, font-medium. Czytelne na 360px. |
 | 17 | Brak wskaźnika scroll kopert | ❌ **Nie rozwiązany** | Potrzebny gradient/fade na krawędzi lub scroll indicator. |
 | 18 | Brak ARIA (8 atrybutów) | ✅ **Znacząco poprawiony** | Z 8 → 29 atrybutów `aria-*`. Dodane: `role="tablist"`, `aria-label` na nav, FAB, prymitywach, `aria-modal`, `aria-progressbar`. |
 
@@ -143,12 +153,12 @@ Data: 2026-08-14
 
 ### Podsumowanie audytu
 
-| Priorytet | Łącznie | ✅ Rozwiązane | ✅ Częściowo | ❌ Otwarte |
+| Priorytet | Łącznie | ✅ Rozwiązane | ⚠️ Częściowo | ❌ Otwarte |
 |---|---|---|---|---|
-| P0 | 5 | 2 | 1 | 2 |
-| P1 | 13 | 5 | 4 | 4 |
+| P0 | 5 | 4 | 1 | 0 |
+| P1 | 13 | 8 | 1 | 4 |
 | P2 | 7 | 1 | 0 | 6 |
-| **Razem** | **25** | **8** | **5** | **12** |
+| **Razem** | **25** | **13** | **2** | **10** |
 
 ---
 
@@ -179,47 +189,29 @@ Pełna specyfikacja: `docs/design-system.md` (11 sekcji: kolory, typografia, spa
 
 Poniższe wymagają zmian w logice, routingu lub modelu danych — **nie zostały wykonane** zgodnie z zasadami upgrade'u.
 
-### 6.1. Routing widoków (P0 #2)
+### 6.1. ~~Routing widoków (P0 #2)~~ — ✅ ZREALIZOWANE
 
-**Problem:** Wszystkie widoki na jednej stronie — brak URL-ów, przycisk wstecz wychodzi z aplikacji.
-
-**Propozycja:** Przenieść widoki na osobne trasy App Router:
-```
-app/
-  (main)/
-    dashboard/page.tsx
-    expenses/page.tsx
-    envelopes/page.tsx
-    stats/page.tsx
-    layout.tsx  ← AppShell + BottomNav
-```
-Wymaga przeniesienia stanu sheet'ów i handler'ów do shared context/store.
+Zrealizowane w commicie `b2da7db`. Trasy: `/`, `/expenses`, `/envelopes`, `/stats`. SheetProvider jako shared context. Recharts lazy-loaded na `/stats`.
 
 ### 6.2. Error boundary (P0 #3)
 
 **Propozycja:** Dodać plik `app/error.tsx` wykorzystujący gotowy komponent `ErrorState`. Wymaga dodania granicy błędów w App Router — jedna linia kodu, ale jest to zmiana architekturalna.
 
-### 6.3. Lazy loading widoków
+### 6.3. ~~Lazy loading widoków~~ — ✅ ZREALIZOWANE (route splitting)
 
-**Propozycja:** `React.lazy()` + `Suspense` na widokach (szczególnie `StatsView` z Recharts). Zmniejszy initial bundle.
+Rozwiązane przez routing migration — każda trasa ładuje własne komponenty. Recharts (125kB) ładuje się tylko na `/stats`.
 
-### 6.4. Helper `groszeToCurrencyInput()`
+### 6.4. ~~Helper `groszeToCurrencyInput()`~~ — ✅ ZREALIZOWANE
 
-**Propozycja:** Centralny helper w `domain/money.ts`:
-```ts
-export function groszeToCurrencyInput(grosze: number): string {
-  return (grosze / 100).toFixed(2).replace(".", ",");
-}
-```
-Zastąpi 6 miejsc z manualnym formatowaniem w sheetach.
+Zrealizowane w commicie `dded7dc`. Helper w `domain/money.ts`, 6 miejsc zastąpionych.
 
-### 6.5. Migracja formularzy na prymitywy UI
+### 6.5. ~~Migracja formularzy na prymitywy UI~~ — ✅ ZREALIZOWANE
 
-**Propozycja:** Sheety (`ExpenseSheet`, `AddEnvelopeSheet`, `EditFixedExpenseSheet` itd.) powinny używać `<Input>`, `<AmountInput>`, `<Select>`, `<Button>` z biblioteki prymitywów zamiast inline Tailwind. Szacunkowo usunie 500+ linii powtórzonych klas.
+Zrealizowane w commicie `dded7dc`. 7 sheetów zmigrowanych na `Button`, `Input`, `AmountInput`. ~122 net linii usunięte.
 
-### 6.6. Redesign kategorii w ExpenseSheet
+### 6.6. ~~Redesign kategorii w ExpenseSheet~~ — ✅ ZREALIZOWANE
 
-**Propozycja:** Zamienić grid 4×N na scrollowalną listę z emoji + nazwą w jednym wierszu, lub na grid 3×N z większymi kafelkami i czytelnym tekstem.
+Zrealizowane w commicie `dded7dc`. Grid 4×N → 3×N, kafelki 72px, font-medium.
 
 ---
 
@@ -227,10 +219,9 @@ Zastąpi 6 miejsc z manualnym formatowaniem w sheetach.
 
 | Ryzyko | Prawdopodobieństwo | Wpływ | Mitygacja |
 |---|---|---|---|
-| Regresja w formularzach — prymitywy nie zastąpiły jeszcze inline classes | Niskie | Niski | Formularze działają jak wcześniej, prymitywy to nowy kod |
-| Stale console errors w dev po restart | Niskie | Brak | Cache Next.js — `.next` do wyczyszczenia po problemach |
+| Stale Next.js cache po zmianach routingu | Niskie | Brak | `rm -rf .next` rozwiązuje |
 | Brak testów na nowe komponenty UI | Średnie | Średni | Prymitywy są proste (pure render), ale testy snapshot byłyby wartościowe |
-| `page.tsx` wciąż 575 linii | Niskie | Niski | Większość to handler'y sheet'ów — docelowo rozwiąże routing (6.1) |
+| SheetProvider w jednym pliku | Niskie | Niski | Duży plik (~340 linii), ale ma jedną odpowiedzialność. Ewentualne rozbicie na mniejsze konteksty. |
 | Envelope fill colors hardcoded w logice | Niskie | Niski | Semantyczne tokeny (`envelope-ok/warn/over`) zdefiniowane, używane w EnvelopeTiles |
 
 ---
@@ -239,20 +230,26 @@ Zastąpi 6 miejsc z manualnym formatowaniem w sheetach.
 
 | Metryka | Przed | Po |
 |---|---|---|
-| `page.tsx` linie | 861 | 575 (−33%) |
+| Monolityczny `page.tsx` | 861 linii, 1 trasa | **Usunięty** — 4 trasy, 5 plików route, SheetProvider context |
+| Trasy App Router | 1 (`/`) | 4 (`/`, `/expenses`, `/envelopes`, `/stats`) |
+| Recharts bundle | Na każdej stronie | Tylko `/stats` (125kB lazy) |
+| Build: `/` | — | 6.61 kB |
+| Build: `/expenses` | — | 3.26 kB |
+| Build: `/envelopes` | — | 3.58 kB |
+| Build: `/stats` | — | 125 kB (Recharts) |
 | Arbitralne rozmiary tekstu | 293 | 0 (−100%) |
 | Tokeny typografii | 0 | 8 |
 | Tokeny kolorów semantycznych | 0 | 6 |
 | Komponenty UI prymitywów | 0 | 16 |
+| Sheety zmigrowane na prymitywy | 0 | 7 |
 | Atrybuty `aria-*` | 8 | 29 (+263%) |
-| Instancje `focus-visible` | 0 | 10 |
-| Pliki zmienione | — | 49 |
-| Linie dodane | — | ~1 810 |
-| Linie usunięte | — | ~746 |
+| Instancje `focus-visible` | 0 | 17+ |
+| Audyt: rozwiązane | 8/25 | **13/25** (52%) |
+| Audyt: otwarte | 12/25 | **10/25** |
+| Propozycje zrealizowane | 0/6 | **5/6** |
 | Nowe zależności | — | 0 |
 | Build errors | — | 0 |
 | TypeScript errors | — | 0 |
-| Lint warnings | — | 0 |
 
 ---
 
@@ -264,3 +261,6 @@ Zastąpi 6 miejsc z manualnym formatowaniem w sheetach.
 | `72cd088` | refactor(ui): split page.tsx into AppShell + view components |
 | `b397d2a` | feat(ui): improve envelope tiles signature, centralize date formatting |
 | `2b0c7ce` | feat(pwa): native feel polish and manifest shortcuts |
+| `ed8dbc9` | docs: UI upgrade report and progress update |
+| `dded7dc` | refactor(ui): migrate forms to UI primitives, redesign category grid |
+| `b2da7db` | refactor(routing): migrate to App Router with route-per-view |

@@ -120,21 +120,26 @@
 
 ## UI/UX Upgrade ✅
 
-**Zakres:** Audyt UI, design system, biblioteka prymitywów, refaktor architektury komponentów, PWA polish.
+**Zakres:** Audyt UI, design system, biblioteka prymitywów, refaktor architektury komponentów, routing, migracja formularzy, PWA polish.
 
 **Co zrobione:**
 - `docs/design-system.md` — pełna specyfikacja design systemu (11 sekcji)
 - `docs/ui-audit.md` — audyt 25 problemów UI/UX
 - `docs/ui-upgrade-report.md` — raport końcowy upgrade'u
 - `src/components/ui/` — 16 nowych prymitywów UI (Button, Input, Card, Sheet, Dialog, Badge, ProgressBar, Tabs, Skeleton, EmptyState, ErrorState itd.)
-- `src/components/layout/AppShell.tsx` — shell aplikacji z desktop/mobile nav
+- `src/components/layout/AppShell.tsx` — shell aplikacji z `usePathname()`-based navigation
 - `src/components/views/` — 3 wydzielone widoki (Dashboard, Envelopes, Stats)
 - `src/lib/format.ts` — centralna biblioteka formatowania (daty, pluralizacje, kwoty ze znakiem)
 - `globals.css` — 6 semantycznych tokenów kolorów domenowych, 8 tokenów skali typograficznej, CSS natywnego PWA feel
 - Zamienione 293 arbitralnych rozmiarów tekstu na tokeny (0 pozostało)
-- `page.tsx` zredukowany z 861 → 575 linii
+- **Routing App Router**: monolityczny `page.tsx` (861 linii) usunięty → 4 trasy (`/`, `/expenses`, `/envelopes`, `/stats`) z route group `(main)`, shared layout, SheetProvider context
+- **Recharts lazy-loading**: 125kB ładuje się tylko na `/stats`
+- **Migracja formularzy**: 7 sheetów zmigrowanych na prymitywy UI (`Button`, `Input`, `AmountInput`)
+- **Helper `groszeToCurrencyInput()`** w `domain/money.ts` — zastąpił 6 miejsc z manualnym formatowaniem
+- **Redesign kategorii**: grid 4×N → 3×N w ExpenseSheet, kafelki 72px, czytelne na 360px
 - Atrybuty ARIA: 8 → 29 (+263%)
 - `public/manifest.json` — dodane shortcuts (Dodaj wydatek, Koperty)
+- Audyt: 13/25 rozwiązanych (52%), 5/6 propozycji zrealizowanych
 - Build: 0 errors, 0 warnings, lint clean
 - 0 nowych zależności
 
