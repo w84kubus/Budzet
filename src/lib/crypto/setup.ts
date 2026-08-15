@@ -11,8 +11,17 @@ import {
   createVerificationToken,
   verifyKey,
 } from "./crypto";
-import { setEncryptionKey, clearEncryptionKey } from "./key-store";
-import { getSettings, updateSettings } from "@/lib/firebase/db";
+import { setEncryptionKey, clearEncryptionKey, getEncryptionSalt } from "./key-store";
+import {
+  getSettings,
+  updateSettings,
+  savePeriod,
+  saveFixedExpenseDef,
+  saveFixedExpenseInstance,
+  saveEnvelope,
+  saveTransaction,
+} from "@/lib/firebase/db";
+import { useBudgetStore } from "@/stores/budget-store";
 
 /**
  * Initialize encryption for a NEW user (registration).
@@ -94,6 +103,67 @@ async function migrateToEncryption(
   });
 
   return true;
+}
+
+/**
+ * Re-encrypt all data with a new password.
+ * Called during password change. The data in the Zustand store is already
+ * decrypted (in memory). We derive a new key, set it, then re-save
+ * everything so it gets encrypted with the new key.
+ */
+export async function reEncryptWithNewPassword(
+  budgetId: string,
+  newPassword: string
+): Promise<void> {
+  // Use existing salt (no need to regenerate)
+  const existingSalt = getEncryptionSalt();
+  const salt = existingSalt ?? generateSalt();
+
+  // Derive new key from new password
+  const newKey = await deriveKey(newPassword, salt);
+
+  // Read all data from store BEFORE switching the key
+  // (data is currently decrypted in memory)
+  const store = useBudgetStore.getState();
+  const {
+    periods,
+    fixedExpenseDefs,
+    allFixedExpenseInstances,
+    envelopes,
+    allTransactions,
+  } = store;
+
+  // Switch to new key
+  setEncryptionKey(newKey, salt);
+
+  // Update verification token + salt in settings
+  const saltB64 = saltToBase64(salt);
+  const verifyToken = await createVerificationToken(newKey);
+  await updateSettings(budgetId, {
+    encryptionSalt: saltB64,
+    encryptionVerify: verifyToken,
+  });
+
+  // Re-save all data (will be encrypted with new key)
+  console.log("[E2E] Re-encrypting all data with new key...");
+
+  for (const period of periods) {
+    await savePeriod(budgetId, period);
+  }
+  for (const def of fixedExpenseDefs) {
+    await saveFixedExpenseDef(budgetId, def);
+  }
+  for (const inst of allFixedExpenseInstances) {
+    await saveFixedExpenseInstance(budgetId, inst);
+  }
+  for (const env of envelopes) {
+    await saveEnvelope(budgetId, env);
+  }
+  for (const tx of allTransactions) {
+    await saveTransaction(budgetId, tx);
+  }
+
+  console.log("[E2E] Re-encryption complete.");
 }
 
 /**

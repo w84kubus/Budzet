@@ -12,7 +12,7 @@ import {
   updateEnvelope,
   deleteEnvelope,
 } from "@/lib/firebase/db";
-import { signOut } from "@/lib/firebase/auth";
+import { signOut, changePassword } from "@/lib/firebase/auth";
 import { hashPin } from "@/lib/pin";
 import { formatAmount } from "@/domain/money";
 import {
@@ -56,6 +56,15 @@ export default function SettingsPage() {
   const [importError, setImportError] = useState<string | null>(null);
   const [confirmWord, setConfirmWord] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Password change
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [currentPass, setCurrentPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [newPassConfirm, setNewPassConfirm] = useState("");
+  const [passError, setPassError] = useState("");
+  const [passSuccess, setPassSuccess] = useState(false);
+  const [passLoading, setPassLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -174,6 +183,50 @@ export default function SettingsPage() {
     },
     [budgetId]
   );
+
+  const handleChangePassword = useCallback(async () => {
+    setPassError("");
+    setPassSuccess(false);
+
+    if (newPass.length < 6) {
+      setPassError("Nowe haslo musi miec co najmniej 6 znakow.");
+      return;
+    }
+    if (newPass !== newPassConfirm) {
+      setPassError("Nowe hasla nie sa identyczne.");
+      return;
+    }
+    if (currentPass === newPass) {
+      setPassError("Nowe haslo musi byc inne niz obecne.");
+      return;
+    }
+
+    setPassLoading(true);
+    try {
+      await changePassword(currentPass, newPass);
+      setPassSuccess(true);
+      setCurrentPass("");
+      setNewPass("");
+      setNewPassConfirm("");
+      setTimeout(() => {
+        setShowPasswordChange(false);
+        setPassSuccess(false);
+      }, 2000);
+    } catch (err) {
+      const code = (err as { code?: string }).code;
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setPassError("Obecne haslo jest nieprawidlowe.");
+      } else if (code === "auth/weak-password") {
+        setPassError("Nowe haslo jest za slabe.");
+      } else if (code === "auth/too-many-requests") {
+        setPassError("Za duzo prob. Sprobuj pozniej.");
+      } else {
+        setPassError("Nie udalo sie zmienic hasla. Sprobuj ponownie.");
+      }
+    } finally {
+      setPassLoading(false);
+    }
+  }, [currentPass, newPass, newPassConfirm]);
 
   const handleLogout = useCallback(async () => {
     await signOut();
@@ -586,11 +639,83 @@ export default function SettingsPage() {
       {/* ── Account ── */}
       <Section title="Konto">
         <p className="mb-3 text-caption text-muted">{user?.email}</p>
+
+        {/* Password change */}
+        {!showPasswordChange ? (
+          <button
+            onClick={() => setShowPasswordChange(true)}
+            className="mb-3 w-full rounded-xl bg-panel-2 py-3 text-sm font-medium text-text transition-colors hover:bg-line"
+          >
+            🔑 Zmien haslo
+          </button>
+        ) : (
+          <div className="mb-3 space-y-3 rounded-xl border border-line bg-panel-2 p-4">
+            <p className="text-sm font-medium text-text">Zmiana hasla</p>
+            {settings?.encryptionSalt && (
+              <p className="text-micro text-muted">
+                Dane zostana ponownie zaszyfrowane nowym kluczem.
+              </p>
+            )}
+            <input
+              type="password"
+              value={currentPass}
+              onChange={(e) => setCurrentPass(e.target.value)}
+              placeholder="Obecne haslo"
+              autoComplete="current-password"
+              className="w-full rounded-lg border border-line bg-ink px-3 py-2.5 text-sm text-text placeholder:text-muted/50 focus:border-brass focus:outline-none"
+            />
+            <input
+              type="password"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+              placeholder="Nowe haslo (min. 6 znakow)"
+              autoComplete="new-password"
+              className="w-full rounded-lg border border-line bg-ink px-3 py-2.5 text-sm text-text placeholder:text-muted/50 focus:border-brass focus:outline-none"
+            />
+            <input
+              type="password"
+              value={newPassConfirm}
+              onChange={(e) => setNewPassConfirm(e.target.value)}
+              placeholder="Powtorz nowe haslo"
+              autoComplete="new-password"
+              className="w-full rounded-lg border border-line bg-ink px-3 py-2.5 text-sm text-text placeholder:text-muted/50 focus:border-brass focus:outline-none"
+            />
+            {passError && (
+              <p className="text-caption text-bad">{passError}</p>
+            )}
+            {passSuccess && (
+              <p className="text-caption text-good">Haslo zmienione ✓</p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleChangePassword}
+                disabled={passLoading || !currentPass || !newPass || !newPassConfirm}
+                className="flex-1 rounded-xl bg-brass py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-30"
+              >
+                {passLoading ? "Zmieniam..." : "Zmien haslo"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPasswordChange(false);
+                  setCurrentPass("");
+                  setNewPass("");
+                  setNewPassConfirm("");
+                  setPassError("");
+                  setPassSuccess(false);
+                }}
+                className="rounded-xl px-4 py-2.5 text-sm text-muted hover:text-text"
+              >
+                Anuluj
+              </button>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleLogout}
           className="w-full rounded-xl border border-line py-3 text-sm font-medium text-muted transition-colors hover:border-bad/30 hover:text-bad"
         >
-          Wyloguj się
+          Wyloguj sie
         </button>
       </Section>
     </div>
