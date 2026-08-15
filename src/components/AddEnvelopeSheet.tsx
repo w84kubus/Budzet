@@ -16,7 +16,7 @@ type Props = {
   }) => void;
 };
 
-const EMOJI_OPTIONS = ["💰", "🏠", "🚗", "🎮", "📚", "🎵", "🏋️", "🐕", "☕", "🍕", "🎓", "💻"];
+import { ENVELOPE_EMOJI_OPTIONS } from "@/domain/constants";
 
 export function AddEnvelopeSheet({ open, onClose, onSave }: Props) {
   const [name, setName] = useState("");
@@ -75,7 +75,7 @@ export function AddEnvelopeSheet({ open, onClose, onSave }: Props) {
             <div>
               <label className="mb-1.5 block text-caption font-medium text-muted">Ikona</label>
               <div className="flex flex-wrap gap-1.5">
-                {EMOJI_OPTIONS.map((e) => (
+                {ENVELOPE_EMOJI_OPTIONS.map((e) => (
                   <button
                     key={e}
                     onClick={() => setEmoji(e)}

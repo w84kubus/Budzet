@@ -19,6 +19,7 @@ import {
   downloadFile,
 } from "@/domain/export";
 import type { BackupData } from "@/domain/export";
+import { ENVELOPE_EMOJI_OPTIONS } from "@/domain/constants";
 import type { Envelope, FixedExpenseDef } from "@/domain/types";
 
 function parseAmountInput(val: string): number {
@@ -274,6 +275,9 @@ export default function SettingsPage() {
               <EditableEnvelopeRow
                 key={env.id}
                 env={env}
+                onSaveEmoji={(emoji) => {
+                  if (budgetId) updateEnvelope(budgetId, env.id, { emoji });
+                }}
                 onSaveName={(name) => {
                   if (budgetId) updateEnvelope(budgetId, env.id, { name });
                 }}
@@ -694,21 +698,25 @@ function EditableDefRow({
 
 function EditableEnvelopeRow({
   env,
+  onSaveEmoji,
   onSaveName,
   onSavePlan,
   onArchive,
 }: {
   env: Envelope;
+  onSaveEmoji: (emoji: string) => void;
   onSaveName: (name: string) => void;
   onSavePlan: (monthlyPlan: number) => void;
   onArchive: () => void;
 }) {
   const [editingName, setEditingName] = useState(false);
   const [editingPlan, setEditingPlan] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [nameValue, setNameValue] = useState(env.name);
   const [planValue, setPlanValue] = useState(formatAmount(env.monthlyPlan));
   const nameRef = useRef<HTMLInputElement>(null);
   const planRef = useRef<HTMLInputElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (editingName) nameRef.current?.focus();
@@ -717,6 +725,18 @@ function EditableEnvelopeRow({
   useEffect(() => {
     if (editingPlan) planRef.current?.focus();
   }, [editingPlan]);
+
+  // Close emoji picker on outside click
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handleClick = (e: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showEmojiPicker]);
 
   const commitName = () => {
     const trimmed = nameValue.trim();
@@ -739,12 +759,48 @@ function EditableEnvelopeRow({
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-lg px-3 py-2.5">
-      {/* Emoji + Name */}
-      <div className="min-w-0 flex-1">
-        {editingName ? (
-          <div className="flex items-center gap-1">
-            <span className="text-sm">{env.emoji}</span>
+    <div className="rounded-lg px-3 py-2.5">
+      <div className="flex items-center gap-2">
+        {/* Emoji button */}
+        <div className="relative" ref={emojiPickerRef}>
+          <button
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className={`flex h-8 w-8 items-center justify-center rounded-lg text-body transition-colors ${
+              showEmojiPicker
+                ? "bg-brass/15 ring-1 ring-brass/40"
+                : "hover:bg-panel-2"
+            }`}
+            title="Zmień ikonę"
+          >
+            {env.emoji}
+          </button>
+
+          {/* Emoji picker dropdown */}
+          {showEmojiPicker && (
+            <div className="absolute left-0 top-full z-20 mt-1 grid grid-cols-6 gap-1 rounded-xl border border-line bg-panel p-2 shadow-lg shadow-ink/50">
+              {ENVELOPE_EMOJI_OPTIONS.map((e) => (
+                <button
+                  key={e}
+                  onClick={() => {
+                    if (e !== env.emoji) onSaveEmoji(e);
+                    setShowEmojiPicker(false);
+                  }}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg text-body-lg transition-colors ${
+                    env.emoji === e
+                      ? "bg-brass/15 ring-1 ring-brass/40"
+                      : "hover:bg-panel-2"
+                  }`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Name */}
+        <div className="min-w-0 flex-1">
+          {editingName ? (
             <input
               ref={nameRef}
               type="text"
@@ -760,55 +816,55 @@ function EditableEnvelopeRow({
               }}
               className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-sm text-text outline-none focus:border-brass"
             />
-          </div>
-        ) : (
-          <button
-            onClick={() => setEditingName(true)}
-            className="text-left text-sm text-text hover:text-brass transition-colors"
-            title="Kliknij, aby edytować nazwę"
-          >
-            {env.emoji} {env.name}
-          </button>
-        )}
-      </div>
+          ) : (
+            <button
+              onClick={() => setEditingName(true)}
+              className="text-left text-sm text-text hover:text-brass transition-colors"
+              title="Kliknij, aby edytować nazwę"
+            >
+              {env.name}
+            </button>
+          )}
+        </div>
 
-      {/* Monthly plan */}
-      <div className="w-[100px] shrink-0 text-right">
-        {editingPlan ? (
-          <input
-            ref={planRef}
-            type="text"
-            inputMode="decimal"
-            value={planValue}
-            onChange={(e) => setPlanValue(e.target.value)}
-            onBlur={commitPlan}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") commitPlan();
-              if (e.key === "Escape") {
-                setPlanValue(formatAmount(env.monthlyPlan));
-                setEditingPlan(false);
-              }
-            }}
-            className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-micro tabular-nums text-text outline-none focus:border-brass"
-          />
-        ) : (
-          <button
-            onClick={() => setEditingPlan(true)}
-            className="font-mono text-micro tabular-nums text-muted hover:text-brass transition-colors"
-            title="Kliknij, aby edytować kwotę"
-          >
-            {formatAmount(env.monthlyPlan)} zł
-          </button>
-        )}
-      </div>
+        {/* Monthly plan */}
+        <div className="w-[100px] shrink-0 text-right">
+          {editingPlan ? (
+            <input
+              ref={planRef}
+              type="text"
+              inputMode="decimal"
+              value={planValue}
+              onChange={(e) => setPlanValue(e.target.value)}
+              onBlur={commitPlan}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitPlan();
+                if (e.key === "Escape") {
+                  setPlanValue(formatAmount(env.monthlyPlan));
+                  setEditingPlan(false);
+                }
+              }}
+              className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-right font-mono text-micro tabular-nums text-text outline-none focus:border-brass"
+            />
+          ) : (
+            <button
+              onClick={() => setEditingPlan(true)}
+              className="font-mono text-micro tabular-nums text-muted hover:text-brass transition-colors"
+              title="Kliknij, aby edytować kwotę"
+            >
+              {formatAmount(env.monthlyPlan)} zł
+            </button>
+          )}
+        </div>
 
-      {/* Archive button */}
-      <button
-        onClick={onArchive}
-        className="w-[75px] shrink-0 text-right text-micro text-muted hover:text-bad transition-colors"
-      >
-        Archiwizuj
-      </button>
+        {/* Archive button */}
+        <button
+          onClick={onArchive}
+          className="w-[75px] shrink-0 text-right text-micro text-muted hover:text-bad transition-colors"
+        >
+          Archiwizuj
+        </button>
+      </div>
     </div>
   );
 }
