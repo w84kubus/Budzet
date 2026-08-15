@@ -1,16 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useBudgetData } from "@/lib/hooks/use-budget-data";
-import { usePinLock } from "@/lib/hooks/use-pin-lock";
 import { useBudgetStore } from "@/stores/budget-store";
-import { PinLock } from "@/components/PinLock";
-import { AppShell } from "@/components/layout/AppShell";
-import { DashboardView } from "@/components/views/DashboardView";
-import { EnvelopesView } from "@/components/views/EnvelopesView";
-import { StatsView } from "@/components/views/StatsView";
 import { ExpenseSheet } from "@/components/ExpenseSheet";
 import { AddFixedExpenseSheet } from "@/components/AddFixedExpenseSheet";
 import { AddEnvelopeSheet } from "@/components/AddEnvelopeSheet";
@@ -19,14 +11,11 @@ import { DistributeFundsSheet } from "@/components/DistributeFundsSheet";
 import { WithdrawalSheet } from "@/components/WithdrawalSheet";
 import { EnvelopeTransferSheet } from "@/components/EnvelopeTransferSheet";
 import { ClosePeriodWizard } from "@/components/ClosePeriodWizard";
-import { ExpensesList } from "@/components/ExpensesList";
 import { EnvelopeHistory } from "@/components/envelopes/EnvelopeHistory";
 import { ToastContainer, showToast } from "@/components/Toast";
-import { DashboardSkeleton } from "@/components/ui";
-import {
-  calculateFreeFunds,
-} from "@/domain/calculations";
+import { calculateFreeFunds } from "@/domain/calculations";
 import { closePeriod } from "@/domain/operations";
+import { formatAmount } from "@/domain/money";
 import {
   saveTransaction,
   deleteTransaction,
@@ -40,7 +29,6 @@ import {
   savePeriod,
   saveTransferTask,
 } from "@/lib/firebase/db";
-import { formatAmount } from "@/domain/money";
 import type {
   Transaction,
   Envelope,
@@ -50,21 +38,40 @@ import type {
   TransferBreakdownItem,
 } from "@/domain/types";
 
-export default function Home() {
-  const router = useRouter();
-  const { user, loading, budgetId } = useAuth();
-  useBudgetData(budgetId);
-  const { isLocked } = usePinLock();
+type SheetContextType = {
+  openExpenseSheet: () => void;
+  openAddDef: () => void;
+  openAddEnvelope: () => void;
+  openEditInstance: (instance: FixedExpenseInstance, def: FixedExpenseDef) => void;
+  openDistribute: () => void;
+  openWithdrawal: () => void;
+  openClosePeriod: () => void;
+  openEnvelopeTransfer: (envelope: Envelope, amount: number) => void;
+  openEnvelopeHistory: (envelope: Envelope) => void;
+  handleDeleteTransaction: (txId: string) => Promise<void>;
+  handleTogglePaid: (instance: FixedExpenseInstance) => Promise<void>;
+  handleMarkTransferDone: (taskId: string) => Promise<void>;
+  handleChangePeriod: (periodId: string) => void;
+};
+
+const SheetContext = createContext<SheetContextType | null>(null);
+
+export function useSheets() {
+  const ctx = useContext(SheetContext);
+  if (!ctx) throw new Error("useSheets must be used within SheetProvider");
+  return ctx;
+}
+
+export function SheetProvider({ children }: { children: ReactNode }) {
+  const { budgetId } = useAuth();
 
   const settings = useBudgetStore((s) => s.settings);
   const periods = useBudgetStore((s) => s.periods);
-  const isDataLoaded = useBudgetStore((s) => s.isDataLoaded);
   const fixedExpenseDefs = useBudgetStore((s) => s.fixedExpenseDefs);
   const fixedExpenseInstances = useBudgetStore((s) => s.fixedExpenseInstances);
   const envelopes = useBudgetStore((s) => s.envelopes);
   const transactions = useBudgetStore((s) => s.transactions);
   const allTransactions = useBudgetStore((s) => s.allTransactions);
-  const allFixedExpenseInstances = useBudgetStore((s) => s.allFixedExpenseInstances);
   const transferTasks = useBudgetStore((s) => s.transferTasks);
   const activePeriodId = useBudgetStore((s) => s.activePeriodId);
   const setActivePeriodId = useBudgetStore((s) => s.setActivePeriodId);
@@ -85,25 +92,9 @@ export default function Home() {
   const [envelopeHistoryOpen, setEnvelopeHistoryOpen] = useState(false);
   const [historyEnvelope, setHistoryEnvelope] = useState<Envelope | null>(null);
 
-  const [activeNav, setActiveNav] = useState<"dashboard" | "expenses" | "envelopes" | "stats">("dashboard");
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
-
-  useEffect(() => {
-    if (user && isDataLoaded && !settings) {
-      router.push("/onboarding");
-    }
-  }, [user, isDataLoaded, settings, router]);
-
-  // ── Helpers ──
   const activePeriod = activePeriodId
     ? periods.find((p) => p.id === activePeriodId)
     : periods.find((p) => p.status === "open");
-  const today = new Date().toISOString().split("T")[0];
 
   const freeFunds = activePeriod
     ? calculateFreeFunds(transactions, fixedExpenseInstances)
@@ -180,7 +171,7 @@ export default function Home() {
       });
       showToast({ message: `Dodano: ${data.name}` });
     },
-    [budgetId, fixedExpenseDefs.length, activePeriodId] // eslint-disable-line react-hooks/exhaustive-deps
+    [budgetId, fixedExpenseDefs.length, activePeriod]
   );
 
   const handleAddEnvelope = useCallback(
@@ -202,15 +193,6 @@ export default function Home() {
     [budgetId, envelopes.length]
   );
 
-  const handleEditInstance = useCallback(
-    (instance: FixedExpenseInstance, def: FixedExpenseDef) => {
-      setEditingInstance(instance);
-      setEditingDef(def);
-      setEditInstOpen(true);
-    },
-    []
-  );
-
   const handleSaveInstancePlanned = useCallback(
     async (instanceId: string, planned: number) => {
       if (!budgetId) return;
@@ -226,13 +208,6 @@ export default function Home() {
       showToast({ message: `Zmieniono nazwę na „${name}"` });
     },
     [budgetId]
-  );
-
-  const handleChangePeriod = useCallback(
-    (periodId: string) => {
-      setActivePeriodId(periodId);
-    },
-    [setActivePeriodId]
   );
 
   const handleDistribute = useCallback(
@@ -312,20 +287,6 @@ export default function Home() {
     [budgetId, activePeriod]
   );
 
-  const handleCoverOverdraft = useCallback(
-    (envelope: Envelope, overdraftAmount: number) => {
-      setTransferTarget(envelope);
-      setTransferAmount(overdraftAmount);
-      setTransferOpen(true);
-    },
-    []
-  );
-
-  const handleExpandEnvelope = useCallback((envelope: Envelope) => {
-    setHistoryEnvelope(envelope);
-    setEnvelopeHistoryOpen(true);
-  }, []);
-
   const handleDeleteTransaction = useCallback(
     async (txId: string) => {
       if (!budgetId) return;
@@ -333,6 +294,13 @@ export default function Home() {
       showToast({ message: "Usunięto transakcję" });
     },
     [budgetId]
+  );
+
+  const handleChangePeriod = useCallback(
+    (periodId: string) => {
+      setActivePeriodId(periodId);
+    },
+    [setActivePeriodId]
   );
 
   const handleClosePeriod = useCallback(
@@ -370,108 +338,38 @@ export default function Home() {
     [budgetId, activePeriod, fixedExpenseDefs, setActivePeriodId]
   );
 
-  // ── Render guards ──
+  // ── Context value ──
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-ink">
-        <DashboardSkeleton />
-      </div>
-    );
-  }
-
-  if (!user) return null;
-  if (isLocked) return <PinLock />;
-
-  // ── Active view ──
-
-  const renderActiveView = () => {
-    switch (activeNav) {
-      case "dashboard":
-        return (
-          <DashboardView
-            activePeriod={activePeriod ?? null}
-            periods={periods}
-            settings={settings}
-            transactions={transactions}
-            allTransactions={allTransactions}
-            fixedExpenseDefs={fixedExpenseDefs}
-            fixedExpenseInstances={fixedExpenseInstances}
-            envelopes={envelopes}
-            transferTasks={transferTasks}
-            freeFunds={freeFunds}
-            today={today}
-            onChangePeriod={handleChangePeriod}
-            onTogglePaid={handleTogglePaid}
-            onMarkTransferDone={handleMarkTransferDone}
-            onAddDef={() => setAddDefOpen(true)}
-            onAddEnvelope={() => setAddEnvOpen(true)}
-            onEditInstance={handleEditInstance}
-            onDistribute={() => setDistributeOpen(true)}
-            onClosePeriod={() => setClosePeriodOpen(true)}
-            onShowAllExpenses={() => setActiveNav("expenses")}
-          />
-        );
-      case "envelopes":
-        return (
-          <EnvelopesView
-            activePeriod={activePeriod ?? null}
-            settings={settings}
-            transactions={transactions}
-            allTransactions={allTransactions}
-            envelopes={envelopes}
-            fixedExpenseDefs={fixedExpenseDefs}
-            freeFunds={freeFunds}
-            today={today}
-            onAddEnvelope={() => setAddEnvOpen(true)}
-            onDistribute={() => setDistributeOpen(true)}
-            onWithdrawal={() => setWithdrawalOpen(true)}
-            onClosePeriod={() => setClosePeriodOpen(true)}
-            onExpandEnvelope={handleExpandEnvelope}
-            onCoverOverdraft={handleCoverOverdraft}
-          />
-        );
-      case "expenses":
-        return (
-          <ExpensesList
-            transactions={transactions}
-            allTransactions={allTransactions}
-            fixedExpenseDefs={fixedExpenseDefs}
-            envelopes={envelopes}
-            periods={periods}
-            activePeriodId={activePeriod?.id ?? ""}
-            onDelete={handleDeleteTransaction}
-          />
-        );
-      case "stats":
-        return (
-          <StatsView
-            activePeriod={activePeriod ?? null}
-            settings={settings}
-            periods={periods}
-            transactions={transactions}
-            allTransactions={allTransactions}
-            allFixedExpenseInstances={allFixedExpenseInstances}
-            fixedExpenseDefs={fixedExpenseDefs}
-            fixedExpenseInstances={fixedExpenseInstances}
-            envelopes={envelopes}
-            today={today}
-          />
-        );
-      default:
-        return null;
-    }
+  const contextValue: SheetContextType = {
+    openExpenseSheet: () => setSheetOpen(true),
+    openAddDef: () => setAddDefOpen(true),
+    openAddEnvelope: () => setAddEnvOpen(true),
+    openEditInstance: (instance, def) => {
+      setEditingInstance(instance);
+      setEditingDef(def);
+      setEditInstOpen(true);
+    },
+    openDistribute: () => setDistributeOpen(true),
+    openWithdrawal: () => setWithdrawalOpen(true),
+    openClosePeriod: () => setClosePeriodOpen(true),
+    openEnvelopeTransfer: (envelope, amount) => {
+      setTransferTarget(envelope);
+      setTransferAmount(amount);
+      setTransferOpen(true);
+    },
+    openEnvelopeHistory: (envelope) => {
+      setHistoryEnvelope(envelope);
+      setEnvelopeHistoryOpen(true);
+    },
+    handleDeleteTransaction,
+    handleTogglePaid,
+    handleMarkTransferDone,
+    handleChangePeriod,
   };
 
   return (
-    <>
-      <AppShell
-        activeNav={activeNav}
-        onNavigate={setActiveNav}
-        onFab={() => setSheetOpen(true)}
-      >
-        {renderActiveView()}
-      </AppShell>
+    <SheetContext.Provider value={contextValue}>
+      {children}
 
       {/* ── Sheets ── */}
 
@@ -570,6 +468,6 @@ export default function Home() {
       )}
 
       <ToastContainer />
-    </>
+    </SheetContext.Provider>
   );
 }

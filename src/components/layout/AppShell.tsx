@@ -1,26 +1,43 @@
 "use client";
 
 import { type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { BottomNav } from "@/components/BottomNav";
 import { OnlineIndicator } from "@/components/OnlineIndicator";
+import { useSheets } from "@/lib/contexts/sheet-context";
 
 type NavItem = "dashboard" | "expenses" | "envelopes" | "stats";
 
-const NAV_TABS: { key: NavItem; label: string }[] = [
-  { key: "dashboard", label: "Pulpit" },
-  { key: "expenses", label: "Wydatki" },
-  { key: "envelopes", label: "Koperty" },
-  { key: "stats", label: "Statystyki" },
+const NAV_TABS: { key: NavItem; label: string; href: string }[] = [
+  { key: "dashboard", label: "Pulpit", href: "/" },
+  { key: "expenses", label: "Wydatki", href: "/expenses" },
+  { key: "envelopes", label: "Koperty", href: "/envelopes" },
+  { key: "stats", label: "Statystyki", href: "/stats" },
 ];
 
+function pathnameToNav(pathname: string): NavItem {
+  if (pathname.startsWith("/expenses")) return "expenses";
+  if (pathname.startsWith("/envelopes")) return "envelopes";
+  if (pathname.startsWith("/stats")) return "stats";
+  return "dashboard";
+}
+
 type AppShellProps = {
-  activeNav: NavItem;
-  onNavigate: (item: NavItem) => void;
-  onFab: () => void;
   children: ReactNode;
 };
 
-export function AppShell({ activeNav, onNavigate, onFab, children }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { openExpenseSheet } = useSheets();
+
+  const activeNav = pathnameToNav(pathname);
+
+  const handleNavigate = (item: NavItem) => {
+    const tab = NAV_TABS.find((t) => t.key === item);
+    if (tab) router.push(tab.href);
+  };
+
   return (
     <div className="min-h-screen bg-ink pb-24 md:pb-8">
       {/* Online indicator */}
@@ -36,7 +53,7 @@ export function AppShell({ activeNav, onNavigate, onFab, children }: AppShellPro
               key={tab.key}
               role="tab"
               aria-selected={activeNav === tab.key}
-              onClick={() => onNavigate(tab.key)}
+              onClick={() => handleNavigate(tab.key)}
               className={`flex-1 rounded-lg py-2 text-caption font-medium transition-colors
                 focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-ink
                 ${
@@ -58,14 +75,14 @@ export function AppShell({ activeNav, onNavigate, onFab, children }: AppShellPro
       <div className="md:hidden">
         <BottomNav
           active={activeNav}
-          onNavigate={onNavigate}
-          onFab={onFab}
+          onNavigate={handleNavigate}
+          onFab={openExpenseSheet}
         />
       </div>
 
       {/* Desktop FAB */}
       <button
-        onClick={onFab}
+        onClick={openExpenseSheet}
         className="fixed right-8 bottom-8 z-30 hidden h-14 w-14 items-center justify-center rounded-2xl bg-brass shadow-lg shadow-ink/50 active:opacity-90 md:flex
           focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         aria-label="Dodaj wydatek"
