@@ -401,7 +401,9 @@ function StepFixedExpenses({
   }, [addingNew]);
 
   const updateDef = (id: string, updates: Partial<EditableFixedDef>) => {
-    setFixedDefs(fixedDefs.map((d) => (d.tempId === id ? { ...d, ...updates } : d)));
+    setFixedDefs(fixedDefs.map((d) =>
+      d.tempId === id ? { ...d, ...updates } : d
+    ));
   };
 
   const removeDef = (id: string) => {
@@ -410,16 +412,14 @@ function StepFixedExpenses({
 
   const addDef = () => {
     if (!newName.trim()) return;
-    setFixedDefs([
-      ...fixedDefs,
-      {
-        tempId: tempId(),
-        name: newName.trim(),
-        type: newType,
-        defaultPlanned: parseAmountInput(newAmount),
-        dueDay: null,
-      },
-    ]);
+    const newDef: EditableFixedDef = {
+      tempId: tempId(),
+      name: newName.trim(),
+      type: newType,
+      defaultPlanned: parseAmountInput(newAmount),
+      dueDay: null,
+    };
+    setFixedDefs([...fixedDefs, newDef]);
     setNewName("");
     setNewAmount("");
     setNewType("single");
@@ -432,11 +432,16 @@ function StepFixedExpenses({
         Wydatki stałe
       </h2>
       <p className="mb-4 text-sm text-muted">
-        Comiesięczne rachunki i zobowiązania. Edytuj kwoty, dodaj własne lub
-        usuń te, które Cię nie dotyczą.
+        Dodaj swoje comiesięczne rachunki i zobowiązania — czynsz, raty,
+        subskrypcje. Kwoty możesz uzupełnić teraz lub później.
       </p>
 
       <div className="mb-4 max-h-[340px] space-y-1.5 overflow-y-auto">
+        {fixedDefs.length === 0 && !addingNew && (
+          <p className="py-4 text-center text-sm text-muted">
+            Brak wydatków stałych. Dodaj swoje poniżej.
+          </p>
+        )}
         {fixedDefs.map((def) => (
           <FixedDefRow
             key={def.tempId}
@@ -961,15 +966,19 @@ function StepSummary({
           <p className="text-body font-medium text-text">{paydayDay}.</p>
         </div>
         <div className="rounded-lg bg-panel px-3 py-2.5">
-          <p className="text-micro text-muted">Wydatki stałe</p>
+          <p className="text-micro text-muted">
+            Wydatki stałe ({fixedDefs.filter((d) => d.defaultPlanned > 0).length}/{fixedDefs.length})
+          </p>
           <p className="font-mono text-body font-medium tabular-nums text-text">
-            {totalFixed > 0 ? `${formatAmount(totalFixed)} zł` : "—"}
+            {formatAmount(totalFixed)} zł
           </p>
         </div>
         <div className="rounded-lg bg-panel px-3 py-2.5">
-          <p className="text-micro text-muted">Plany kopert</p>
+          <p className="text-micro text-muted">
+            Plany kopert ({envelopes.filter((e) => e.monthlyPlan > 0).length}/{envelopes.length})
+          </p>
           <p className="font-mono text-body font-medium tabular-nums text-text">
-            {totalEnvPlans > 0 ? `${formatAmount(totalEnvPlans)} zł` : "—"}
+            {formatAmount(totalEnvPlans)} zł
           </p>
         </div>
       </div>
