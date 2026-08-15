@@ -550,6 +550,39 @@ export default function SettingsPage() {
         )}
       </Section>
 
+      {/* ── Encryption ── */}
+      <Section title="Szyfrowanie E2E">
+        {settings?.encryptionSalt ? (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-good/15">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6L5 9L10 3" stroke="#4ADE80" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-caption text-good">Szyfrowanie aktywne</span>
+            </div>
+            <p className="text-micro leading-relaxed text-muted">
+              Twoje kwoty, nazwy transakcji, koperty i wydatki stale sa zaszyfrowane kluczem wyprowadzonym z Twojego hasla. Nikt - nawet administrator bazy danych - nie moze ich odczytac.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-bad/15">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M3 3L9 9M9 3L3 9" stroke="#F87171" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+              <span className="text-caption text-bad">Szyfrowanie nieaktywne</span>
+            </div>
+            <p className="text-micro text-muted">
+              Wyloguj sie i zaloguj ponownie, aby aktywowac szyfrowanie E2E.
+            </p>
+          </div>
+        )}
+      </Section>
+
       {/* ── Account ── */}
       <Section title="Konto">
         <p className="mb-3 text-caption text-muted">{user?.email}</p>

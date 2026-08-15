@@ -49,19 +49,25 @@ export async function initEncryptionForLogin(
 
   if (!settings || !settings.encryptionSalt || !settings.encryptionVerify) {
     // No encryption set up yet - set it up now (migration)
-    return await migrateToEncryption(budgetId, password);
+    console.log("[E2E] No encryption metadata found - migrating...");
+    const result = await migrateToEncryption(budgetId, password);
+    console.log("[E2E] Migration complete. Encryption is now active.");
+    return result;
   }
 
+  console.log("[E2E] Encryption metadata found - deriving key...");
   const salt = saltFromBase64(settings.encryptionSalt);
   const key = await deriveKey(password, salt);
 
   const isValid = await verifyKey(key, settings.encryptionVerify);
   if (!isValid) {
+    console.error("[E2E] Key verification FAILED - wrong password or corrupted token");
     clearEncryptionKey();
     return false;
   }
 
   setEncryptionKey(key, salt);
+  console.log("[E2E] Key verified and ready. Encryption active.");
   return true;
 }
 
