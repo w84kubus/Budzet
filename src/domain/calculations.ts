@@ -194,8 +194,9 @@ export function calculateAccountBalances(
 /**
  * wolneŚrodki =
  *     Σ income(okres)
- *   − Σ fixedExpense zapłacone(okres)
- *   − Σ pozostałe niezapłacone wydatki stałe wg PLANU(okres)
+ *   − Σ fixedExpense transakcje(okres)
+ *   − Σ planowane niezapłacone wydatki stałe(okres)
+ *   − Σ planowane zapłacone bez transakcji (legacy data)
  *   − Σ envelopeExpense(paidFrom='main', okres)
  *   − Σ allocation(okres)
  */
@@ -205,6 +206,9 @@ export function calculateFreeFunds(
 ): number {
   let funds = 0;
 
+  // Collect which defIds have a fixedExpense transaction
+  const defsWithTransaction = new Set<string>();
+
   for (const tx of periodTransactions) {
     switch (tx.kind) {
       case "income":
@@ -212,6 +216,9 @@ export function calculateFreeFunds(
         break;
       case "fixedExpense":
         funds -= tx.amount;
+        if (tx.fixedExpenseDefId) {
+          defsWithTransaction.add(tx.fixedExpenseDefId);
+        }
         break;
       case "envelopeExpense":
         if ((tx.paidFrom ?? "savings") === "main") {
@@ -224,11 +231,17 @@ export function calculateFreeFunds(
     }
   }
 
-  // Subtract planned amounts for unpaid fixed expenses
+  // Subtract planned amounts for fixed expenses NOT already covered by a transaction
+  const seenDefs = new Set<string>();
   for (const instance of fixedExpenseInstances) {
-    if (!instance.isPaid) {
-      funds -= instance.planned;
-    }
+    if (seenDefs.has(instance.defId)) continue;
+    seenDefs.add(instance.defId);
+
+    // Skip if this def already has a fixedExpense transaction (already subtracted above)
+    if (defsWithTransaction.has(instance.defId)) continue;
+
+    // No transaction exists → subtract planned amount (whether paid or not)
+    funds -= instance.planned;
   }
 
   return funds;

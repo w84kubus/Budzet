@@ -108,6 +108,13 @@ export async function updateFixedExpenseDef(
   );
 }
 
+export async function deleteFixedExpenseDef(
+  budgetId: string,
+  defId: string
+): Promise<void> {
+  await deleteDoc(docRef(paths.fixedExpenseDefDoc(budgetId, defId)));
+}
+
 export async function saveFixedExpenseDefs(
   budgetId: string,
   defs: FixedExpenseDef[]
@@ -229,6 +236,13 @@ export async function updateEnvelope(
   );
 }
 
+export async function deleteEnvelope(
+  budgetId: string,
+  envelopeId: string
+): Promise<void> {
+  await deleteDoc(docRef(paths.envelopeDoc(budgetId, envelopeId)));
+}
+
 export function subscribeEnvelopes(
   budgetId: string,
   callback: (envelopes: Envelope[]) => void
@@ -251,7 +265,12 @@ export async function saveTransaction(
   const ref = transaction.id
     ? docRef(paths.transactionDoc(budgetId, transaction.id))
     : doc(collRef(paths.transactionsCollection(budgetId)));
-  await setDoc(ref, { ...transaction, id: ref.id });
+  // Strip undefined values — Firestore rejects them
+  const data: Record<string, unknown> = { ...transaction, id: ref.id };
+  for (const key of Object.keys(data)) {
+    if (data[key] === undefined) delete data[key];
+  }
+  await setDoc(ref, data);
   return ref.id;
 }
 

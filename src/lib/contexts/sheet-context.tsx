@@ -16,6 +16,7 @@ import { ToastContainer, showToast } from "@/components/Toast";
 import { calculateFreeFunds } from "@/domain/calculations";
 import { closePeriod } from "@/domain/operations";
 import { formatAmount } from "@/domain/money";
+import { getCategoryById } from "@/domain/constants";
 import {
   saveTransaction,
   deleteTransaction,
@@ -111,8 +112,20 @@ export function SheetProvider({ children }: { children: ReactNode }) {
         createdAt: new Date().toISOString(),
       };
       const savedId = await saveTransaction(budgetId, fullTx);
+
+      // Build descriptive toast message
+      const parts: string[] = [];
+      if (tx.subcategory) {
+        const cat = getCategoryById(tx.subcategory);
+        parts.push(`${cat.emoji} ${cat.name}`);
+      }
+      if (tx.note) {
+        parts.push(`„${tx.note}"`);
+      }
+      const detail = parts.length > 0 ? parts.join(" · ") + " — " : "";
+
       showToast({
-        message: `Zapisano — ${formatAmount(tx.amount)} zł`,
+        message: `${detail}${formatAmount(tx.amount)} zł`,
         undoAction: () => {
           deleteTransaction(budgetId, savedId);
         },
@@ -123,14 +136,43 @@ export function SheetProvider({ children }: { children: ReactNode }) {
 
   const handleTogglePaid = useCallback(
     async (instance: FixedExpenseInstance) => {
-      if (!budgetId) return;
-      await updateFixedExpenseInstance(budgetId, instance.id, {
-        isPaid: !instance.isPaid,
-        paidAt: !instance.isPaid ? new Date().toISOString() : null,
-        actual: !instance.isPaid ? instance.planned : 0,
-      });
+      if (!budgetId || !activePeriod) return;
+      const nowPaying = !instance.isPaid;
+      const now = new Date().toISOString();
+      const txId = `fixpaid_${instance.id}`;
+
+      if (nowPaying) {
+        // Mark paid → create fixedExpense transaction
+        await saveTransaction(budgetId, {
+          id: txId,
+          periodId: activePeriod.id,
+          kind: "fixedExpense",
+          amount: instance.planned,
+          date: now.split("T")[0],
+          fixedExpenseDefId: instance.defId,
+          isImpulse: false,
+          createdAt: now,
+        });
+        await updateFixedExpenseInstance(budgetId, instance.id, {
+          isPaid: true,
+          paidAt: now,
+          actual: instance.planned,
+        });
+      } else {
+        // Unmark paid → remove the fixedExpense transaction
+        try {
+          await deleteTransaction(budgetId, txId);
+        } catch {
+          // Transaction may not exist (legacy data) — ignore
+        }
+        await updateFixedExpenseInstance(budgetId, instance.id, {
+          isPaid: false,
+          paidAt: null,
+          actual: 0,
+        });
+      }
     },
-    [budgetId]
+    [budgetId, activePeriod]
   );
 
   const handleMarkTransferDone = useCallback(
@@ -145,7 +187,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
   );
 
   const handleAddFixedExpense = useCallback(
-    async (data: { name: string; type: FixedExpenseType; defaultPlanned: number; dueDay: number | null }) => {
+    async (data: { name: string; type: FixedExpenseType; defaultPlanned: number; dueDay: number | null; endDate?: string | null }) => {
       if (!budgetId || !activePeriod) return;
       const defId = `fed_${Date.now()}`;
       const def: FixedExpenseDef = {
@@ -154,6 +196,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
         type: data.type,
         defaultPlanned: data.defaultPlanned,
         dueDay: data.dueDay,
+        endDate: data.endDate ?? null,
         subcategories: [],
         order: fixedExpenseDefs.length,
         archived: false,
@@ -377,8 +420,6 @@ export function SheetProvider({ children }: { children: ReactNode }) {
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         onSave={handleSaveExpense}
-        envelopes={envelopes}
-        fixedExpenseDefs={fixedExpenseDefs}
         periodId={activePeriod?.id ?? ""}
       />
 

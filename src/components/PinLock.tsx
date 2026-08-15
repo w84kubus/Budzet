@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { usePinStore } from "@/stores/pin-store";
 import { verifyPin } from "@/lib/pin";
 import { signOut } from "@/lib/firebase/auth";
@@ -10,6 +10,7 @@ export function PinLock() {
   const [error, setError] = useState("");
   const [verifying, setVerifying] = useState(false);
   const pinStore = usePinStore();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDigit = useCallback(
     (digit: string) => {
@@ -50,6 +51,19 @@ export function PinLock() {
     pinStore.setLocked(false);
     pinStore.setPinHash(null);
   }, [pinStore]);
+
+  // Keyboard support — listen for digit keys and backspace
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key >= "0" && e.key <= "9") {
+        handleDigit(e.key);
+      } else if (e.key === "Backspace") {
+        handleBackspace();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleDigit, handleBackspace]);
 
   const padButtons = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"];
 

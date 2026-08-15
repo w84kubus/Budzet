@@ -3,19 +3,13 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { formatAmount, terminalInputToGrosze } from "@/domain/money";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import type { Envelope, FixedExpenseDef, Transaction, TransactionKind } from "@/domain/types";
-
-type CategoryTarget =
-  | { type: "envelope"; id: string; name: string; emoji: string }
-  | { type: "fixedExpense"; id: string; name: string };
+import { EXPENSE_CATEGORIES, detectCategory, getCategoryById } from "@/domain/constants";
+import type { Transaction } from "@/domain/types";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onSave: (tx: Omit<Transaction, "id" | "createdAt">) => void;
-  envelopes: Envelope[];
-  fixedExpenseDefs: FixedExpenseDef[];
   periodId: string;
 };
 
@@ -32,8 +26,6 @@ export function ExpenseSheet({
   open,
   onClose,
   onSave,
-  envelopes,
-  fixedExpenseDefs,
   periodId,
 }: Props) {
   // Terminal keypad mode (mobile)
@@ -42,12 +34,16 @@ export function ExpenseSheet({
   const [textAmount, setTextAmount] = useState("");
   const [isMobile, setIsMobile] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState<CategoryTarget | null>(null);
-  const [showMore, setShowMore] = useState(false);
   const [note, setNote] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isImpulse, setIsImpulse] = useState(false);
-  const [paidFrom, setPaidFrom] = useState<"main" | "savings">("savings");
   const desktopInputRef = useRef<HTMLInputElement>(null);
+  const noteInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-detected category from note text
+  const autoDetectedId = detectCategory(note);
+  // Effective category: manual pick > auto-detection > null
+  const effectiveCategoryId = selectedCategoryId ?? autoDetectedId;
 
   // Detect mobile vs desktop
   useEffect(() => {
@@ -66,11 +62,9 @@ export function ExpenseSheet({
     if (open) {
       setDigits("");
       setTextAmount("");
-      setSelectedCategory(null);
-      setShowMore(false);
       setNote("");
+      setSelectedCategoryId(null);
       setIsImpulse(false);
-      setPaidFrom("savings");
       // Focus desktop input after mount
       if (!isMobile) {
         setTimeout(() => desktopInputRef.current?.focus(), 100);
@@ -80,8 +74,8 @@ export function ExpenseSheet({
 
   const handleDigit = useCallback((d: string) => {
     setDigits((prev) => {
-      if (prev.length >= 8) return prev; // max 999 999,99
-      if (prev === "" && d === "0") return prev; // no leading zero
+      if (prev.length >= 8) return prev;
+      if (prev === "" && d === "0") return prev;
       return prev + d;
     });
   }, []);
@@ -91,59 +85,27 @@ export function ExpenseSheet({
   }, []);
 
   const handleSave = useCallback(() => {
-    if (amount <= 0 || !selectedCategory) return;
+    if (amount <= 0 || !effectiveCategoryId) return;
 
     const today = new Date().toISOString().split("T")[0];
 
-    let kind: TransactionKind;
-    let envelopeId: string | undefined;
-    let fixedExpenseDefId: string | undefined;
-
-    if (selectedCategory.type === "envelope") {
-      kind = "envelopeExpense";
-      envelopeId = selectedCategory.id;
-    } else {
-      kind = "fixedExpense";
-      fixedExpenseDefId = selectedCategory.id;
-    }
-
     onSave({
       periodId,
-      kind,
+      kind: "envelopeExpense",
       amount,
       date: today,
-      envelopeId,
-      fixedExpenseDefId,
-      paidFrom: selectedCategory.type === "envelope" ? paidFrom : undefined,
+      paidFrom: "main",
+      subcategory: effectiveCategoryId,
       note: note.trim() || undefined,
       isImpulse,
     });
 
     onClose();
-  }, [amount, selectedCategory, periodId, paidFrom, note, isImpulse, onSave, onClose]);
+  }, [amount, effectiveCategoryId, periodId, note, isImpulse, onSave, onClose]);
 
   if (!open) return null;
 
-  // Build category list: envelopes first, then accumulating fixed expenses
-  const categories: CategoryTarget[] = [
-    ...envelopes
-      .filter((e) => !e.archived)
-      .map((e) => ({
-        type: "envelope" as const,
-        id: e.id,
-        name: e.name,
-        emoji: e.emoji,
-      })),
-    ...fixedExpenseDefs
-      .filter((d) => !d.archived && d.type === "accumulating")
-      .map((d) => ({
-        type: "fixedExpense" as const,
-        id: d.id,
-        name: d.name,
-      })),
-  ];
-
-  const canSave = amount > 0 && selectedCategory !== null;
+  const canSave = amount > 0 && effectiveCategoryId !== null;
 
   return (
     <>
@@ -160,8 +122,8 @@ export function ExpenseSheet({
           <div className="h-[4px] w-10 rounded-full bg-line" />
         </div>
 
-        {/* Amount display — mobile: passive display, desktop: editable input */}
-        <div className="px-5 pb-4 text-center">
+        {/* Amount display */}
+        <div className="px-5 pb-3 text-center">
           {isMobile ? (
             <>
               <span
@@ -184,6 +146,10 @@ export function ExpenseSheet({
                 onChange={(e) => setTextAmount(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && canSave) handleSave();
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    noteInputRef.current?.focus();
+                  }
                 }}
                 placeholder="0,00"
                 className="w-40 border-b-2 border-line bg-transparent text-center font-display text-display font-semibold tabular-nums tracking-[-0.02em] text-text placeholder:text-muted/30 focus:border-brass focus:outline-none"
@@ -196,116 +162,91 @@ export function ExpenseSheet({
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-5">
-          {/* Category grid — 3 columns for readability on small screens */}
-          <div className="mb-4 grid grid-cols-3 gap-2">
-            {categories.map((cat) => {
-              const isSelected =
-                selectedCategory?.type === cat.type &&
-                selectedCategory?.id === cat.id;
-
-              return (
-                <button
-                  key={`${cat.type}-${cat.id}`}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`flex min-h-[72px] flex-col items-center justify-center rounded-xl border px-2 py-2.5 transition-colors ${
-                    isSelected
-                      ? "border-brass/40 bg-brass/10"
-                      : "border-line bg-panel-2 active:bg-line"
-                  }`}
-                >
-                  {cat.type === "envelope" ? (
-                    <>
-                      <span className="text-title leading-none">{cat.emoji}</span>
-                      <span
-                        className={`mt-1.5 line-clamp-2 text-center text-micro font-medium leading-tight ${
-                          isSelected ? "text-brass" : "text-muted"
-                        }`}
-                      >
-                        {cat.name}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-sm leading-none text-muted">💸</span>
-                      <span
-                        className={`mt-1.5 line-clamp-2 text-center text-micro font-medium leading-tight ${
-                          isSelected ? "text-brass" : "text-muted"
-                        }`}
-                      >
-                        {cat.name}
-                      </span>
-                    </>
-                  )}
-                </button>
-              );
-            })}
+          {/* Note / name input */}
+          <div className="mb-3">
+            <input
+              ref={noteInputRef}
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && canSave) handleSave();
+              }}
+              placeholder="Co kupujesz? np. Żabka, Orlen, Rossmann…"
+              className="w-full rounded-xl border border-line bg-panel-2 px-4 py-2.5 text-sm text-text placeholder:text-muted/40 focus:border-brass/40 focus:outline-none"
+            />
+            {/* Auto-detection hint */}
+            {autoDetectedId && !selectedCategoryId && (
+              <p className="mt-1 px-1 text-micro text-muted/60">
+                Auto: {getCategoryById(autoDetectedId).emoji}{" "}
+                {getCategoryById(autoDetectedId).name}
+              </p>
+            )}
           </div>
 
-          {/* More options */}
-          {!showMore ? (
-            <button
-              onClick={() => setShowMore(true)}
-              className="mb-4 w-full text-center text-caption text-muted"
-            >
-              Więcej opcji ▾
-            </button>
-          ) : (
-            <div className="mb-4 space-y-3">
-              {/* Note */}
-              <Input
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Notatka (opcjonalne)"
-              />
+          {/* Category grid */}
+          <div className="mb-3">
+            <span className="mb-2 block text-micro font-medium text-muted">
+              Kategoria
+            </span>
+            <div className="grid grid-cols-4 gap-1.5">
+              {EXPENSE_CATEGORIES.map((cat) => {
+                const isAutoDetected = autoDetectedId === cat.id && !selectedCategoryId;
+                const isManuallySelected = selectedCategoryId === cat.id;
+                const isSelected = isManuallySelected || isAutoDetected;
 
-              {/* Impulse toggle */}
-              <button
-                onClick={() => setIsImpulse(!isImpulse)}
-                className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors ${
-                  isImpulse
-                    ? "border-bad/30 bg-bad/8 text-bad"
-                    : "border-line bg-panel-2 text-muted"
-                }`}
-              >
-                <span>⚡ To był impuls</span>
-                <div
-                  className={`h-5 w-9 rounded-full transition-colors ${
-                    isImpulse ? "bg-bad" : "bg-line"
-                  }`}
-                >
-                  <div
-                    className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                      isImpulse ? "translate-x-4" : "translate-x-0"
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() =>
+                      setSelectedCategoryId(
+                        selectedCategoryId === cat.id ? null : cat.id
+                      )
+                    }
+                    className={`flex min-h-[56px] flex-col items-center justify-center rounded-lg border px-1 py-2 transition-colors ${
+                      isSelected
+                        ? isAutoDetected
+                          ? "border-brass/25 bg-brass/5"
+                          : "border-brass/40 bg-brass/10"
+                        : "border-line bg-panel-2 active:bg-line"
                     }`}
-                  />
-                </div>
-              </button>
-
-              {/* Paid from */}
-              {selectedCategory?.type === "envelope" && (
-                <div>
-                  <span className="mb-1.5 block text-caption font-medium text-muted">
-                    Zapłacone z
-                  </span>
-                  <div className="flex gap-[1px] overflow-hidden rounded-lg bg-line">
-                    {(["main", "savings"] as const).map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => setPaidFrom(opt)}
-                        className={`flex-1 py-2 text-caption font-medium transition-colors ${
-                          paidFrom === opt
-                            ? "bg-brass/15 text-brass"
-                            : "bg-panel-2 text-muted"
-                        }`}
-                      >
-                        {opt === "main" ? "Główne" : "Oszczędnościowe"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                  >
+                    <span className="text-body-lg leading-none">{cat.emoji}</span>
+                    <span
+                      className={`mt-1 line-clamp-1 text-center text-[10px] font-medium leading-tight ${
+                        isSelected ? "text-brass" : "text-muted"
+                      }`}
+                    >
+                      {cat.name}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
+
+          {/* Impulse toggle */}
+          <button
+            onClick={() => setIsImpulse(!isImpulse)}
+            className={`mb-3 flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+              isImpulse
+                ? "border-bad/30 bg-bad/8 text-bad"
+                : "border-line bg-panel-2 text-muted"
+            }`}
+          >
+            <span>⚡ To był impuls</span>
+            <div
+              className={`h-5 w-9 rounded-full transition-colors ${
+                isImpulse ? "bg-bad" : "bg-line"
+              }`}
+            >
+              <div
+                className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                  isImpulse ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </div>
+          </button>
         </div>
 
         {/* Keypad — mobile only */}
@@ -321,7 +262,6 @@ export function ExpenseSheet({
                   {d}
                 </button>
               ))}
-              {/* Bottom row: 00, 0, backspace */}
               <button
                 onClick={() => {
                   handleDigit("0");

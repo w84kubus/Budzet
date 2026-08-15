@@ -62,7 +62,7 @@ export function MainIndicator({
       </div>
       <div className="mb-3 text-center">
         <span
-          className={`font-display text-hero font-semibold leading-none tracking-[-0.02em] tabular-nums ${
+          className={`font-display text-hero font-semibold leading-none tracking-[-0.02em] tabular-nums md:text-[4.5rem] ${
             isNegative ? "text-bad" : "text-brass"
           } amount-enter`}
           style={{ fontOpticalSizing: "auto" }}
@@ -71,7 +71,7 @@ export function MainIndicator({
           {formatAmount(Math.abs(freeFunds))}
         </span>
         <span
-          className={`ml-2 font-display text-title font-medium ${
+          className={`ml-2 font-display text-title font-medium md:text-[1.75rem] ${
             isNegative ? "text-bad/60" : "text-brass/60"
           }`}
         >

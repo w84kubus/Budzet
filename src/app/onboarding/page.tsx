@@ -17,7 +17,6 @@ import type {
   FixedExpenseDef,
   FixedExpenseInstance,
   Envelope,
-  FixedExpenseType,
 } from "@/domain/types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -29,7 +28,7 @@ const STEPS: Step[] = ["payday", "income", "fixed", "envelopes", "summary", "pin
 type EditableFixedDef = {
   tempId: string;
   name: string;
-  type: FixedExpenseType;
+  type: "single" | "accumulating";
   defaultPlanned: number; // grosze
   dueDay: number | null;
 };
@@ -164,6 +163,7 @@ export default function OnboardingPage() {
           type: def.type,
           defaultPlanned: def.defaultPlanned,
           dueDay: def.dueDay,
+          endDate: null,
           subcategories: [],
           order: i,
           archived: false,
@@ -393,7 +393,6 @@ function StepFixedExpenses({
   const [addingNew, setAddingNew] = useState(false);
   const [newName, setNewName] = useState("");
   const [newAmount, setNewAmount] = useState("");
-  const [newType, setNewType] = useState<FixedExpenseType>("single");
   const newNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -415,14 +414,13 @@ function StepFixedExpenses({
     const newDef: EditableFixedDef = {
       tempId: tempId(),
       name: newName.trim(),
-      type: newType,
+      type: "single",
       defaultPlanned: parseAmountInput(newAmount),
       dueDay: null,
     };
     setFixedDefs([...fixedDefs, newDef]);
     setNewName("");
     setNewAmount("");
-    setNewType("single");
     setAddingNew(false);
   };
 
@@ -482,28 +480,6 @@ function StepFixedExpenses({
               />
               <span className="text-micro text-muted">zł</span>
             </div>
-          </div>
-          <div className="mb-3 flex gap-2">
-            <button
-              onClick={() => setNewType("single")}
-              className={`rounded-lg px-3 py-1.5 text-micro transition-colors ${
-                newType === "single"
-                  ? "bg-brass/15 text-brass ring-1 ring-brass/40"
-                  : "bg-panel-2 text-muted hover:text-text"
-              }`}
-            >
-              Jednorazowy
-            </button>
-            <button
-              onClick={() => setNewType("accumulating")}
-              className={`rounded-lg px-3 py-1.5 text-micro transition-colors ${
-                newType === "accumulating"
-                  ? "bg-brass/15 text-brass ring-1 ring-brass/40"
-                  : "bg-panel-2 text-muted hover:text-text"
-              }`}
-            >
-              Narastający
-            </button>
           </div>
           <div className="flex gap-2">
             <button
@@ -565,10 +541,6 @@ function FixedDefRow({
     <div className="flex items-center gap-2 rounded-lg bg-panel px-3 py-2">
       <span className="min-w-0 flex-1 truncate text-sm text-text">
         {def.name}
-      </span>
-
-      <span className="rounded bg-panel-2 px-1.5 py-0.5 text-micro text-muted">
-        {def.type === "accumulating" ? "narastający" : "jednorazowy"}
       </span>
 
       <div className="w-[90px] text-right">

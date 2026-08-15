@@ -39,22 +39,22 @@ export function ToastContainer() {
   if (!toast) return null;
 
   return (
-    <div
-      className={`fixed inset-x-5 bottom-24 z-50 rounded-xl bg-panel-2 px-4 py-3 shadow-xl transition-all duration-300 ${
-        visible
-          ? "translate-y-0 opacity-100"
-          : "translate-y-4 opacity-0"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-sm text-text">{toast.message}</span>
+    <div className="fixed inset-x-0 bottom-20 z-50 flex justify-center px-5 md:bottom-8">
+      <div
+        className={`flex items-center gap-3 rounded-full border border-line/50 bg-panel-2 px-5 py-2.5 shadow-lg shadow-black/30 transition-all duration-300 ${
+          visible
+            ? "translate-y-0 opacity-100"
+            : "translate-y-4 opacity-0"
+        }`}
+      >
+        <span className="text-caption font-medium text-text">{toast.message}</span>
         {toast.undoAction && (
           <button
             onClick={() => {
               toast.undoAction?.();
               setVisible(false);
             }}
-            className="shrink-0 text-sm font-semibold text-brass"
+            className="shrink-0 text-caption font-semibold text-brass"
           >
             Cofnij
           </button>

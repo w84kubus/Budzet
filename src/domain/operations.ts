@@ -65,9 +65,11 @@ export function closePeriod(input: ClosePeriodInput): ClosePeriodResult {
     status: "open",
   };
 
-  // Create instances for all non-archived fixed expense defs
+  // Create instances for non-archived defs that haven't expired
+  const periodMonth = periodId; // "YYYY-MM"
   const newInstances: FixedExpenseInstance[] = fixedExpenseDefs
     .filter((def) => !def.archived)
+    .filter((def) => !def.endDate || def.endDate >= periodMonth)
     .map((def) => ({
       id: `${periodId}_${def.id}`,
       periodId,

@@ -2,6 +2,7 @@
 
 import { formatAmount } from "@/domain/money";
 import { formatDateShort } from "@/lib/format";
+import { getCategoryById } from "@/domain/constants";
 import type { Transaction, FixedExpenseDef, Envelope } from "@/domain/types";
 
 type Props = {
@@ -24,7 +25,14 @@ function getLabel(
       return def?.name ?? "Wydatek stały";
     }
     case "envelopeExpense": {
-      const env = tx.envelopeId ? envs.get(tx.envelopeId) : null;
+      if (!tx.envelopeId) {
+        if (tx.subcategory) {
+          const cat = getCategoryById(tx.subcategory);
+          return `${cat.emoji} ${cat.name}`;
+        }
+        return "💳 Konto główne";
+      }
+      const env = envs.get(tx.envelopeId);
       return env ? `${env.emoji} ${env.name}` : "Wydatek kopertowy";
     }
     case "allocation": {

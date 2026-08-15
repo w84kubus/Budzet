@@ -5,6 +5,7 @@ import { MainIndicator } from "@/components/dashboard/MainIndicator";
 import { TransferTaskCard } from "@/components/dashboard/TransferTaskCard";
 import { FixedExpenses } from "@/components/dashboard/FixedExpenses";
 import { EnvelopeTiles } from "@/components/dashboard/EnvelopeTiles";
+import { CategorySummary } from "@/components/dashboard/CategorySummary";
 import { ImpulseCounter } from "@/components/dashboard/ImpulseCounter";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { Button } from "@/components/ui";
@@ -94,49 +95,50 @@ export function DashboardView({
         />
       </div>
 
-      {/* ── Desktop: 2-column grid / Mobile: stack ── */}
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        {/* LEFT COLUMN */}
-        <div className="space-y-4 md:space-y-5">
-          <MainIndicator
-            period={activePeriod}
-            transactions={transactions}
-            fixedExpenseInstances={fixedExpenseInstances}
-            paydayDay={settings.paydayDay}
-            today={today}
+      {/* ── Main content ── */}
+      <div className="mt-4 space-y-4 md:space-y-5">
+        {/* Main indicator — full width */}
+        <MainIndicator
+          period={activePeriod}
+          transactions={transactions}
+          fixedExpenseInstances={fixedExpenseInstances}
+          paydayDay={settings.paydayDay}
+          today={today}
+        />
+
+        {activeTask && (
+          <TransferTaskCard
+            task={activeTask}
+            envelopes={envelopes}
+            onMarkDone={onMarkTransferDone}
           />
+        )}
 
-          {activeTask && (
-            <TransferTaskCard
-              task={activeTask}
-              envelopes={envelopes}
-              onMarkDone={onMarkTransferDone}
-            />
-          )}
+        {/* Action buttons */}
+        {activePeriod.status === "open" && (
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth
+              onClick={onDistribute}
+              disabled={freeFunds <= 0}
+            >
+              Rozdysponuj
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              fullWidth
+              onClick={onClosePeriod}
+            >
+              Mam wypłatę
+            </Button>
+          </div>
+        )}
 
-          {/* Action buttons */}
-          {activePeriod.status === "open" && (
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                fullWidth
-                onClick={onDistribute}
-                disabled={freeFunds <= 0}
-              >
-                Rozdysponuj
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                fullWidth
-                onClick={onClosePeriod}
-              >
-                Mam wypłatę
-              </Button>
-            </div>
-          )}
-
+        {/* Zobowiązania stałe | Wydatki w tym okresie — side by side on desktop */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <FixedExpenses
             defs={fixedExpenseDefs}
             instances={fixedExpenseInstances}
@@ -144,31 +146,27 @@ export function DashboardView({
             onAddDef={onAddDef}
             onEditInstance={onEditInstance}
           />
+          <CategorySummary transactions={transactions} />
         </div>
 
-        {/* RIGHT COLUMN */}
-        <div className="space-y-4 md:space-y-5">
-          <EnvelopeTiles
-            envelopes={envelopes}
-            allTransactions={allTransactions}
-            onAdd={onAddEnvelope}
-          />
-        </div>
+        {/* Envelopes */}
+        <EnvelopeTiles
+          envelopes={envelopes}
+          allTransactions={allTransactions}
+          onAdd={onAddEnvelope}
+        />
 
-        {/* FULL WIDTH ROW */}
-        <div className="space-y-4 md:col-span-2 md:space-y-5">
-          <ImpulseCounter
-            periodTransactions={transactions}
-            allTransactions={allTransactions}
-            currentPeriodId={activePeriod.id}
-          />
-          <RecentTransactions
-            transactions={transactions}
-            fixedExpenseDefs={fixedExpenseDefs}
-            envelopes={envelopes}
-            onShowAll={onShowAllExpenses}
-          />
-        </div>
+        <ImpulseCounter
+          periodTransactions={transactions}
+          allTransactions={allTransactions}
+          currentPeriodId={activePeriod.id}
+        />
+        <RecentTransactions
+          transactions={transactions}
+          fixedExpenseDefs={fixedExpenseDefs}
+          envelopes={envelopes}
+          onShowAll={onShowAllExpenses}
+        />
       </div>
     </div>
   );

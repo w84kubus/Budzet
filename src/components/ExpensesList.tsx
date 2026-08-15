@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { formatAmount } from "@/domain/money";
 import { pluralTransakcje } from "@/lib/format";
+import { getCategoryById, EXPENSE_CATEGORIES } from "@/domain/constants";
 import type {
   Transaction,
   FixedExpenseDef,
@@ -25,6 +26,7 @@ type Filter = {
   search: string;
   envelopeId: string | null;
   fixedDefId: string | null;
+  categoryId: string | null;
   onlyImpulse: boolean;
 };
 
@@ -52,6 +54,7 @@ export function ExpensesList({
     search: "",
     envelopeId: null,
     fixedDefId: null,
+    categoryId: null,
     onlyImpulse: false,
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -137,6 +140,9 @@ export function ExpensesList({
         (t) => t.fixedExpenseDefId === filter.fixedDefId
       );
     }
+    if (filter.categoryId) {
+      result = result.filter((t) => t.subcategory === filter.categoryId);
+    }
     if (filter.onlyImpulse) {
       result = result.filter((t) => t.isImpulse);
     }
@@ -208,7 +214,14 @@ export function ExpensesList({
   };
 
   const getLabel = (tx: Transaction) => {
-    if (tx.kind === "envelopeExpense" && tx.envelopeId) {
+    if (tx.kind === "envelopeExpense") {
+      if (!tx.envelopeId) {
+        if (tx.subcategory) {
+          const cat = getCategoryById(tx.subcategory);
+          return `${cat.emoji} ${cat.name}`;
+        }
+        return "💳 Konto główne";
+      }
       const env = envelopeMap.get(tx.envelopeId);
       return env ? `${env.emoji} ${env.name}` : "Koperta";
     }
@@ -285,7 +298,7 @@ export function ExpensesList({
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`rounded-lg px-3 py-1.5 text-micro font-medium transition-colors ${
-              showFilters || filter.envelopeId || filter.fixedDefId || filter.onlyImpulse
+              showFilters || filter.envelopeId || filter.fixedDefId || filter.categoryId || filter.onlyImpulse
                 ? "bg-brass/15 text-brass"
                 : "bg-panel text-muted"
             }`}
@@ -379,6 +392,33 @@ export function ExpensesList({
             </select>
           </div>
 
+          {/* Category filter — chips */}
+          <div>
+            <label className="mb-1.5 block text-micro text-muted">
+              Kategoria
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {EXPENSE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() =>
+                    setFilter((f) => ({
+                      ...f,
+                      categoryId: f.categoryId === cat.id ? null : cat.id,
+                    }))
+                  }
+                  className={`rounded-lg px-2.5 py-1.5 text-micro font-medium transition-colors ${
+                    filter.categoryId === cat.id
+                      ? "bg-brass/20 text-brass ring-1 ring-brass/30"
+                      : "bg-panel-2 text-muted hover:text-text"
+                  }`}
+                >
+                  {cat.emoji} {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Impulse toggle */}
           <label className="flex items-center gap-2">
             <input
@@ -400,6 +440,7 @@ export function ExpensesList({
                 search: "",
                 envelopeId: null,
                 fixedDefId: null,
+                categoryId: null,
                 onlyImpulse: false,
               })
             }
@@ -420,7 +461,7 @@ export function ExpensesList({
         {visibleGroups.length === 0 ? (
           <div className="rounded-xl bg-panel p-8 text-center">
             <p className="text-sm text-muted">
-              {filter.search || filter.envelopeId || filter.fixedDefId || filter.onlyImpulse
+              {filter.search || filter.envelopeId || filter.fixedDefId || filter.categoryId || filter.onlyImpulse
                 ? "Brak wyników dla wybranych filtrów."
                 : "Brak transakcji w tym okresie."}
             </p>

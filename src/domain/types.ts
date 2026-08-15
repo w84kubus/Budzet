@@ -21,6 +21,7 @@ export type FixedExpenseDef = {
   type: FixedExpenseType;
   defaultPlanned: number; // grosze
   dueDay: number | null;
+  endDate: string | null; // ISO date "YYYY-MM" — last month this expense is active, null = no end
   subcategories: string[];
   order: number;
   archived: boolean;

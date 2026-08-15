@@ -8,7 +8,9 @@ import { useBudgetStore } from "@/stores/budget-store";
 import {
   updateSettings,
   updateFixedExpenseDef,
+  deleteFixedExpenseDef,
   updateEnvelope,
+  deleteEnvelope,
 } from "@/lib/firebase/db";
 import { signOut } from "@/lib/firebase/auth";
 import { hashPin } from "@/lib/pin";
@@ -157,6 +159,22 @@ export default function SettingsPage() {
     [budgetId]
   );
 
+  const handleDeleteDef = useCallback(
+    async (def: FixedExpenseDef) => {
+      if (!budgetId) return;
+      await deleteFixedExpenseDef(budgetId, def.id);
+    },
+    [budgetId]
+  );
+
+  const handleDeleteEnvelope = useCallback(
+    async (env: Envelope) => {
+      if (!budgetId) return;
+      await deleteEnvelope(budgetId, env.id);
+    },
+    [budgetId]
+  );
+
   const handleLogout = useCallback(async () => {
     await signOut();
     router.push("/login");
@@ -234,6 +252,7 @@ export default function SettingsPage() {
                   if (budgetId) updateFixedExpenseDef(budgetId, def.id, { defaultPlanned });
                 }}
                 onArchive={() => handleToggleArchiveDef(def)}
+                onDelete={() => handleDeleteDef(def)}
               />
             ))}
           </div>
@@ -285,6 +304,7 @@ export default function SettingsPage() {
                   if (budgetId) updateEnvelope(budgetId, env.id, { monthlyPlan });
                 }}
                 onArchive={() => handleToggleArchiveEnvelope(env)}
+                onDelete={() => handleDeleteEnvelope(env)}
               />
             ))}
           </div>
@@ -581,14 +601,17 @@ function EditableDefRow({
   onSaveName,
   onSavePlanned,
   onArchive,
+  onDelete,
 }: {
   def: FixedExpenseDef;
   onSaveName: (name: string) => void;
   onSavePlanned: (defaultPlanned: number) => void;
   onArchive: () => void;
+  onDelete: () => void;
 }) {
   const [editingName, setEditingName] = useState(false);
   const [editingAmount, setEditingAmount] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [nameValue, setNameValue] = useState(def.name);
   const [amountValue, setAmountValue] = useState(
     formatAmount(def.defaultPlanned)
@@ -645,13 +668,20 @@ function EditableDefRow({
             className="w-full rounded border border-line bg-panel-2 px-2 py-0.5 text-sm text-text outline-none focus:border-brass"
           />
         ) : (
-          <button
-            onClick={() => setEditingName(true)}
-            className="text-left text-sm text-text hover:text-brass transition-colors"
-            title="Kliknij, aby edytować nazwę"
-          >
-            {def.name}
-          </button>
+          <div>
+            <button
+              onClick={() => setEditingName(true)}
+              className="text-left text-sm text-text hover:text-brass transition-colors"
+              title="Kliknij, aby edytować nazwę"
+            >
+              {def.name}
+            </button>
+            {def.endDate && (
+              <p className="text-micro text-muted/70">
+                do {def.endDate.replace("-", "/")}
+              </p>
+            )}
+          </div>
         )}
       </div>
 
@@ -685,13 +715,46 @@ function EditableDefRow({
         )}
       </div>
 
-      {/* Archive button */}
-      <button
-        onClick={onArchive}
-        className="w-[75px] shrink-0 text-right text-micro text-muted hover:text-bad transition-colors"
-      >
-        Archiwizuj
-      </button>
+      {/* Actions */}
+      {confirmDelete ? (
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="text-micro text-bad">Usunąć?</span>
+          <button
+            onClick={() => {
+              onDelete();
+              setConfirmDelete(false);
+            }}
+            className="rounded-md bg-bad/15 px-2 py-0.5 text-micro font-medium text-bad hover:bg-bad/25 transition-colors"
+          >
+            Tak
+          </button>
+          <button
+            onClick={() => setConfirmDelete(false)}
+            className="rounded-md px-2 py-0.5 text-micro text-muted hover:text-text transition-colors"
+          >
+            Nie
+          </button>
+        </div>
+      ) : (
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={onArchive}
+            className="rounded-md px-2 py-0.5 text-micro text-muted hover:text-text transition-colors"
+            title="Archiwizuj"
+          >
+            Archiwizuj
+          </button>
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-muted/50 hover:bg-bad/10 hover:text-bad transition-colors"
+            title="Usuń"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 3.5H11.5M5.5 6V10M8.5 6V10M3.5 3.5L4 11.5C4 12.05 4.45 12.5 5 12.5H9C9.55 12.5 10 12.05 10 11.5L10.5 3.5M5 3.5V2C5 1.45 5.45 1 6 1H8C8.55 1 9 1.45 9 2V3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -702,16 +765,19 @@ function EditableEnvelopeRow({
   onSaveName,
   onSavePlan,
   onArchive,
+  onDelete,
 }: {
   env: Envelope;
   onSaveEmoji: (emoji: string) => void;
   onSaveName: (name: string) => void;
   onSavePlan: (monthlyPlan: number) => void;
   onArchive: () => void;
+  onDelete: () => void;
 }) {
   const [editingName, setEditingName] = useState(false);
   const [editingPlan, setEditingPlan] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [nameValue, setNameValue] = useState(env.name);
   const [planValue, setPlanValue] = useState(formatAmount(env.monthlyPlan));
   const nameRef = useRef<HTMLInputElement>(null);
@@ -857,13 +923,46 @@ function EditableEnvelopeRow({
           )}
         </div>
 
-        {/* Archive button */}
-        <button
-          onClick={onArchive}
-          className="w-[75px] shrink-0 text-right text-micro text-muted hover:text-bad transition-colors"
-        >
-          Archiwizuj
-        </button>
+        {/* Actions */}
+        {confirmDelete ? (
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="text-micro text-bad">Usunąć?</span>
+            <button
+              onClick={() => {
+                onDelete();
+                setConfirmDelete(false);
+              }}
+              className="rounded-md bg-bad/15 px-2 py-0.5 text-micro font-medium text-bad hover:bg-bad/25 transition-colors"
+            >
+              Tak
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="rounded-md px-2 py-0.5 text-micro text-muted hover:text-text transition-colors"
+            >
+              Nie
+            </button>
+          </div>
+        ) : (
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              onClick={onArchive}
+              className="rounded-md px-2 py-0.5 text-micro text-muted hover:text-text transition-colors"
+              title="Archiwizuj"
+            >
+              Archiwizuj
+            </button>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-muted/50 hover:bg-bad/10 hover:text-bad transition-colors"
+              title="Usuń"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2.5 3.5H11.5M5.5 6V10M8.5 6V10M3.5 3.5L4 11.5C4 12.05 4.45 12.5 5 12.5H9C9.55 12.5 10 12.05 10 11.5L10.5 3.5M5 3.5V2C5 1.45 5.45 1 6 1H8C8.55 1 9 1.45 9 2V3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

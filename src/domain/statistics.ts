@@ -6,6 +6,7 @@ import type {
   Envelope,
 } from "./types";
 import { calculateImpulseTotal } from "./calculations";
+import { getCategoryById } from "./constants";
 
 // ─── Period Summary ─────────────────────────────────────────────────────────
 
@@ -108,52 +109,32 @@ export type CategoryBreakdown = {
 
 export function calculateCategoryBreakdown(
   transactions: Transaction[],
-  fixedExpenseDefs: FixedExpenseDef[],
-  fixedExpenseInstances: FixedExpenseInstance[],
-  envelopes: Envelope[]
+  _fixedExpenseDefs: FixedExpenseDef[],
+  _fixedExpenseInstances: FixedExpenseInstance[],
+  _envelopes: Envelope[]
 ): CategoryBreakdown[] {
   const categories: CategoryBreakdown[] = [];
 
-  // Envelope expenses
-  const envelopeMap = new Map(envelopes.map((e) => [e.id, e]));
-  const envelopeTotals = new Map<string, number>();
+  // Group envelopeExpense transactions by subcategory (expense category)
+  const categoryTotals = new Map<string, number>();
   for (const tx of transactions) {
-    if (tx.kind === "envelopeExpense" && tx.envelopeId) {
-      envelopeTotals.set(
-        tx.envelopeId,
-        (envelopeTotals.get(tx.envelopeId) ?? 0) + tx.amount
+    if (tx.kind === "envelopeExpense" && tx.subcategory) {
+      categoryTotals.set(
+        tx.subcategory,
+        (categoryTotals.get(tx.subcategory) ?? 0) + tx.amount
       );
     }
   }
-  for (const [envId, total] of envelopeTotals) {
-    const env = envelopeMap.get(envId);
-    if (env) {
-      categories.push({
-        id: envId,
-        name: env.name,
-        emoji: env.emoji,
-        amount: total,
-        percentage: 0,
-        type: "envelope",
-      });
-    }
-  }
 
-  // Fixed expenses
-  const defMap = new Map(fixedExpenseDefs.map((d) => [d.id, d]));
-  for (const inst of fixedExpenseInstances) {
-    if (!inst.isPaid) continue;
-    const def = defMap.get(inst.defId);
-    if (!def) continue;
-    const amount = inst.actual > 0 ? inst.actual : inst.planned;
-    if (amount <= 0) continue;
+  for (const [catId, amount] of categoryTotals) {
+    const cat = getCategoryById(catId);
     categories.push({
-      id: def.id,
-      name: def.name,
-      emoji: "📌",
+      id: catId,
+      name: cat.name,
+      emoji: cat.emoji,
       amount,
       percentage: 0,
-      type: "fixed",
+      type: "envelope",
     });
   }
 
@@ -293,9 +274,9 @@ export type CategoryHistory = {
 export function calculateCategoryHistory(
   periods: Period[],
   allTransactions: Transaction[],
-  allInstances: FixedExpenseInstance[],
-  fixedExpenseDefs: FixedExpenseDef[],
-  envelopes: Envelope[],
+  _allInstances: FixedExpenseInstance[],
+  _fixedExpenseDefs: FixedExpenseDef[],
+  _envelopes: Envelope[],
   currentPeriodId: string,
   maxPeriods: number = 6
 ): CategoryHistory[] {
@@ -304,10 +285,8 @@ export function calculateCategoryHistory(
     .slice(-maxPeriods);
 
   const currentIdx = sorted.findIndex((p) => p.id === currentPeriodId);
-  const envelopeMap = new Map(envelopes.map((e) => [e.id, e]));
-  const defMap = new Map(fixedExpenseDefs.map((d) => [d.id, d]));
 
-  // Build per-period per-category amounts
+  // Build per-period per-category amounts — group by subcategory (expense category)
   const categoryAmounts = new Map<string, number[]>();
   const categoryMeta = new Map<
     string,
@@ -317,45 +296,18 @@ export function calculateCategoryHistory(
   for (let pi = 0; pi < sorted.length; pi++) {
     const period = sorted[pi];
     const txs = allTransactions.filter((t) => t.periodId === period.id);
-    const instances = allInstances.filter(
-      (i) => i.periodId === period.id
-    );
 
-    // Envelope expenses
     for (const tx of txs) {
-      if (tx.kind === "envelopeExpense" && tx.envelopeId) {
-        const env = envelopeMap.get(tx.envelopeId);
-        if (!env) continue;
-        if (!categoryAmounts.has(tx.envelopeId)) {
-          categoryAmounts.set(
-            tx.envelopeId,
-            new Array(sorted.length).fill(0)
-          );
-          categoryMeta.set(tx.envelopeId, {
-            name: env.name,
-            emoji: env.emoji,
-          });
-        }
-        categoryAmounts.get(tx.envelopeId)![pi] += tx.amount;
-      }
-    }
+      // Only envelopeExpense with subcategory = categorized one-time expenses
+      if (tx.kind !== "envelopeExpense" || !tx.subcategory) continue;
 
-    // Fixed expenses
-    for (const inst of instances) {
-      if (!inst.isPaid) continue;
-      const def = defMap.get(inst.defId);
-      if (!def) continue;
-      const amount = inst.actual > 0 ? inst.actual : inst.planned;
-      if (amount <= 0) continue;
-
-      if (!categoryAmounts.has(def.id)) {
-        categoryAmounts.set(
-          def.id,
-          new Array(sorted.length).fill(0)
-        );
-        categoryMeta.set(def.id, { name: def.name, emoji: "📌" });
+      const catId = tx.subcategory;
+      if (!categoryAmounts.has(catId)) {
+        const cat = getCategoryById(catId);
+        categoryAmounts.set(catId, new Array(sorted.length).fill(0));
+        categoryMeta.set(catId, { name: cat.name, emoji: cat.emoji });
       }
-      categoryAmounts.get(def.id)![pi] += amount;
+      categoryAmounts.get(catId)![pi] += tx.amount;
     }
   }
 
@@ -380,6 +332,8 @@ export function calculateCategoryHistory(
         : current > 0
         ? null
         : null;
+
+    if (current <= 0) continue;
 
     result.push({
       id,

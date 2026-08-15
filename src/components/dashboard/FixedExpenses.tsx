@@ -13,19 +13,30 @@ type Props = {
 
 export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditInstance }: Props) {
   const defMap = new Map(defs.map((d) => [d.id, d]));
-  const sorted = [...instances].sort((a, b) => {
+
+  // Filter: only instances with matching def, deduplicate by defId (keep first)
+  const seen = new Set<string>();
+  const validInstances = instances.filter((inst) => {
+    if (!defMap.has(inst.defId)) return false;
+    if (seen.has(inst.defId)) return false;
+    seen.add(inst.defId);
+    return true;
+  });
+
+  const sorted = [...validInstances].sort((a, b) => {
     const defA = defMap.get(a.defId);
     const defB = defMap.get(b.defId);
     if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1;
     return (defA?.order ?? 0) - (defB?.order ?? 0);
   });
 
-  const totalPlanned = instances.reduce((s, i) => s + i.planned, 0);
-  const totalPaid = instances
+  const totalPlanned = validInstances.reduce((s, i) => s + i.planned, 0);
+  const totalPaid = validInstances
     .filter((i) => i.isPaid)
-    .reduce((s, i) => s + (i.actual > 0 ? i.actual : i.planned), 0);
+    .reduce((s, i) => s + i.planned, 0);
+  const paidCount = validInstances.filter((i) => i.isPaid).length;
 
-  if (instances.length === 0 && !onAddDef) {
+  if (validInstances.length === 0 && !onAddDef) {
     return null;
   }
 
@@ -33,7 +44,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
     <section>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-caption font-semibold uppercase tracking-wider text-muted">
-          Wydatki stałe
+          Zobowiązania stałe
         </h2>
         {onAddDef && (
           <button
@@ -48,9 +59,9 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
         )}
       </div>
 
-      {instances.length === 0 ? (
+      {validInstances.length === 0 ? (
         <div className="rounded-xl bg-panel p-5 text-center">
-          <p className="text-sm text-muted">Brak wydatków stałych.</p>
+          <p className="text-sm text-muted">Brak zobowiązań stałych.</p>
           {onAddDef && (
             <button
               onClick={onAddDef}
@@ -66,42 +77,39 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
             const def = defMap.get(inst.defId);
             if (!def) return null;
 
-            const isAccumulating = def.type === "accumulating";
-            const progressPct =
-              isAccumulating && inst.planned > 0
-                ? Math.min(100, (inst.actual / inst.planned) * 100)
-                : 0;
-
             return (
               <div
                 key={inst.id}
                 className="flex items-center gap-3 bg-panel px-4 py-3"
               >
-                {/* Checkbox */}
+                {/* Checkbox — 44×44 touch target, 22×22 visual */}
                 <button
                   onClick={() => onTogglePaid(inst)}
-                  className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[5px] border border-line transition-colors"
-                  style={
-                    inst.isPaid
-                      ? { backgroundColor: "var(--color-muted)", borderColor: "var(--color-muted)" }
-                      : undefined
-                  }
+                  className="flex h-11 w-11 shrink-0 items-center justify-center -ml-2.5"
                   aria-label={inst.isPaid ? "Oznacz jako niezapłacone" : "Oznacz jako zapłacone"}
                 >
-                  {inst.isPaid && (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path
-                        d="M2.5 6L5 8.5L9.5 3.5"
-                        stroke="var(--color-ink)"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
+                  <span
+                    className={`flex h-[22px] w-[22px] items-center justify-center rounded-md border-[1.5px] transition-colors ${
+                      inst.isPaid
+                        ? "border-good/60 bg-good/15"
+                        : "border-muted/40 bg-panel-2"
+                    }`}
+                  >
+                    {inst.isPaid && (
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <path
+                          d="M2.5 6.5L5.5 9.5L10.5 3.5"
+                          stroke="var(--color-good)"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
                 </button>
 
-                {/* Name + progress */}
+                {/* Name */}
                 <div className="min-w-0 flex-1">
                   <span
                     className={`block text-sm leading-tight ${
@@ -110,15 +118,6 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
                   >
                     {def.name}
                   </span>
-
-                  {isAccumulating && !inst.isPaid && inst.planned > 0 && (
-                    <div className="mt-1.5 h-[2px] w-full rounded-full bg-panel-2">
-                      <div
-                        className="h-full rounded-full bg-muted/50 transition-all duration-300"
-                        style={{ width: `${progressPct}%` }}
-                      />
-                    </div>
-                  )}
                 </div>
 
                 {/* Amount — clickable to edit */}
@@ -128,10 +127,7 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
                     inst.isPaid ? "text-muted/50" : "text-text/80"
                   }`}
                 >
-                  {isAccumulating && !inst.isPaid
-                    ? `${formatAmount(inst.actual)} / ${formatAmount(inst.planned)}`
-                    : `${formatAmount(inst.planned)}`}
-                  {" zł"}
+                  {formatAmount(inst.planned)} zł
                 </button>
               </div>
             );
@@ -140,13 +136,20 @@ export function FixedExpenses({ defs, instances, onTogglePaid, onAddDef, onEditI
       )}
 
       {/* Summary */}
-      {instances.length > 0 && (
+      {validInstances.length > 0 && (
         <div className="mt-2 px-1 text-micro text-muted">
-          Zapłacono{" "}
-          <span className="font-mono tabular-nums">{formatAmount(totalPaid)}</span>{" "}
-          z{" "}
-          <span className="font-mono tabular-nums">{formatAmount(totalPlanned)}</span>{" "}
-          zł
+          {paidCount === validInstances.length ? (
+            <>
+              Wszystko opłacone ·{" "}
+              <span className="font-mono tabular-nums">{formatAmount(totalPlanned)}</span> zł
+            </>
+          ) : (
+            <>
+              {paidCount}/{validInstances.length} opłacone ·{" "}
+              <span className="font-mono tabular-nums">{formatAmount(totalPaid)}</span> z{" "}
+              <span className="font-mono tabular-nums">{formatAmount(totalPlanned)}</span> zł
+            </>
+          )}
         </div>
       )}
     </section>

@@ -26,6 +26,7 @@ export const FixedExpenseDefSchema = z.object({
   type: z.enum(["single", "accumulating"]),
   defaultPlanned: nonNegativeGrosze,
   dueDay: z.number().int().min(1).max(31).nullable(),
+  endDate: z.string().regex(/^\d{4}-\d{2}$/).nullable().optional(),
   subcategories: z.array(z.string()),
   order: z.number().int().nonnegative(),
   archived: z.boolean(),

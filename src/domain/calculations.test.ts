@@ -246,27 +246,27 @@ describe("calculateFreeFunds", () => {
     expect(calculateFreeFunds(txs, [])).toBe(401000);
   });
 
-  it("subtracts planned amounts for unpaid fixed expenses", () => {
+  it("subtracts planned amounts for all fixed expenses without transactions", () => {
     const txs = [tx({ kind: "income", amount: 500000 })];
     const instances: FixedExpenseInstance[] = [
       { id: "i1", periodId: "2026-08", defId: "d1", planned: 99000, actual: 0, isPaid: false, paidAt: null },
       { id: "i2", periodId: "2026-08", defId: "d2", planned: 50000, actual: 50000, isPaid: true, paidAt: "2026-08-10" },
     ];
-    // 500000 - 99000 (unpaid plan) = 401000
-    // The paid one is not subtracted via instances — it should be subtracted via fixedExpense transaction
-    expect(calculateFreeFunds(txs, instances)).toBe(401000);
+    // 500000 - 99000 (d1, no tx) - 50000 (d2, paid but no tx → still subtracted) = 351000
+    expect(calculateFreeFunds(txs, instances)).toBe(351000);
   });
 
   it("subtracts both paid txns and unpaid plans correctly", () => {
     const txs = [
       tx({ kind: "income", amount: 500000 }),
-      tx({ kind: "fixedExpense", amount: 50000 }), // paid fixed expense
+      tx({ kind: "fixedExpense", amount: 50000, fixedExpenseDefId: "d2" }), // paid fixed expense with defId link
     ];
     const instances: FixedExpenseInstance[] = [
       { id: "i1", periodId: "2026-08", defId: "d1", planned: 99000, actual: 0, isPaid: false, paidAt: null },
       { id: "i2", periodId: "2026-08", defId: "d2", planned: 50000, actual: 50000, isPaid: true, paidAt: "2026-08-10" },
     ];
-    // 500000 - 50000 (paid txn) - 99000 (unpaid plan) = 351000
+    // 500000 - 50000 (paid txn for d2) - 99000 (d1, no tx) = 351000
+    // d2 is NOT subtracted again because it has a matching transaction
     expect(calculateFreeFunds(txs, instances)).toBe(351000);
   });
 

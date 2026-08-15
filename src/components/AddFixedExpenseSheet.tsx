@@ -4,31 +4,35 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AmountInput } from "@/components/ui/AmountInput";
-import type { FixedExpenseType } from "@/domain/types";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onSave: (data: {
     name: string;
-    type: FixedExpenseType;
+    type: "single";
     defaultPlanned: number;
     dueDay: number | null;
+    endDate: string | null;
   }) => void;
 };
 
 export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
   const [name, setName] = useState("");
-  const [type, setType] = useState<FixedExpenseType>("single");
   const [amount, setAmount] = useState("");
   const [dueDay, setDueDay] = useState("");
+  const [hasEndDate, setHasEndDate] = useState(false);
+  const [endMonth, setEndMonth] = useState("");
+  const [endYear, setEndYear] = useState("");
 
   useEffect(() => {
     if (open) {
       setName("");
-      setType("single");
       setAmount("");
       setDueDay("");
+      setHasEndDate(false);
+      setEndMonth("");
+      setEndYear("");
     }
   }, [open]);
 
@@ -41,11 +45,21 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
       : 0;
     const day = dueDay ? parseInt(dueDay, 10) : null;
 
+    let endDate: string | null = null;
+    if (hasEndDate && endMonth && endYear) {
+      const m = parseInt(endMonth, 10);
+      const y = parseInt(endYear, 10);
+      if (m >= 1 && m <= 12 && y >= 2024 && y <= 2099) {
+        endDate = `${y}-${String(m).padStart(2, "0")}`;
+      }
+    }
+
     onSave({
       name: name.trim(),
-      type,
+      type: "single",
       defaultPlanned: Number.isFinite(grosze) ? grosze : 0,
       dueDay: day && day >= 1 && day <= 31 ? day : null,
+      endDate,
     });
     onClose();
   };
@@ -71,33 +85,14 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
               label="Nazwa"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="np. Czynsz"
+              placeholder="np. Czynsz, Kredyt"
               autoFocus
             />
-
-            <div>
-              <label className="mb-1.5 block text-caption font-medium text-muted">Typ</label>
-              <div className="flex gap-[1px] overflow-hidden rounded-lg bg-line">
-                {(["single", "accumulating"] as const).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setType(t)}
-                    className={`flex-1 py-2 text-caption font-medium transition-colors ${
-                      type === t
-                        ? "bg-brass/15 text-brass"
-                        : "bg-panel-2 text-muted"
-                    }`}
-                  >
-                    {t === "single" ? "Jednorazowy" : "Narastający"}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <div className="flex gap-3">
               <div className="flex-1">
                 <AmountInput
-                  label="Kwota planowana"
+                  label="Kwota miesięczna"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
@@ -114,6 +109,56 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
                   className="text-center"
                 />
               </div>
+            </div>
+
+            {/* End date toggle */}
+            <div>
+              <button
+                onClick={() => setHasEndDate(!hasEndDate)}
+                className="flex items-center gap-2 text-caption text-muted hover:text-text transition-colors"
+              >
+                <div
+                  className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
+                    hasEndDate
+                      ? "border-brass/60 bg-brass/15"
+                      : "border-line bg-panel-2"
+                  }`}
+                >
+                  {hasEndDate && (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-brass" />
+                    </svg>
+                  )}
+                </div>
+                Ma termin końca spłaty (np. kredyt, raty)
+              </button>
+
+              {hasEndDate && (
+                <div className="mt-3 flex items-center gap-2 pl-7">
+                  <span className="text-caption text-muted">Ostatnia rata:</span>
+                  <Input
+                    inputMode="numeric"
+                    value={endMonth}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                      setEndMonth(v);
+                    }}
+                    placeholder="MM"
+                    className="w-14 text-center"
+                  />
+                  <span className="text-caption text-muted">/</span>
+                  <Input
+                    inputMode="numeric"
+                    value={endYear}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                      setEndYear(v);
+                    }}
+                    placeholder="RRRR"
+                    className="w-20 text-center"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
