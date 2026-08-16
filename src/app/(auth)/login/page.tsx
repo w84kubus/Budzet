@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/firebase/auth";
+import { validateEmail } from "@/lib/validation";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,10 +16,22 @@ export default function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      setError(emailCheck.error!);
+      return;
+    }
+
+    if (!password) {
+      setError("Podaj hasło.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      await signIn(email.trim().toLowerCase(), password);
       router.push("/dashboard");
     } catch (err) {
       const code = (err as { code?: string }).code;

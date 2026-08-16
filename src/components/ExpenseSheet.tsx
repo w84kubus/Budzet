@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { formatAmount, terminalInputToGrosze } from "@/domain/money";
 import { Button } from "@/components/ui/Button";
 import { EXPENSE_CATEGORIES, detectCategory, getCategoryById } from "@/domain/constants";
+import { sanitizeWithLimit, validateAmount } from "@/lib/validation";
 import type { Transaction } from "@/domain/types";
 
 type Props = {
@@ -87,7 +88,11 @@ export function ExpenseSheet({
   const handleSave = useCallback(() => {
     if (amount <= 0 || !effectiveCategoryId) return;
 
+    const amountCheck = validateAmount(amount);
+    if (!amountCheck.valid) return;
+
     const today = new Date().toISOString().split("T")[0];
+    const sanitizedNote = note ? sanitizeWithLimit(note, 500) : undefined;
 
     onSave({
       periodId,
@@ -96,7 +101,7 @@ export function ExpenseSheet({
       date: today,
       paidFrom: "main",
       subcategory: effectiveCategoryId,
-      note: note.trim() || undefined,
+      note: sanitizedNote || undefined,
       isImpulse,
     });
 

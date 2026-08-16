@@ -22,6 +22,7 @@ import {
 } from "@/domain/export";
 import type { BackupData } from "@/domain/export";
 import { ENVELOPE_EMOJI_OPTIONS } from "@/domain/constants";
+import { sanitize, validateAmount, validatePassword } from "@/lib/validation";
 import type { Envelope, FixedExpenseDef } from "@/domain/types";
 
 function parseAmountInput(val: string): number {
@@ -188,8 +189,9 @@ export default function SettingsPage() {
     setPassError("");
     setPassSuccess(false);
 
-    if (newPass.length < 6) {
-      setPassError("Nowe haslo musi miec co najmniej 6 znakow.");
+    const passCheck = validatePassword(newPass);
+    if (!passCheck.valid) {
+      setPassError(passCheck.error!);
       return;
     }
     if (newPass !== newPassConfirm) {
@@ -786,9 +788,9 @@ function EditableDefRow({
   }, [editingAmount]);
 
   const commitName = () => {
-    const trimmed = nameValue.trim();
-    if (trimmed && trimmed !== def.name) {
-      onSaveName(trimmed);
+    const sanitized = sanitize(nameValue).slice(0, 100);
+    if (sanitized && sanitized !== def.name) {
+      onSaveName(sanitized);
     } else {
       setNameValue(def.name);
     }
@@ -797,7 +799,7 @@ function EditableDefRow({
 
   const commitAmount = () => {
     const grosze = parseAmountInput(amountValue);
-    if (grosze > 0 && grosze !== def.defaultPlanned) {
+    if (grosze > 0 && grosze !== def.defaultPlanned && validateAmount(grosze).valid) {
       onSavePlanned(grosze);
     } else {
       setAmountValue(formatAmount(def.defaultPlanned));
@@ -814,6 +816,7 @@ function EditableDefRow({
             ref={nameRef}
             type="text"
             value={nameValue}
+            maxLength={100}
             onChange={(e) => setNameValue(e.target.value)}
             onBlur={commitName}
             onKeyDown={(e) => {
@@ -963,9 +966,9 @@ function EditableEnvelopeRow({
   }, [showEmojiPicker]);
 
   const commitName = () => {
-    const trimmed = nameValue.trim();
-    if (trimmed && trimmed !== env.name) {
-      onSaveName(trimmed);
+    const sanitized = sanitize(nameValue).slice(0, 100);
+    if (sanitized && sanitized !== env.name) {
+      onSaveName(sanitized);
     } else {
       setNameValue(env.name);
     }
@@ -974,7 +977,7 @@ function EditableEnvelopeRow({
 
   const commitPlan = () => {
     const grosze = parseAmountInput(planValue);
-    if (grosze > 0 && grosze !== env.monthlyPlan) {
+    if (grosze > 0 && grosze !== env.monthlyPlan && validateAmount(grosze).valid) {
       onSavePlan(grosze);
     } else {
       setPlanValue(formatAmount(env.monthlyPlan));
@@ -1029,6 +1032,7 @@ function EditableEnvelopeRow({
               ref={nameRef}
               type="text"
               value={nameValue}
+              maxLength={100}
               onChange={(e) => setNameValue(e.target.value)}
               onBlur={commitName}
               onKeyDown={(e) => {

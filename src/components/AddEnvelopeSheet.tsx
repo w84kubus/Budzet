@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AmountInput } from "@/components/ui/AmountInput";
+import { validateName, validateAmount } from "@/lib/validation";
 
 type Props = {
   open: boolean;
@@ -36,7 +37,9 @@ export function AddEnvelopeSheet({ open, onClose, onSave }: Props) {
   if (!open) return null;
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    const nameCheck = validateName(name);
+    if (!nameCheck.valid) return;
+
     const planGrosze = monthlyPlan
       ? Math.round(parseFloat(monthlyPlan.replace(",", ".")) * 100)
       : 0;
@@ -44,12 +47,17 @@ export function AddEnvelopeSheet({ open, onClose, onSave }: Props) {
       ? Math.round(parseFloat(targetAmount.replace(",", ".")) * 100)
       : null;
 
+    const safePlan = Number.isFinite(planGrosze) ? planGrosze : 0;
+    const safeTarget = targetGrosze && Number.isFinite(targetGrosze) ? targetGrosze : null;
+
+    if (safePlan > 0 && !validateAmount(safePlan).valid) return;
+    if (safeTarget && !validateAmount(safeTarget).valid) return;
+
     onSave({
-      name: name.trim(),
+      name: nameCheck.sanitized,
       emoji,
-      monthlyPlan: Number.isFinite(planGrosze) ? planGrosze : 0,
-      targetAmount:
-        targetGrosze && Number.isFinite(targetGrosze) ? targetGrosze : null,
+      monthlyPlan: safePlan,
+      targetAmount: safeTarget,
     });
     onClose();
   };
@@ -125,7 +133,7 @@ export function AddEnvelopeSheet({ open, onClose, onSave }: Props) {
             <Button variant="secondary" fullWidth onClick={onClose}>
               Anuluj
             </Button>
-            <Button fullWidth onClick={handleSave} disabled={!name.trim()}>
+            <Button fullWidth onClick={handleSave} disabled={!validateName(name).valid}>
               Dodaj
             </Button>
           </div>

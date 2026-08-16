@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/firebase/auth";
+import { validateEmail, validatePassword } from "@/lib/validation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,10 +18,18 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("Hasło musi mieć co najmniej 6 znaków.");
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      setError(emailCheck.error!);
       return;
     }
+
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      setError(passwordCheck.error!);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Hasła nie są identyczne.");
       return;
@@ -28,14 +37,14 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      await signUp(email, password);
+      await signUp(email.trim().toLowerCase(), password);
       router.push("/onboarding");
     } catch (err) {
       const code = (err as { code?: string }).code;
       if (code === "auth/email-already-in-use") {
         setError("Ten adres e-mail jest już zarejestrowany.");
       } else if (code === "auth/weak-password") {
-        setError("Hasło jest za słabe. Użyj co najmniej 6 znaków.");
+        setError("Hasło jest za słabe. Wymagane min. 8 znaków, litera i cyfra.");
       } else if (code === "auth/invalid-email") {
         setError("Nieprawidłowy adres e-mail.");
       } else {
@@ -81,7 +90,7 @@ export default function RegisterPage() {
               type="password"
               required
               autoComplete="new-password"
-              minLength={6}
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-line bg-panel-2 px-3 py-2.5 text-text placeholder:text-muted/50 focus:border-brass focus:outline-none"

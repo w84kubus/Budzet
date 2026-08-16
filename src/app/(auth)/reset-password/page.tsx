@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { resetPassword } from "@/lib/firebase/auth";
+import { validateEmail } from "@/lib/validation";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -13,10 +14,17 @@ export default function ResetPasswordPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      setError(emailCheck.error!);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await resetPassword(email);
+      await resetPassword(email.trim().toLowerCase());
       setSent(true);
     } catch {
       setError("Nie udało się wysłać wiadomości. Sprawdź adres e-mail.");

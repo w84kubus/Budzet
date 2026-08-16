@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AmountInput } from "@/components/ui/AmountInput";
+import { validateName, validateAmount } from "@/lib/validation";
 
 type Props = {
   open: boolean;
@@ -39,10 +40,16 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
   if (!open) return null;
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    const nameCheck = validateName(name);
+    if (!nameCheck.valid) return;
+
     const grosze = amount
       ? Math.round(parseFloat(amount.replace(",", ".")) * 100)
       : 0;
+    const safeGrosze = Number.isFinite(grosze) ? grosze : 0;
+
+    if (safeGrosze > 0 && !validateAmount(safeGrosze).valid) return;
+
     const day = dueDay ? parseInt(dueDay, 10) : null;
 
     let endDate: string | null = null;
@@ -55,9 +62,9 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
     }
 
     onSave({
-      name: name.trim(),
+      name: nameCheck.sanitized,
       type: "single",
-      defaultPlanned: Number.isFinite(grosze) ? grosze : 0,
+      defaultPlanned: safeGrosze,
       dueDay: day && day >= 1 && day <= 31 ? day : null,
       endDate,
     });
@@ -166,7 +173,7 @@ export function AddFixedExpenseSheet({ open, onClose, onSave }: Props) {
             <Button variant="secondary" fullWidth onClick={onClose}>
               Anuluj
             </Button>
-            <Button fullWidth onClick={handleSave} disabled={!name.trim()}>
+            <Button fullWidth onClick={handleSave} disabled={!validateName(name).valid}>
               Dodaj
             </Button>
           </div>
