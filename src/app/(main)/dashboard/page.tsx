@@ -5,6 +5,7 @@ import { useBudgetStore } from "@/stores/budget-store";
 import { useSheets } from "@/lib/contexts/sheet-context";
 import { DashboardView } from "@/components/views/DashboardView";
 import { calculateFreeFunds } from "@/domain/calculations";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function DashboardPage() {
     handleChangePeriod,
   } = useSheets();
 
+  const isDataLoaded = useBudgetStore((s) => s.isDataLoaded);
   const settings = useBudgetStore((s) => s.settings);
   const periods = useBudgetStore((s) => s.periods);
   const fixedExpenseDefs = useBudgetStore((s) => s.fixedExpenseDefs);
@@ -38,6 +40,10 @@ export default function DashboardPage() {
     : 0;
 
   const today = new Date().toISOString().split("T")[0];
+
+  if (!isDataLoaded) {
+    return <LoadingScreen message="Pobieranie danych..." />;
+  }
 
   return (
     <DashboardView

@@ -122,9 +122,23 @@ export function ExpenseSheet({
 
       {/* Sheet */}
       <div className="sheet-enter fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92vh] max-w-[430px] flex-col rounded-t-2xl bg-panel safe-bottom">
-        {/* Handle */}
-        <div className="flex justify-center py-3">
+        {/* Handle + close button */}
+        <div className="relative flex items-center justify-center py-3">
           <div className="h-[4px] w-10 rounded-full bg-line" />
+          <button
+            onClick={onClose}
+            className="absolute right-3 top-2 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors active:bg-panel-2"
+            aria-label="Zamknij"
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path
+                d="M4.5 4.5L13.5 13.5M13.5 4.5L4.5 13.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Amount display */}
@@ -191,10 +205,10 @@ export function ExpenseSheet({
 
           {/* Category grid */}
           <div className="mb-3">
-            <span className="mb-2 block text-micro font-medium text-muted">
+            <span className="mb-1.5 block text-micro font-medium text-muted">
               Kategoria
             </span>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-4 gap-1">
               {EXPENSE_CATEGORIES.map((cat) => {
                 const isAutoDetected = autoDetectedId === cat.id && !selectedCategoryId;
                 const isManuallySelected = selectedCategoryId === cat.id;
@@ -208,7 +222,7 @@ export function ExpenseSheet({
                         selectedCategoryId === cat.id ? null : cat.id
                       )
                     }
-                    className={`flex min-h-[56px] flex-col items-center justify-center rounded-lg border px-1 py-2 transition-colors ${
+                    className={`flex min-h-[44px] flex-col items-center justify-center rounded-lg border px-1 py-1.5 transition-colors ${
                       isSelected
                         ? isAutoDetected
                           ? "border-brass/25 bg-brass/5"
@@ -216,9 +230,9 @@ export function ExpenseSheet({
                         : "border-line bg-panel-2 active:bg-line"
                     }`}
                   >
-                    <span className="text-body-lg leading-none">{cat.emoji}</span>
+                    <span className="text-body leading-none">{cat.emoji}</span>
                     <span
-                      className={`mt-1 line-clamp-1 text-center text-[10px] font-medium leading-tight ${
+                      className={`mt-0.5 line-clamp-1 text-center text-[9px] font-medium leading-tight ${
                         isSelected ? "text-brass" : "text-muted"
                       }`}
                     >
@@ -256,13 +270,13 @@ export function ExpenseSheet({
 
         {/* Keypad - mobile only */}
         {isMobile && (
-          <div className="border-t border-line px-5 pb-2 pt-3">
+          <div className="border-t border-line px-5 pb-1 pt-2">
             <div className="grid grid-cols-3 gap-[1px]">
               {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
                 <button
                   key={d}
                   onClick={() => handleDigit(d)}
-                  className="flex h-[52px] items-center justify-center rounded-lg text-title font-medium text-text active:bg-panel-2"
+                  className="flex h-[44px] items-center justify-center rounded-lg text-title font-medium text-text active:bg-panel-2"
                 >
                   {d}
                 </button>
@@ -272,22 +286,22 @@ export function ExpenseSheet({
                   handleDigit("0");
                   handleDigit("0");
                 }}
-                className="flex h-[52px] items-center justify-center rounded-lg text-body-lg font-medium text-muted active:bg-panel-2"
+                className="flex h-[44px] items-center justify-center rounded-lg text-body-lg font-medium text-muted active:bg-panel-2"
               >
                 00
               </button>
               <button
                 onClick={() => handleDigit("0")}
-                className="flex h-[52px] items-center justify-center rounded-lg text-title font-medium text-text active:bg-panel-2"
+                className="flex h-[44px] items-center justify-center rounded-lg text-title font-medium text-text active:bg-panel-2"
               >
                 0
               </button>
               <button
                 onClick={handleBackspace}
-                className="flex h-[52px] items-center justify-center rounded-lg text-muted active:bg-panel-2"
+                className="flex h-[44px] items-center justify-center rounded-lg text-muted active:bg-panel-2"
                 aria-label="Cofnij"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                   <path
                     d="M9.5 7L4.5 12L9.5 17M5 12H19.5"
                     stroke="currentColor"

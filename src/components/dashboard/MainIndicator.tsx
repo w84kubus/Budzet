@@ -67,18 +67,19 @@ export function MainIndicator({
           </div>
           <div className="mb-3 text-center">
             <span
-              className={`font-display text-hero font-bold leading-none tracking-[-0.02em] tabular-nums md:text-[5.5rem] ${
+              className={`font-display font-bold leading-none tracking-[-0.03em] tabular-nums md:tracking-[-0.02em] ${
                 isNegative ? "text-bad" : "text-white"
               } amount-enter`}
-              style={{ fontOpticalSizing: "auto" }}
+              style={{ fontOpticalSizing: "auto", fontSize: "clamp(2.75rem, 18vw, 5rem)" }}
             >
               {isNegative ? "−" : ""}
               {formatAmount(Math.abs(freeFunds))}
             </span>
             <span
-              className={`ml-2 font-display text-title font-medium md:text-[1.75rem] ${
+              className={`ml-1 font-display font-medium md:ml-2 ${
                 isNegative ? "text-bad/60" : "text-white/50"
               }`}
+              style={{ fontSize: "clamp(0.875rem, 4vw, 1.75rem)" }}
             >
               zł
             </span>

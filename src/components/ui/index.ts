@@ -13,3 +13,4 @@ export { Tabs } from "./Tabs";
 export { Skeleton, DashboardSkeleton } from "./Skeleton";
 export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
+export { LoadingScreen } from "./LoadingScreen";
