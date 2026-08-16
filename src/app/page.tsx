@@ -250,10 +250,10 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <rect x="2" y="4" width="10" height="8" rx="1.5" stroke="#8585A0" strokeWidth="1.2" />
-                  <path d="M5 4V3C5 1.9 5.9 1 7 1C8.1 1 9 1.9 9 3V4" stroke="#8585A0" strokeWidth="1.2" strokeLinecap="round" />
+                  <rect x="2" y="4" width="10" height="8" rx="1.5" stroke="#7C5CFC" strokeWidth="1.2" />
+                  <path d="M5 4V3C5 1.9 5.9 1 7 1C8.1 1 9 1.9 9 3V4" stroke="#7C5CFC" strokeWidth="1.2" strokeLinecap="round" />
                 </svg>
-                Dane szyfrowane
+                Szyfrowanie E2E
               </div>
               <div className="flex items-center gap-1.5">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -305,6 +305,29 @@ export default function LandingPage() {
             title="Ile wydałem impulsywnie?"
             description="Oznaczaj impulsy jednym tapnięciem. Licznik straszy, ale motywuje do zmian."
           />
+        </div>
+
+        {/* E2E encryption highlight */}
+        <div className="mt-6 rounded-2xl border border-brass/20 bg-brass/5 p-6 md:p-8">
+          <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brass/15">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="5" y="10" width="14" height="11" rx="2" stroke="#7C5CFC" strokeWidth="1.5" />
+                <path d="M8 10V7C8 4.79 9.79 3 12 3C14.21 3 16 4.79 16 7V10" stroke="#7C5CFC" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="12" cy="16" r="1.5" fill="#7C5CFC" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="mb-1 text-sm font-semibold text-text">
+                Szyfrowanie end-to-end (AES-256-GCM)
+              </h3>
+              <p className="text-caption leading-relaxed text-muted">
+                Twoje kwoty, nazwy transakcji i koperty są szyfrowane kluczem
+                wyprowadzonym z hasła. Nawet administrator bazy danych nie
+                odczyta Twoich finansów.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

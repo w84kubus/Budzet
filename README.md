@@ -17,6 +17,7 @@
   <img src="https://img.shields.io/badge/Firebase-Firestore+Auth-FFCA28?logo=firebase&logoColor=black" alt="Firebase" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind v4" />
   <img src="https://img.shields.io/badge/PWA-instalowalna-5A0FC8?logo=pwa&logoColor=white" alt="PWA" />
+  <img src="https://img.shields.io/badge/E2E-AES--256--GCM-22C55E?logo=letsencrypt&logoColor=white" alt="E2E Encryption" />
 </p>
 
 ---
@@ -53,9 +54,11 @@ Wszystko wpisywane ręcznie, w czasie rzeczywistym — bez integracji z bankiem,
 - **Plan vs. rzeczywistość** — wydatki stałe: planowane vs. zapłacone
 
 ### Bezpieczeństwo i wygoda
+- **Szyfrowanie E2E** — AES-256-GCM z kluczem PBKDF2 z hasla uzytkownika. Kwoty, nazwy, notatki szyfrowane po stronie klienta - nawet administrator bazy nie odczyta danych
 - **PIN lock** — blokada aplikacji (4-cyfrowy PIN, klawiatura fizyczna + ekranowa)
+- **Zmiana hasla** — z automatyczna re-enkrypcja wszystkich danych
 - **Offline mode** — Firestore persistent cache + Service Worker
-- **Instalacja PWA** — pełny ekran na telefonie, skróty do dodawania wydatków
+- **Instalacja PWA** — pelny ekran na telefonie, skroty do dodawania wydatkow
 
 ## Stack technologiczny
 
@@ -72,6 +75,7 @@ Wszystko wpisywane ręcznie, w czasie rzeczywistym — bez integracji z bankiem,
 | Testy | Vitest (110 testów) |
 | PWA | Serwist (Service Worker) |
 | Deploy | Vercel (auto-deploy z GitHub) |
+| Szyfrowanie | Web Crypto API (AES-256-GCM, PBKDF2) |
 | Czcionki | Fraunces (kwoty), Inter Tight (UI), Geist Mono (tabele) |
 
 ## Architektura
@@ -80,7 +84,7 @@ Wszystko wpisywane ręcznie, w czasie rzeczywistym — bez integracji z bankiem,
 src/
 ├── app/                  # Next.js App Router — strony i layout
 │   ├── layout.tsx        # root layout, fonty, AuthGuard
-│   ├── page.tsx          # pulpit (dashboard)
+│   ├── page.tsx          # landing page (publiczna strona glowna)
 │   ├── expenses/         # lista wydatków z filtrami
 │   ├── envelopes/        # widok kopert
 │   ├── stats/            # statystyki (zakładki)
@@ -106,6 +110,7 @@ src/
 │
 └── lib/                  # infrastruktura
     ├── firebase/         # config, auth, db (Firestore CRUD)
+    ├── crypto/           # E2E: AES-256-GCM encrypt/decrypt, PBKDF2 key derivation
     ├── contexts/         # sheet-context (globalne bottom sheets)
     └── store/            # Zustand store (aktywny okres, PIN)
 ```
@@ -116,7 +121,8 @@ src/
 - **Salda obliczane, nie zapisywane** — saldo koperty = suma transakcji. Nigdy nie jest polem w bazie.
 - **Logika bez Reacta** — `src/domain/` to czyste funkcje z typami. Testowalne bez renderowania.
 - **Optymistyczny UI** — zmiana widoczna natychmiast, zapis w tle dzięki Firestore offline persistence.
-- **Dark-only** — paleta "cichy panel kontrolny": ciemna, ciepła, z akcentem brass (#D9A441).
+- **E2E encryption** — kwoty, nazwy i notatki szyfrowane AES-256-GCM. Klucz wyprowadzany z hasla uzytkownika (PBKDF2, 100k iteracji). Zero zewnetrznych zaleznosci - tylko Web Crypto API.
+- **Dark-only** — paleta "cichy panel kontrolny": ciemna z akcentem purple (#7C5CFC).
 
 ## Uruchomienie lokalne
 
