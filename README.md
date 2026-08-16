@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="public/icon-512.svg" width="96" height="96" alt="Budżet logo" />
+  <img src="public/icon-512.png" width="96" height="96" alt="Budżet logo" style="border-radius: 20px" />
 </p>
 
 <h1 align="center">Budżet</h1>
 
 <p align="center">
-  Osobisty budżet kopertowy — PWA do kontroli wydatków i oszczędzania.
+  Osobisty budżet kopertowy - PWA do kontroli wydatków i oszczędzania.
   <br />
   <a href="https://budzet-rust.vercel.app"><strong>🔗 budzet-rust.vercel.app</strong></a>
 </p>
@@ -31,34 +31,40 @@
 3. 💎 **Ile mam odłożone** i na co konkretnie?
 4. ⚡ **Ile w tym miesiącu** poszło na impulsy?
 
-Wszystko wpisywane ręcznie, w czasie rzeczywistym — bez integracji z bankiem, bo to jest celowe. Świadome wpisywanie wydatku w sklepie zmienia nawyki skuteczniej niż automatyczny import.
+Wszystko wpisywane ręcznie, w czasie rzeczywistym - bez integracji z bankiem, bo to jest celowe. Świadome wpisywanie wydatku w sklepie zmienia nawyki skuteczniej niż automatyczny import.
 
 ## Funkcje
 
 ### Pulpit
-- **Główny wskaźnik** — wolne środki + dzienny limit wydatków
-- **Zobowiązania stałe** — checklist miesięcznych rachunków z oznaczaniem jako opłacone
-- **Wydatki jednorazowe** — szybkie dodawanie z 15 kategoriami i auto-detekcją
-- **Koperty oszczędnościowe** — wizualne kafelki z poziomem napełnienia
+- **Główny wskaźnik** - wolne środki + dzienny limit wydatków
+- **Zobowiązania stałe** - checklist miesięcznych rachunków z oznaczaniem jako opłacone
+- **Wydatki jednorazowe** - szybkie dodawanie z 15 kategoriami i auto-detekcją
+- **Koperty oszczędnościowe** - wizualne kafelki z poziomem napełnienia
 
 ### Zarządzanie finansami
-- **System okresów** — od wypłaty do wypłaty (nie miesiąc kalendarzowy)
-- **Rozdysponowanie środków** — proporcjonalny podział reszty na koperty
-- **Termin końca spłaty** — opcjonalny end date dla kredytów i rat
-- **Impulsy** — oznaczanie wydatków impulsywnych i śledzenie ich sumy
+- **System okresów** - od wypłaty do wypłaty (nie miesiąc kalendarzowy)
+- **Rozdysponowanie środków** - proporcjonalny podział reszty na koperty
+- **Termin końca spłaty** - opcjonalny end date dla kredytów i rat
+- **Impulsy** - oznaczanie wydatków impulsywnych i śledzenie ich sumy
 
 ### Statystyki
-- **Podsumowanie okresu** — przychód, wydatki, stopa oszczędności
-- **Kategorie** — ranking wydatków z wykresem kołowym
-- **Trendy** — porównanie między okresami (wykresy Recharts)
-- **Plan vs. rzeczywistość** — wydatki stałe: planowane vs. zapłacone
+- **Podsumowanie okresu** - przychód, wydatki, stopa oszczędności
+- **Kategorie** - ranking wydatków z wykresem słupkowym
+- **Trendy** - porównanie między okresami (wykresy Recharts)
+- **Plan vs. rzeczywistość** - wydatki stałe: planowane vs. zapłacone
 
-### Bezpieczeństwo i wygoda
-- **Szyfrowanie E2E** — AES-256-GCM z kluczem PBKDF2 z hasla uzytkownika. Kwoty, nazwy, notatki szyfrowane po stronie klienta - nawet administrator bazy nie odczyta danych
-- **PIN lock** — blokada aplikacji (4-cyfrowy PIN, klawiatura fizyczna + ekranowa)
-- **Zmiana hasla** — z automatyczna re-enkrypcja wszystkich danych
-- **Offline mode** — Firestore persistent cache + Service Worker
-- **Instalacja PWA** — pelny ekran na telefonie, skroty do dodawania wydatkow
+### Bezpieczeństwo
+- **Szyfrowanie E2E** - AES-256-GCM z kluczem PBKDF2 z hasla uzytkownika. Kwoty, nazwy, notatki szyfrowane po stronie klienta - nawet administrator bazy nie odczyta danych
+- **Walidacja wejscia** - sanitizacja HTML/XSS, walidacja email (RFC 5322), walidacja hasla (8+ znakow, litera + cyfra), limity dlugosci na wszystkich polach
+- **Rate limiting** - ograniczenie prob rejestracji (3/min + cooldown) + Firebase server-side
+- **PIN lock** - blokada aplikacji (4-cyfrowy PIN, klawiatura fizyczna + ekranowa)
+- **Zmiana hasla** - z automatyczna re-enkrypcja wszystkich danych
+
+### Wygoda
+- **Offline mode** - Firestore persistent cache + Service Worker
+- **Instalacja PWA** - pelny ekran na telefonie, skroty do dodawania wydatkow
+- **iOS safe areas** - poprawna obsluga notcha i dynamicznej wyspy
+- **Eksport danych** - CSV (transakcje) i JSON (pelna kopia zapasowa)
 
 ## Stack technologiczny
 
@@ -71,7 +77,7 @@ Wszystko wpisywane ręcznie, w czasie rzeczywistym — bez integracji z bankiem,
 | Autoryzacja | Firebase Auth (email + hasło) |
 | Stan klienta | Zustand |
 | Wykresy | Recharts |
-| Walidacja | Zod |
+| Walidacja | Zod + custom validators |
 | Testy | Vitest (110 testów) |
 | PWA | Serwist (Service Worker) |
 | Deploy | Vercel (auto-deploy z GitHub) |
@@ -82,17 +88,19 @@ Wszystko wpisywane ręcznie, w czasie rzeczywistym — bez integracji z bankiem,
 
 ```
 src/
-├── app/                  # Next.js App Router — strony i layout
-│   ├── layout.tsx        # root layout, fonty, AuthGuard
+├── app/                  # Next.js App Router - strony i layout
+│   ├── layout.tsx        # root layout, fonty, metadata
 │   ├── page.tsx          # landing page (publiczna strona glowna)
-│   ├── expenses/         # lista wydatków z filtrami
-│   ├── envelopes/        # widok kopert
-│   ├── stats/            # statystyki (zakładki)
+│   ├── (main)/           # grupa autentykowanych stron
+│   │   ├── dashboard/    # pulpit
+│   │   ├── expenses/     # lista wydatków z filtrami
+│   │   ├── envelopes/    # widok kopert
+│   │   └── stats/        # statystyki (zakładki)
+│   ├── (auth)/           # logowanie, rejestracja, reset hasla
 │   ├── settings/         # ustawienia konta
-│   ├── onboarding/       # kreator pierwszej konfiguracji
-│   └── login/            # logowanie, rejestracja, reset hasła
+│   └── onboarding/       # kreator pierwszej konfiguracji
 │
-├── domain/               # 💡 Czysta logika finansowa (zero Reacta)
+├── domain/               # Czysta logika finansowa (zero Reacta)
 │   ├── types.ts          # typy domenowe (Period, Transaction, Envelope…)
 │   ├── schemas.ts        # schematy Zod do walidacji danych z Firestore
 │   ├── money.ts          # formatPLN, parsePLN, terminalInputToGrosze
@@ -100,6 +108,7 @@ src/
 │   ├── operations.ts     # closePeriod, distributeFunds
 │   ├── statistics.ts     # podsumowania, trendy, kategorie
 │   ├── constants.ts      # 15 kategorii wydatków z auto-detekcją
+│   ├── export.ts         # eksport CSV/JSON, import kopii zapasowej
 │   └── defaults.ts       # domyślne wydatki stałe i koperty
 │
 ├── components/           # komponenty React
@@ -109,20 +118,22 @@ src/
 │   └── ui/               # bazowe komponenty UI (Button, Sheet…)
 │
 └── lib/                  # infrastruktura
-    ├── firebase/         # config, auth, db (Firestore CRUD)
-    ├── crypto/           # E2E: AES-256-GCM encrypt/decrypt, PBKDF2 key derivation
+    ├── firebase/         # config, auth, db (Firestore CRUD z enkrypcja)
+    ├── crypto/           # E2E: AES-256-GCM encrypt/decrypt, PBKDF2
+    ├── validation.ts     # sanitizacja XSS, walidacja email/hasla/kwot
     ├── contexts/         # sheet-context (globalne bottom sheets)
-    └── store/            # Zustand store (aktywny okres, PIN)
+    └── hooks/            # use-auth, use-budget-data
 ```
 
 ### Kluczowe decyzje projektowe
 
-- **Kwoty w groszach** — wszystkie kwoty to `number` w groszach (integer). `990 zł` → `99000`. Formatowanie wyłącznie przez `formatPLN()`. Zero operacji na floatach.
-- **Salda obliczane, nie zapisywane** — saldo koperty = suma transakcji. Nigdy nie jest polem w bazie.
-- **Logika bez Reacta** — `src/domain/` to czyste funkcje z typami. Testowalne bez renderowania.
-- **Optymistyczny UI** — zmiana widoczna natychmiast, zapis w tle dzięki Firestore offline persistence.
-- **E2E encryption** — kwoty, nazwy i notatki szyfrowane AES-256-GCM. Klucz wyprowadzany z hasla uzytkownika (PBKDF2, 100k iteracji). Zero zewnetrznych zaleznosci - tylko Web Crypto API.
-- **Dark-only** — paleta "cichy panel kontrolny": ciemna z akcentem purple (#7C5CFC).
+- **Kwoty w groszach** - wszystkie kwoty to `number` w groszach (integer). `990 zł` → `99000`. Formatowanie wyłącznie przez `formatPLN()`. Zero operacji na floatach.
+- **Salda obliczane, nie zapisywane** - saldo koperty = suma transakcji. Nigdy nie jest polem w bazie.
+- **Logika bez Reacta** - `src/domain/` to czyste funkcje z typami. Testowalne bez renderowania.
+- **Optymistyczny UI** - zmiana widoczna natychmiast, zapis w tle dzięki Firestore offline persistence.
+- **E2E encryption** - kwoty, nazwy i notatki szyfrowane AES-256-GCM. Klucz wyprowadzany z hasla uzytkownika (PBKDF2, 100k iteracji). Zero zewnetrznych zaleznosci - tylko Web Crypto API.
+- **Input sanitization** - wszystkie dane uzytkownika przechodza przez sanitize() przed zapisem. Walidacja email blokuje HTML/script injection.
+- **Dark-only** - paleta "cichy panel kontrolny": ciemna z akcentem purple (#7C5CFC).
 
 ## Uruchomienie lokalne
 

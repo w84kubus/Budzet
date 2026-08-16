@@ -1020,27 +1020,16 @@ function EditableEnvelopeRow({
             {env.emoji}
           </button>
 
-          {/* Emoji picker bottom sheet */}
+          {/* Emoji picker popover */}
           {showEmojiPicker && (
-            <>
-              <div
-                className="fixed inset-0 z-20 bg-black/40"
-                onClick={() => setShowEmojiPicker(false)}
-              />
-            </>
+            <div
+              className="fixed inset-0 z-20"
+              onClick={() => setShowEmojiPicker(false)}
+            />
           )}
           {showEmojiPicker && (
-            <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[430px] rounded-t-2xl border-t border-line bg-panel p-4 shadow-lg shadow-ink/50 safe-bottom">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-caption font-medium text-muted">Wybierz ikone</span>
-                <button
-                  onClick={() => setShowEmojiPicker(false)}
-                  className="text-caption text-muted hover:text-text"
-                >
-                  Zamknij
-                </button>
-              </div>
-              <div className="grid grid-cols-8 gap-1.5">
+            <div className="absolute left-0 bottom-full z-30 mb-2 w-[280px] rounded-xl border border-line bg-panel p-3 shadow-xl shadow-ink/60">
+              <div className="grid grid-cols-7 gap-1">
                 {ENVELOPE_EMOJI_OPTIONS.map((e) => (
                   <button
                     key={e}
@@ -1048,7 +1037,7 @@ function EditableEnvelopeRow({
                       if (e !== env.emoji) onSaveEmoji(e);
                       setShowEmojiPicker(false);
                     }}
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-body-lg transition-colors ${
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-body transition-colors ${
                       env.emoji === e
                         ? "bg-brass/15 ring-1 ring-brass/40"
                         : "hover:bg-panel-2"
