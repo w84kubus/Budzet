@@ -171,7 +171,7 @@ export default function LandingPage() {
       <PurpleGlow className="bottom-0 right-[20%] h-[300px] w-[300px] opacity-50" />
 
       {/* ─── Nav ─── */}
-      <nav className="relative z-20 mx-auto flex max-w-6xl items-center justify-between px-5 pt-5 md:px-10 md:pt-8">
+      <nav className="safe-top relative z-20 mx-auto flex max-w-6xl items-center justify-between px-5 pt-5 md:px-10 md:pt-8">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brass/15">
             <span className="font-display text-lg font-bold text-brass">B</span>
