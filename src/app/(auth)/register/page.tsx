@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/firebase/auth";
 import { validateEmail, validatePassword } from "@/lib/validation";
+
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const MAX_ATTEMPTS = 3;
+const COOLDOWN_MS = 30_000; // 30s cooldown after hitting limit
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,10 +17,33 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const attemptsRef = useRef<number[]>([]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Client-side rate limiting
+    const now = Date.now();
+    if (now < cooldownUntil) {
+      const secs = Math.ceil((cooldownUntil - now) / 1000);
+      setError(`Za duzo prob. Poczekaj ${secs}s.`);
+      return;
+    }
+
+    // Clean old attempts outside window
+    attemptsRef.current = attemptsRef.current.filter(
+      (t) => now - t < RATE_LIMIT_WINDOW_MS
+    );
+
+    if (attemptsRef.current.length >= MAX_ATTEMPTS) {
+      setCooldownUntil(now + COOLDOWN_MS);
+      setError("Za duzo prob rejestracji. Poczekaj 30 sekund.");
+      return;
+    }
+
+    attemptsRef.current.push(now);
 
     const emailCheck = validateEmail(email);
     if (!emailCheck.valid) {
@@ -47,6 +74,8 @@ export default function RegisterPage() {
         setError("Hasło jest za słabe. Wymagane min. 8 znaków, litera i cyfra.");
       } else if (code === "auth/invalid-email") {
         setError("Nieprawidłowy adres e-mail.");
+      } else if (code === "auth/too-many-requests") {
+        setError("Za duzo prob. Sprobuj ponownie za kilka minut.");
       } else {
         setError("Nie udało się utworzyć konta. Spróbuj ponownie.");
       }

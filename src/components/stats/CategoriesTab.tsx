@@ -128,9 +128,14 @@ export function CategoriesTab({
           <h3 className="mb-3 text-caption font-medium uppercase tracking-wider text-muted">
             Ranking kategorii
           </h3>
-          <div className="h-[200px] w-full">
+          <div style={{ height: Math.max(180, chartData.length * 44) }} className="w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" barSize={12}>
+              <BarChart
+                data={chartData}
+                layout="vertical"
+                barCategoryGap="20%"
+                margin={{ top: 0, right: 8, bottom: 0, left: 0 }}
+              >
                 <XAxis
                   type="number"
                   tickFormatter={(v) => `${(v / 100).toFixed(0)}`}
@@ -164,6 +169,7 @@ export function CategoriesTab({
                   dataKey="value"
                   fill="var(--color-brass)"
                   radius={[0, 4, 4, 0]}
+                  barSize={16}
                 />
               </BarChart>
             </ResponsiveContainer>

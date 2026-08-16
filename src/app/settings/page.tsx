@@ -261,7 +261,7 @@ export default function SettingsPage() {
     <div className="mx-auto max-w-[600px] px-4 pb-12 md:px-8">
       <div className="safe-top flex items-center gap-3 pt-4 pb-6">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/dashboard")}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel hover:text-text"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -779,6 +779,15 @@ function EditableDefRow({
   const nameRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
 
+  // Sync when decrypted data arrives from store
+  useEffect(() => {
+    if (!editingName) setNameValue(def.name);
+  }, [def.name, editingName]);
+
+  useEffect(() => {
+    if (!editingAmount) setAmountValue(formatAmount(def.defaultPlanned));
+  }, [def.defaultPlanned, editingAmount]);
+
   useEffect(() => {
     if (editingName) nameRef.current?.focus();
   }, [editingName]);
@@ -945,6 +954,15 @@ function EditableEnvelopeRow({
   const planRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
+  // Sync when decrypted data arrives from store
+  useEffect(() => {
+    if (!editingName) setNameValue(env.name);
+  }, [env.name, editingName]);
+
+  useEffect(() => {
+    if (!editingPlan) setPlanValue(formatAmount(env.monthlyPlan));
+  }, [env.monthlyPlan, editingPlan]);
+
   useEffect(() => {
     if (editingName) nameRef.current?.focus();
   }, [editingName]);
@@ -1002,25 +1020,44 @@ function EditableEnvelopeRow({
             {env.emoji}
           </button>
 
-          {/* Emoji picker dropdown */}
+          {/* Emoji picker bottom sheet */}
           {showEmojiPicker && (
-            <div className="absolute left-0 top-full z-20 mt-1 grid grid-cols-6 gap-1 rounded-xl border border-line bg-panel p-2 shadow-lg shadow-ink/50">
-              {ENVELOPE_EMOJI_OPTIONS.map((e) => (
+            <>
+              <div
+                className="fixed inset-0 z-20 bg-black/40"
+                onClick={() => setShowEmojiPicker(false)}
+              />
+            </>
+          )}
+          {showEmojiPicker && (
+            <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[430px] rounded-t-2xl border-t border-line bg-panel p-4 shadow-lg shadow-ink/50 safe-bottom">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-caption font-medium text-muted">Wybierz ikone</span>
                 <button
-                  key={e}
-                  onClick={() => {
-                    if (e !== env.emoji) onSaveEmoji(e);
-                    setShowEmojiPicker(false);
-                  }}
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg text-body-lg transition-colors ${
-                    env.emoji === e
-                      ? "bg-brass/15 ring-1 ring-brass/40"
-                      : "hover:bg-panel-2"
-                  }`}
+                  onClick={() => setShowEmojiPicker(false)}
+                  className="text-caption text-muted hover:text-text"
                 >
-                  {e}
+                  Zamknij
                 </button>
-              ))}
+              </div>
+              <div className="grid grid-cols-8 gap-1.5">
+                {ENVELOPE_EMOJI_OPTIONS.map((e) => (
+                  <button
+                    key={e}
+                    onClick={() => {
+                      if (e !== env.emoji) onSaveEmoji(e);
+                      setShowEmojiPicker(false);
+                    }}
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-body-lg transition-colors ${
+                      env.emoji === e
+                        ? "bg-brass/15 ring-1 ring-brass/40"
+                        : "hover:bg-panel-2"
+                    }`}
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

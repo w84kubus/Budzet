@@ -49,6 +49,16 @@ export function validateEmail(email: string): { valid: boolean; error: string | 
     return { valid: false, error: "Adres e-mail jest za długi." };
   }
 
+  // Block HTML/script injection attempts
+  if (/<[^>]*>/.test(trimmed) || /[<>"']/.test(trimmed)) {
+    return { valid: false, error: "Adres e-mail zawiera niedozwolone znaki." };
+  }
+
+  // Block control characters and null bytes
+  if (/[\x00-\x1F\x7F]/.test(trimmed)) {
+    return { valid: false, error: "Adres e-mail zawiera niedozwolone znaki." };
+  }
+
   if (trimmed.includes("..")) {
     return { valid: false, error: "Adres e-mail zawiera podwójną kropkę." };
   }
