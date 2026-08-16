@@ -67,7 +67,7 @@ export function MainIndicator({
           </div>
           <div className="mb-3 text-center">
             <span
-              className={`font-display text-hero font-bold leading-none tracking-[-0.02em] tabular-nums md:text-[4.5rem] ${
+              className={`font-display text-hero font-bold leading-none tracking-[-0.02em] tabular-nums md:text-[5.5rem] ${
                 isNegative ? "text-bad" : "text-white"
               } amount-enter`}
               style={{ fontOpticalSizing: "auto" }}
