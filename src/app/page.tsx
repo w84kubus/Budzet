@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 function PurpleGlow({ className }: { className?: string }) {
   return (
@@ -173,9 +174,13 @@ export default function LandingPage() {
       {/* ─── Nav ─── */}
       <nav className="safe-top relative z-20 mx-auto flex max-w-6xl items-center justify-between px-5 pt-5 md:px-10 md:pt-8">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brass/15">
-            <span className="font-display text-lg font-bold text-brass">B</span>
-          </div>
+          <Image
+            src="/icon-192.png"
+            alt="Budżet"
+            width={36}
+            height={36}
+            className="rounded-xl"
+          />
           <span className="font-display text-lg font-semibold tracking-tight">Budżet</span>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
@@ -398,6 +403,7 @@ export default function LandingPage() {
       <footer className="relative z-10 mx-auto max-w-6xl px-5 py-8 md:px-10">
         <div className="flex flex-col items-center justify-between gap-3 border-t border-line/30 pt-6 text-micro text-muted md:flex-row">
           <div className="flex items-center gap-2">
+            <Image src="/icon-192.png" alt="Budżet" width={20} height={20} className="rounded-md" />
             <span className="font-display font-semibold text-text">Budżet</span>
             <span>· Osobisty budżet kopertowy</span>
           </div>
